@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node 'C:\\Users\\10\\Documents\\GitHub\\piquim\\.codex\\hooks\\skill-reminder.js'",
+            "timeout": 5,
+            "statusMessage": "Checking Superpowers skills..."
+          }
+        ]
+      }
+    ]
+  }
+}
