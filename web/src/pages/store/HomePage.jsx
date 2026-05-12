@@ -9,6 +9,7 @@ import HeroSlider from "../../components/blocks/HeroSlider";
 import BrandMarquee from "../../components/blocks/BrandMarquee";
 import FeaturedProducts from "../../components/blocks/FeaturedProducts";
 import Services from "../../components/blocks/Services";
+import { getDefaultSectionsForPage, mergeSectionsWithDefaults } from "../../data/defaultSections";
 
 const buildFeaturedCard = (product, index, isWholesale = false) => {
     const data = product.data || {};
@@ -50,7 +51,7 @@ const buildFeaturedCard = (product, index, isWholesale = false) => {
 
 export default function HomePage() {
     const { isWholesale } = useAuth();
-    const [sections, setSections] = useState(null);
+    const [sections, setSections] = useState(() => getDefaultSectionsForPage('home'));
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [featuredLoaded, setFeaturedLoaded] = useState(false);
 
@@ -63,7 +64,7 @@ export default function HomePage() {
                 if (response.ok) {
                     const data = await response.json();
                     if (data.sections && data.sections.length) {
-                        setSections(data.sections);
+                        setSections(mergeSectionsWithDefaults('home', data.sections));
                     }
                 }
 

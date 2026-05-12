@@ -5,7 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { isExternalPath, navigate, normalizeInternalPath } from "../../utils/navigation";
 import { getApiBase, getTenantHeaders } from "../../utils/api";
 
-const DEFAULT_PLACEHOLDER = "Busca tu producto";
+const DEFAULT_PLACEHOLDER = "Busca productos, categorias o materia prima";
 const HIDDEN_TOPICS = new Set(["buscador de tapas", "donde comprar", "mis proyectos", "messi"]);
 
 const normalizeLabel = (value) =>
@@ -23,8 +23,8 @@ const BrandMark = ({ className = "size-8" }) => (
     className={className}
     aria-hidden="true"
   >
-    <rect x="2" y="2" width="28" height="28" rx="6" stroke="currentColor" strokeWidth="2.5" />
-    <path d="M11 9h10v5h-5v9h-5V9z" fill="currentColor" />
+    <rect x="2" y="2" width="28" height="28" rx="8" stroke="currentColor" strokeWidth="2.5" />
+    <path d="M10 8.5h6.8c3.98 0 6.7 2.25 6.7 5.75 0 3.74-2.72 6.05-6.96 6.05H15V24h-5V8.5Zm5 4.1v3.7h1.3c1.44 0 2.26-.58 2.26-1.83 0-1.18-.82-1.87-2.26-1.87H15Z" fill="currentColor" />
   </svg>
 );
 
@@ -40,6 +40,12 @@ const CartIcon = ({ className = "size-4" }) => (
     <circle cx="9" cy="20" r="1.2" />
     <circle cx="18" cy="20" r="1.2" />
     <path d="M2 3h3l2.2 11h10.7l2-8.5H6.2" />
+  </svg>
+);
+
+const HeartIcon = ({ className = "size-4" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6l1.2 1.2L12 21l7.6-7.6 1.2-1.2a5.4 5.4 0 0 0 0-7.6Z" />
   </svg>
 );
 
@@ -321,6 +327,7 @@ export default function Header({
 
   const productsActive = activeRoute.startsWith("/catalog");
   const accountLabel = user ? "Mi cuenta" : "Ingresar";
+  const isPiquimPreset = settings?.branding?.design_preset === "piquim" || normalizeLabel(resolvedBrand).includes("piquim");
 
   const mobilePrimaryLinks = useMemo(() => {
     const seen = new Set();
@@ -337,6 +344,205 @@ export default function Header({
       return true;
     });
   }, [extraLinks, staticLinks]);
+
+  if (isPiquimPreset) {
+    const primaryLinks = links.length
+      ? links
+      : [
+          { label: "Inicio", href: "/" },
+          { label: "Catalogo", href: "/catalog" },
+          { label: "Nosotros", href: "/about" },
+        ];
+
+    return (
+      <>
+      <header className="fixed left-0 right-0 top-0 z-50 w-full border-b border-[#E8DFD8]/80 bg-[#FFFAF6]/35 font-[var(--font-family)] backdrop-blur-2xl">
+        <div className="w-full px-[60px] py-[18px] max-md:px-4">
+          <div className="flex min-h-[68px] items-center justify-between gap-3 overflow-hidden rounded-[30px] bg-[linear-gradient(90deg,rgba(255,191,140,0.74)_0%,rgba(255,239,232,0.62)_48%,rgba(255,191,140,0.74)_100%)] px-[60px] py-[18px] shadow-[0_18px_60px_rgba(255,77,0,0.12)] outline outline-1 -outline-offset-1 outline-[#E8DFD8]/90 backdrop-blur-2xl max-md:px-5">
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="flex shrink-0 items-center gap-3 text-[#ff4d00]"
+              aria-label="Ir a inicio"
+            >
+              {logoUrl ? (
+                <img src={logoUrl} alt={resolvedBrand} className="h-10 w-auto max-w-[150px] object-contain" />
+              ) : (
+                <img src="/piquim/catalogo/logo-navbar.png" alt={resolvedBrand} className="h-[31px] w-[108px] object-contain" />
+              )}
+            </button>
+
+            <nav className="hidden items-center justify-center gap-2 rounded-full bg-[#fffaf6]/45 px-2 py-1 lg:flex">
+              {primaryLinks.slice(0, 5).map((item) => {
+                const target = item.href || "/";
+                const isExternalTarget = isExternalPath(target);
+                const normalizedTarget = isExternalTarget ? target : normalizeRoute(target);
+                const active = !isExternalTarget && (normalizeRoute(activeRoute) === normalizedTarget || (target === "/catalog" && productsActive));
+                return (
+                  <a
+                    key={`${item.label}-${target}`}
+                    href={target}
+                    onClick={(event) => {
+                      if (isExternalTarget) return;
+                      event.preventDefault();
+                      navigate(target);
+                    }}
+                    target={isExternalTarget ? "_blank" : undefined}
+                    rel={isExternalTarget ? "noopener noreferrer" : undefined}
+                    className={`rounded-full px-5 py-2 text-sm font-bold transition-colors ${
+                      active ? "bg-[#1a1614] text-[#fffaf6]" : "text-[#1a1614] hover:bg-white/60"
+                    }`}
+                  >
+                    {item.label}
+                  </a>
+                );
+              })}
+            </nav>
+
+            <div className="hidden min-w-0 flex-1 justify-end gap-2 md:flex">
+              {showSearch ? (
+                <label className="relative hidden w-full max-w-[310px] xl:block">
+                  <input
+                    className="h-11 w-full rounded-full border border-[#dab6a6] bg-[#fffaf6]/80 pl-4 pr-11 text-sm font-semibold text-[#1a1614] placeholder:text-[#7b665d] focus:border-[#ff4d00] focus:outline-none"
+                    placeholder={searchPlaceholder}
+                    type="text"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    onKeyDown={handleSearchKey}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => navigate("/catalog")}
+                    className="absolute right-1.5 top-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-[#1a1614] text-white"
+                    aria-label="Buscar"
+                  >
+                    <SearchIcon />
+                  </button>
+                </label>
+              ) : null}
+
+              <button
+                type="button"
+                onClick={() => navigate("/catalog")}
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-[#dab6a6] bg-[#fffaf6]/85 text-[#1a1614] transition-colors hover:bg-white"
+                aria-label="Buscar catalogo"
+              >
+                <SearchIcon />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate(user ? "/profile" : "/login")}
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-[#dab6a6] bg-[#fffaf6]/85 text-[#1a1614] transition-colors hover:bg-white"
+                aria-label="Guardados"
+              >
+                <HeartIcon />
+              </button>
+
+              {showCart ? (
+                <button
+                  type="button"
+                  onClick={() => navigate("/cart")}
+                  className="relative flex h-11 w-11 items-center justify-center rounded-full border border-[#dab6a6] bg-[#fffaf6]/85 text-[#1a1614] transition-colors hover:bg-white"
+                  aria-label="Carrito"
+                >
+                  <CartIcon />
+                  {cartCount > 0 ? (
+                    <span className="absolute -right-1 -top-1 min-w-[18px] rounded-full bg-[#ff4d00] px-1.5 text-center text-[10px] font-black leading-[18px] text-white">
+                      {cartCount}
+                    </span>
+                  ) : null}
+                </button>
+              ) : null}
+
+              {showAccount ? (
+                <button
+                  type="button"
+                  onClick={handleAccountClick}
+                  className="hidden rounded-full bg-[#ff4d00] px-5 py-3 text-sm font-black text-white shadow-[0_12px_28px_rgba(255,77,0,0.24)] transition-transform hover:-translate-y-0.5 xl:inline-flex"
+                >
+                  {user ? "Mi cuenta" : "Registrarse"}
+                </button>
+              ) : null}
+            </div>
+
+            <div className="ml-auto flex items-center gap-2 lg:hidden">
+              {showCart ? (
+                <button
+                  type="button"
+                  onClick={() => navigate("/cart")}
+                  className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#fffaf6]/85 text-[#1a1614]"
+                  aria-label="Carrito"
+                >
+                  <CartIcon />
+                  {cartCount > 0 ? (
+                    <span className="absolute -right-1 -top-1 min-w-[16px] rounded-full bg-[#ff4d00] px-1 text-center text-[9px] font-bold leading-[16px] text-white">
+                      {cartCount}
+                    </span>
+                  ) : null}
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen((current) => !current)}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1a1614] text-[#fffaf6]"
+                aria-label={mobileMenuOpen ? "Cerrar menu" : "Abrir menu"}
+              >
+                {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
+              </button>
+            </div>
+          </div>
+
+          {mobileMenuOpen ? (
+            <div className="mt-3 rounded-[24px] border border-[#dab6a6] bg-[#fffaf6] p-4 shadow-2xl lg:hidden">
+              {showSearch ? (
+                <label className="relative block">
+                  <input
+                    className="h-11 w-full rounded-full border border-[#dab6a6] bg-white pl-4 pr-11 text-sm font-semibold text-[#1a1614] placeholder:text-[#7b665d] focus:border-[#ff4d00] focus:outline-none"
+                    placeholder={searchPlaceholder}
+                    type="text"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    onKeyDown={handleSearchKey}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => navigate("/catalog")}
+                    className="absolute right-1.5 top-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-[#ff4d00] text-white"
+                    aria-label="Buscar"
+                  >
+                    <SearchIcon />
+                  </button>
+                </label>
+              ) : null}
+
+              <div className="mt-4 grid gap-2">
+                {primaryLinks.map((item) => (
+                  <button
+                    key={`mobile-${item.label}-${item.href}`}
+                    type="button"
+                    onClick={() => handleMobileNavigate(item.href || "/")}
+                    className="rounded-2xl bg-[#ffefe8] px-4 py-3 text-left text-sm font-black text-[#1a1614]"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={handleAccountClick}
+                  className="rounded-2xl bg-[#ff4d00] px-4 py-3 text-left text-sm font-black text-white"
+                >
+                  {user ? "Mi cuenta" : "Registrarse"}
+                </button>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </header>
+      <div className="h-[113px] max-md:h-[93px]" aria-hidden="true" />
+      </>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 bg-white/70 backdrop-blur-xl dark:border-zinc-800/50 dark:bg-[#120c08]/70">

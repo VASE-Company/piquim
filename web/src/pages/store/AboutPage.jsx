@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import StoreLayout from '../../components/layout/StoreLayout';
 import PageBuilder from '../../components/PageBuilder';
 import { getApiBase, getTenantHeaders } from '../../utils/api';
-import { DEFAULT_ABOUT_SECTIONS } from '../../data/defaultSections';
+import { getDefaultSectionsForPage, mergeSectionsWithDefaults } from '../../data/defaultSections';
 
 export default function AboutPage() {
-    const [sections, setSections] = useState(DEFAULT_ABOUT_SECTIONS);
+    const [sections, setSections] = useState(() => getDefaultSectionsForPage('about'));
 
     useEffect(() => {
         const loadAbout = async () => {
@@ -16,8 +16,8 @@ export default function AboutPage() {
 
                 if (response.ok) {
                     const data = await response.json();
-                    if (Array.isArray(data.sections)) {
-                        setSections(data.sections);
+                    if (Array.isArray(data.sections) && data.sections.length) {
+                        setSections(mergeSectionsWithDefaults('about', data.sections));
                     }
                 }
             } catch (err) {

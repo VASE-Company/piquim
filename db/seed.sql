@@ -3,9 +3,9 @@ BEGIN;
 WITH seed AS (
   SELECT
     '636736e2-e135-44cd-ac5c-5d4ccb839a73'::uuid AS tenant_id,
-    'Sanitarios El Teflon'::text AS tenant_name,
+    'PIQUIM'::text AS tenant_name,
     'localhost'::text AS domain,
-    'admin@teflon.local'::text AS admin_email,
+    'admin@piquim.local'::text AS admin_email,
     '$2a$10$hE0tkmdmSK4yBrODZ6VsNeC.twjKZHiH6jcG4z79ysV17hwKo636a'::text AS password_hash
 )
 INSERT INTO tenants (id, name, status)
@@ -37,23 +37,82 @@ INSERT INTO tenant_settings (tenant_id, branding, theme, commerce)
 SELECT
   tenant_id,
   '{
-    "name": "Sanitarios El Teflon",
+    "name": "PIQUIM",
     "logo_url": "",
+    "design_preset": "piquim",
     "navbar": {
       "links": [
         { "label": "Inicio", "href": "/" },
-        { "label": "Catalogo", "href": "/catalog" }
+        { "label": "Catalogo", "href": "/catalog" },
+        { "label": "Nosotros", "href": "/about" }
       ]
+    },
+    "catalog_cards": [
+      { "id": "heladeria", "title": "Heladeria", "prefix": "01 - Frio que enamora", "description": "Materia prima para la elaboracion de helados artesanales, bases estables y terminaciones con sabor propio.", "tags": ["Pulpas", "Variegattos", "Bases", "Neutros"], "image": "/piquim/catalog-heladeria.jpg", "category": "Heladeria" },
+      { "id": "panaderia", "title": "Panaderia", "prefix": "02 - Hornear es un arte", "description": "Premezclas, mejoradores y soluciones pensadas para produccion diaria con textura, volumen y regularidad.", "tags": ["Premezclas", "Mejoradores", "Aditivos", "Chipa"], "image": "/piquim/catalog-panaderia.jpg", "category": "Panaderia" },
+      { "id": "confiteria", "title": "Confiteria", "prefix": "03 - Dulce inspiracion", "description": "Cremas, mousses, dulces y bases para piezas de pasteleria con terminacion profesional.", "tags": ["Cremas", "Mousses", "DDL", "Brownie"], "image": "/piquim/catalog-confiteria.jpg", "category": "Confiteria" }
+    ],
+    "footer": {
+      "description": "Materia prima premium para heladerias, panaderias y confiterias. Mar del Plata, desde 1992.",
+      "quickLinks": [
+        { "label": "Catalogo", "href": "/catalog" },
+        { "label": "Nosotros", "href": "/about" }
+      ],
+      "shopLinks": [
+        { "label": "Heladeria", "href": "/catalog?category=Heladeria" },
+        { "label": "Panaderia", "href": "/catalog?category=Panaderia" },
+        { "label": "Confiteria", "href": "/catalog?category=Confiteria" },
+        { "label": "Promociones", "href": "/catalog" }
+      ],
+      "helpLinks": [
+        { "label": "Envios y entregas", "href": "/about" },
+        { "label": "Pagos y facturacion", "href": "/checkout" },
+        { "label": "Cambios y devoluciones", "href": "/about" },
+        { "label": "Preguntas frecuentes", "href": "/about" }
+      ],
+      "legalLinks": [
+        { "label": "Terminos", "href": "/terms" },
+        { "label": "Privacidad", "href": "/privacy" },
+        { "label": "Cookies", "href": "/privacy" },
+        { "label": "Defensa al consumidor", "href": "/about" }
+      ],
+      "newsletter": {
+        "enabled": true,
+        "title": "Novedades para profesionales",
+        "description": "Recibi lanzamientos, promociones y catalogos tecnicos en tu correo.",
+        "placeholder": "tu@email.com",
+        "buttonLabel": "Suscribirme"
+      },
+      "legalText": "(c) 2026 Piquim Profesional S.A. - Mar del Plata, Argentina - CUIT 30-XXXXXXXX-X",
+      "contact": {
+        "address": "Mar del Plata, Argentina",
+        "phone": "",
+        "email": "ventas@piquim.local"
+      },
+      "socials": {
+        "instagram": "",
+        "facebook": "",
+        "youtube": "",
+        "tiktok": "",
+        "whatsapp": ""
+      }
     }
   }'::jsonb,
   '{
     "mode": "light",
-    "primary": "#f97316",
-    "accent": "#181411",
-    "background": "#ffffff",
-    "text": "#181411",
-    "secondary": "#6b7280",
-    "font_family": "Inter, sans-serif"
+    "primary": "#ff4d00",
+    "accent": "#ff7a2f",
+    "background": "#fffaf6",
+    "text": "#1a1614",
+    "secondary": "#6f625d",
+    "font_family": "Gilroy, Manrope, sans-serif",
+    "catalog": {
+      "panel_bg": "#fff3eb",
+      "surface_bg": "#fffaf6",
+      "card_bg": "#ffffff",
+      "border": "#dab6a6",
+      "muted_text": "#7b665d"
+    }
   }'::jsonb,
   '{
     "mode": "both",
@@ -64,7 +123,8 @@ SELECT
     "reviews_enabled": true,
     "tax_rate": 0.21,
     "whatsapp_number": "",
-    "email": "",
+    "address": "Mar del Plata, Argentina",
+    "email": "ventas@piquim.local",
     "order_notification_email": "",
     "payment_methods": ["transfer", "cash_on_pickup"],
     "default_delivery": "distance:auto",
@@ -171,7 +231,7 @@ SET
 
 WITH seed AS (
   SELECT
-    'admin@teflon.local'::text AS admin_email,
+    'admin@piquim.local'::text AS admin_email,
     '$2a$10$hE0tkmdmSK4yBrODZ6VsNeC.twjKZHiH6jcG4z79ysV17hwKo636a'::text AS password_hash
 )
 INSERT INTO users (email, password_hash, role, status)
@@ -186,7 +246,7 @@ SET
 WITH seed AS (
   SELECT
     '636736e2-e135-44cd-ac5c-5d4ccb839a73'::uuid AS tenant_id,
-    'admin@teflon.local'::text AS admin_email
+    'admin@piquim.local'::text AS admin_email
 ),
 admin_user AS (
   SELECT id
@@ -218,7 +278,11 @@ WITH seed AS (
   SELECT '636736e2-e135-44cd-ac5c-5d4ccb839a73'::uuid AS tenant_id
 )
 INSERT INTO categories (tenant_id, name, slug, data)
-SELECT tenant_id, 'Productos', 'productos', '{}'::jsonb
+SELECT tenant_id, 'Heladeria', 'heladeria', '{}'::jsonb FROM seed
+UNION ALL
+SELECT tenant_id, 'Panaderia', 'panaderia', '{}'::jsonb FROM seed
+UNION ALL
+SELECT tenant_id, 'Confiteria', 'confiteria', '{}'::jsonb
 FROM seed
 ON CONFLICT (tenant_id, slug) DO UPDATE
 SET
@@ -291,20 +355,25 @@ INSERT INTO product_cache (
   currency,
   stock,
   brand,
-  status
+  status,
+  data
 )
 SELECT
   tenant_id,
   'ERP-001',
   'PROD-001',
-  'Producto demo',
-  'Producto inicial para validar la tienda y el panel.',
+  'Base neutra para helado artesanal',
+  'Materia prima profesional para heladerias que necesitan textura estable, buen rendimiento y sabor limpio.',
   15000.00,
   12000.00,
   'ARS',
   50,
-  'Marca Demo',
-  'active'
+  'PIQUIM',
+  'active',
+  '{
+    "short_description": "Base profesional para elaboracion de helados artesanales.",
+    "image": "/piquim/product-bucket.png"
+  }'::jsonb
 FROM seed
 ON CONFLICT (tenant_id, erp_id) DO UPDATE
 SET
@@ -317,6 +386,7 @@ SET
   stock = EXCLUDED.stock,
   brand = EXCLUDED.brand,
   status = EXCLUDED.status,
+  data = EXCLUDED.data,
   updated_at = now();
 
 WITH product_ref AS (
@@ -329,7 +399,7 @@ category_ref AS (
   SELECT id
   FROM categories
   WHERE tenant_id = '636736e2-e135-44cd-ac5c-5d4ccb839a73'::uuid
-    AND slug = 'productos'
+    AND slug = 'heladeria'
 )
 INSERT INTO product_categories (product_id, category_id)
 SELECT product_ref.id, category_ref.id

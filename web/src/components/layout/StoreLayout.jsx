@@ -14,7 +14,7 @@ export default function StoreLayout({ children }) {
     const defaultNavLinks = [
         { label: 'Inicio', href: '/' },
         { label: 'Catalogo', href: '/catalog' },
-        { label: 'Sobre nosotros', href: '/about' },
+        { label: 'Nosotros', href: '/about' },
     ];
 
     const configuredNavLinks = Array.isArray(settings?.branding?.navbar?.links)

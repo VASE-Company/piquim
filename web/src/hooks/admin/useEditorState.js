@@ -7,6 +7,7 @@ import {
     DEFAULT_ADMIN_PANEL_THEME,
 } from '../../utils/adminPanelTheme';
 import { DEFAULT_STOREFRONT_LIGHT_THEME } from '../../utils/storefrontTheme';
+import { PIQUIM_CATALOG_CARDS, PIQUIM_FOOTER_DEFAULTS } from '../../data/piquimBranding';
 import { normalizePriceTierLabels } from '../../utils/priceTierLabels';
 
 const RESERVED_PLACEHOLDER_TERMS = new Set(['messi']);
@@ -53,9 +54,17 @@ export function useEditorState(user) {
         branding: {
             name: '',
             logo_url: '',
+            design_preset: 'piquim',
+            catalog_cards: PIQUIM_CATALOG_CARDS,
             admin_panel: DEFAULT_ADMIN_PANEL_BRANDING,
             navbar: { links: [] },
-            footer: { description: '', socials: {}, contact: {}, quickLinks: [] }
+            footer: {
+                ...PIQUIM_FOOTER_DEFAULTS,
+                socialLinks: PIQUIM_FOOTER_DEFAULTS.socials,
+                socials: {},
+                contact: {},
+                quickLinks: PIQUIM_FOOTER_DEFAULTS.shopLinks,
+            }
         },
         theme: {
             ...DEFAULT_STOREFRONT_LIGHT_THEME,
@@ -254,6 +263,10 @@ export function useEditorState(user) {
                         footer: {
                             ...(prev.branding?.footer || {}),
                             ...(data.settings?.branding?.footer || {}),
+                            newsletter: {
+                                ...((prev.branding?.footer || {}).newsletter || {}),
+                                ...((data.settings?.branding?.footer || {}).newsletter || {}),
+                            },
                         },
                         admin_panel: {
                             ...DEFAULT_ADMIN_PANEL_BRANDING,
