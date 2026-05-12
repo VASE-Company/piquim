@@ -49,6 +49,12 @@ const HeartIcon = ({ className = "size-4" }) => (
   </svg>
 );
 
+const BookmarkIcon = ({ className = "size-4" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21L12 17L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z" />
+  </svg>
+);
+
 const UserIcon = ({ className = "size-4" }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20 21v-1a6 6 0 0 0-6-6H10a6 6 0 0 0-6 6v1" />
@@ -356,28 +362,26 @@ export default function Header({
 
     return (
       <>
-      <header className="fixed left-0 right-0 top-0 z-50 w-full border-b border-[#E8DFD8]/80 bg-[#FFFAF6]/35 font-[var(--font-family)] backdrop-blur-2xl">
-        <div className="w-full px-[60px] py-[18px] max-md:px-4">
-          <div className="flex min-h-[68px] items-center justify-between gap-3 overflow-hidden rounded-[30px] bg-[linear-gradient(90deg,rgba(255,191,140,0.74)_0%,rgba(255,239,232,0.62)_48%,rgba(255,191,140,0.74)_100%)] px-[60px] py-[18px] shadow-[0_18px_60px_rgba(255,77,0,0.12)] outline outline-1 -outline-offset-1 outline-[#E8DFD8]/90 backdrop-blur-2xl max-md:px-5">
+      <header className="fixed left-0 right-0 top-0 z-50 flex w-full flex-col items-center justify-center overflow-hidden border-b border-[#E8DFD8]/80 bg-[#FFFAF6]/35 font-[var(--font-family)] px-[60px] py-[18px] backdrop-blur-2xl max-md:px-4">
+        <div className="w-full">
+          <div className="inline-flex w-full items-center justify-center overflow-hidden rounded-[30px] bg-[linear-gradient(90deg,rgba(255,191,140,0.74)_0%,rgba(255,239,232,0.62)_48%,rgba(255,191,140,0.74)_100%)] px-[60px] py-[18px] shadow-[0_18px_60px_rgba(255,77,0,0.12)] outline outline-1 -outline-offset-1 outline-[#E8DFD8]/90 backdrop-blur-2xl max-md:px-5">
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="flex shrink-0 items-center gap-3 text-[#ff4d00]"
+              className="shrink-0"
               aria-label="Ir a inicio"
             >
               {logoUrl ? (
-                <img src={logoUrl} alt={resolvedBrand} className="h-10 w-auto max-w-[150px] object-contain" />
+                <img src={logoUrl} alt={resolvedBrand} className="h-[31px] w-auto max-w-[150px] object-contain" />
               ) : (
-                <img src="/piquim/catalogo/logo-navbar.png" alt={resolvedBrand} className="h-[31px] w-[108px] object-contain" />
+                <img src="/piquim/catalogo/logo-navbar.png" alt={resolvedBrand} style={{ width: 108, height: 31 }} />
               )}
             </button>
 
-            <nav className="hidden items-center justify-center gap-2 rounded-full bg-[#fffaf6]/45 px-2 py-1 lg:flex">
-              {primaryLinks.slice(0, 5).map((item) => {
+            <nav className="flex flex-1 items-center justify-center gap-8 overflow-hidden max-md:hidden">
+              {primaryLinks.slice(0, 3).map((item) => {
                 const target = item.href || "/";
                 const isExternalTarget = isExternalPath(target);
-                const normalizedTarget = isExternalTarget ? target : normalizeRoute(target);
-                const active = !isExternalTarget && (normalizeRoute(activeRoute) === normalizedTarget || (target === "/catalog" && productsActive));
                 return (
                   <a
                     key={`${item.label}-${target}`}
@@ -389,9 +393,8 @@ export default function Header({
                     }}
                     target={isExternalTarget ? "_blank" : undefined}
                     rel={isExternalTarget ? "noopener noreferrer" : undefined}
-                    className={`rounded-full px-5 py-2 text-sm font-bold transition-colors ${
-                      active ? "bg-[#1a1614] text-[#fffaf6]" : "text-[#1a1614] hover:bg-white/60"
-                    }`}
+                    className="text-sm font-medium text-[#1A1614]"
+                    style={{ fontFamily: "Helvetica Neue Medium Extended, Gilroy, sans-serif" }}
                   >
                     {item.label}
                   </a>
@@ -399,54 +402,33 @@ export default function Header({
               })}
             </nav>
 
-            <div className="hidden min-w-0 flex-1 justify-end gap-2 md:flex">
-              {showSearch ? (
-                <label className="relative hidden w-full max-w-[310px] xl:block">
-                  <input
-                    className="h-11 w-full rounded-full border border-[#dab6a6] bg-[#fffaf6]/80 pl-4 pr-11 text-sm font-semibold text-[#1a1614] placeholder:text-[#7b665d] focus:border-[#ff4d00] focus:outline-none"
-                    placeholder={searchPlaceholder}
-                    type="text"
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    onKeyDown={handleSearchKey}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => navigate("/catalog")}
-                    className="absolute right-1.5 top-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-[#1a1614] text-white"
-                    aria-label="Buscar"
-                  >
-                    <SearchIcon />
-                  </button>
-                </label>
-              ) : null}
-
+            <div className="flex items-center justify-center gap-3.5 overflow-hidden">
               <button
                 type="button"
                 onClick={() => navigate("/catalog")}
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-[#dab6a6] bg-[#fffaf6]/85 text-[#1a1614] transition-colors hover:bg-white"
+                className="flex items-center justify-center overflow-hidden rounded-full text-black"
                 aria-label="Buscar catalogo"
               >
-                <SearchIcon />
+                <SearchIcon className="size-6" />
               </button>
 
               <button
                 type="button"
-                onClick={() => navigate(user ? "/profile" : "/login")}
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-[#dab6a6] bg-[#fffaf6]/85 text-[#1a1614] transition-colors hover:bg-white"
+                onClick={() => navigate("/profile")}
+                className="flex items-center justify-center overflow-hidden rounded-full text-black max-sm:hidden"
                 aria-label="Guardados"
               >
-                <HeartIcon />
+                <BookmarkIcon className="size-6" />
               </button>
 
               {showCart ? (
                 <button
                   type="button"
                   onClick={() => navigate("/cart")}
-                  className="relative flex h-11 w-11 items-center justify-center rounded-full border border-[#dab6a6] bg-[#fffaf6]/85 text-[#1a1614] transition-colors hover:bg-white"
+                  className="relative flex items-center justify-center overflow-hidden rounded-full text-black"
                   aria-label="Carrito"
                 >
-                  <CartIcon />
+                  <CartIcon className="size-6" />
                   {cartCount > 0 ? (
                     <span className="absolute -right-1 -top-1 min-w-[18px] rounded-full bg-[#ff4d00] px-1.5 text-center text-[10px] font-black leading-[18px] text-white">
                       {cartCount}
@@ -458,10 +440,11 @@ export default function Header({
               {showAccount ? (
                 <button
                   type="button"
-                  onClick={handleAccountClick}
-                  className="hidden rounded-full bg-[#ff4d00] px-5 py-3 text-sm font-black text-white shadow-[0_12px_28px_rgba(255,77,0,0.24)] transition-transform hover:-translate-y-0.5 xl:inline-flex"
+                  onClick={() => navigate("/register")}
+                  className="flex h-6 w-[100px] items-center justify-center gap-5 overflow-hidden rounded-full bg-[#FF4D00] text-sm font-bold text-[#FFFAF6] max-sm:hidden"
+                  style={{ fontFamily: "Gilroy, sans-serif" }}
                 >
-                  {user ? "Mi cuenta" : "Registrarse"}
+                  Registrarse
                 </button>
               ) : null}
             </div>

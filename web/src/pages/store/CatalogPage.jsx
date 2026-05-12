@@ -1147,9 +1147,27 @@ function PiquimSubcatalogSidebar({ catalog }) {
 }
 
 function PiquimSubcatalogProductCard({ product, accent, mediaGradient, icon }) {
+    const resolvedGradient = product.mediaGradient || mediaGradient;
+    const resolvedIcon = product.icon || icon;
+    const coldAccent = product.coldAccent || accent;
+    const favoriteLeft = typeof product.favoriteOffset === 'number' ? product.favoriteOffset : 227;
+    const openProduct = () => navigate(`/product/${product.id}`);
+    const stopNestedAction = (event) => event.stopPropagation();
+
     return (
-        <article className="flex h-[380px] min-w-[282px] flex-col items-start justify-start overflow-hidden rounded-[18px] bg-white outline outline-1 -outline-offset-1 outline-[#E8DFD8]">
-            <div className="relative h-[220px] w-full overflow-hidden" style={{ background: mediaGradient }}>
+        <article
+            role="button"
+            tabIndex={0}
+            onClick={openProduct}
+            onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openProduct();
+                }
+            }}
+            className="flex h-[380px] min-w-[282px] cursor-pointer flex-col items-start justify-start overflow-hidden rounded-[18px] bg-white outline outline-1 -outline-offset-1 outline-[#E8DFD8] transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_18px_35px_rgba(26,22,20,0.12)]"
+        >
+            <div className="relative h-[220px] w-full overflow-hidden" style={{ background: resolvedGradient }}>
                 {product.badge ? (
                     <div
                         className="absolute left-4 top-4 inline-flex items-start justify-start overflow-hidden rounded-full px-2.5 py-1.5"
@@ -1160,13 +1178,26 @@ function PiquimSubcatalogProductCard({ product, accent, mediaGradient, icon }) {
                         </span>
                     </div>
                 ) : null}
-                <button type="button" className="absolute right-4 top-4 flex size-10 items-center justify-center rounded-full bg-white/85 text-[#1A1614]">
-                    <HeartIcon className="size-5" />
+                <button
+                    type="button"
+                    onClick={stopNestedAction}
+                    className="absolute top-4 flex h-[23px] w-[35px] items-center justify-center rounded-[10px] bg-white text-[#1A1614]"
+                    style={{ left: favoriteLeft }}
+                >
+                    <BookmarkPillIcon />
                 </button>
-                <ProductDisplayIcon type={icon} className="absolute left-1/2 top-12 h-[138px] w-[86px] -translate-x-1/2" accent={accent} />
-                <div className="absolute bottom-[17px] right-6 inline-flex h-[35px] w-[87px] items-center justify-center gap-[15px] rounded-[15px] bg-white py-2.5">
-                    <SnowflakeSmallIcon className="size-4" accent={accent} />
-                    <FlameSmallIcon className="size-4 text-[#FF4D00]" />
+                {product.mediaKind === 'image' ? (
+                    <img
+                        src={product.imageSrc}
+                        alt={product.name}
+                        className="absolute inset-0 h-full w-full object-cover"
+                    />
+                ) : (
+                    <ProductDisplayIcon type={resolvedIcon} className="absolute left-1/2 top-12 h-[138px] w-[86px] -translate-x-1/2" accent={coldAccent} />
+                )}
+                <div className="absolute bottom-[17px] left-[171px] inline-flex h-[35px] w-[87px] items-center justify-center gap-[15px] rounded-[15px] bg-white py-2.5">
+                    <SnowflakeSmallIcon className="size-[25px]" accent={coldAccent} />
+                    <FlameSmallIcon className="size-[25px] text-[#FF5900CC]" />
                 </div>
             </div>
             <div className="flex w-full flex-col items-start justify-start gap-1.5 overflow-hidden p-[18px]">
@@ -1182,7 +1213,14 @@ function PiquimSubcatalogProductCard({ product, accent, mediaGradient, icon }) {
                 <div className="h-2 w-px" />
                 <div className="inline-flex w-full items-center justify-between overflow-hidden">
                     <p className="text-xl font-black text-[#1A1614]">{product.price}</p>
-                    <button type="button" className="flex size-9 items-center justify-center rounded-full bg-[#FF4D00] text-white">
+                    <button
+                        type="button"
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            openProduct();
+                        }}
+                        className="flex size-9 items-center justify-center rounded-full bg-[#FF4D00] text-white"
+                    >
                         <CartPlusIcon className="size-5" />
                     </button>
                 </div>
@@ -1215,6 +1253,21 @@ function ProductDisplayIcon({ type, className = '', accent = '#6BB8E0' }) {
         <svg className={className} viewBox="0 0 86 138" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M43 12c18 0 31 12 31 29 0 11-6 21-16 26l-8 55c-.5 4-3.8 7-7.9 7s-7.4-3-7.9-7l-8-55C16 62 10 52 10 41c0-17 15-29 33-29Z" fill="#fffaf6" stroke="#1A1614" strokeWidth="5" />
             <path d="M25 42c7 7 29 7 36 0M31 65h24" stroke={accent} strokeWidth="5" strokeLinecap="round" />
+        </svg>
+    );
+}
+
+function BookmarkPillIcon() {
+    return (
+        <svg width="35" height="23" viewBox="0 0 35 23" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="35" height="23" rx="10" fill="white" />
+            <path
+                d="M21.0714 5.5C21.4503 5.5 21.8137 5.64048 22.0816 5.89053C22.3495 6.14058 22.5 6.47973 22.5 6.83336V16.8335C22.5 16.9503 22.4671 17.065 22.4046 17.1661C22.3422 17.2673 22.2524 17.3514 22.1442 17.41C22.036 17.4686 21.9132 17.4996 21.7881 17.5C21.663 17.5004 21.54 17.4701 21.4314 17.4122L18.2086 15.6935C17.9928 15.5785 17.7485 15.5179 17.5 15.5179C17.2515 15.5179 17.0072 15.5785 16.7914 15.6935L13.5686 17.4122C13.46 17.4701 13.337 17.5004 13.2119 17.5C13.0868 17.4996 12.964 17.4686 12.8558 17.41C12.7476 17.3514 12.6578 17.2673 12.5954 17.1661C12.5329 17.065 12.5 16.9503 12.5 16.8335V6.83336C12.5 6.47973 12.6505 6.14058 12.9184 5.89053C13.1863 5.64048 13.5497 5.5 13.9286 5.5H21.0714Z"
+                stroke="black"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
         </svg>
     );
 }
