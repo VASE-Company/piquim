@@ -11,6 +11,7 @@ import { getPriceAccessState } from "../../utils/priceVisibility";
 import { getLowStockThreshold, getStockStatus, isInStock } from "../../utils/stock";
 import { createPlaceholderImage } from "../../utils/productImage";
 import { PIQUIM_CATALOG_CARDS } from "../../data/piquimBranding";
+import { PIQUIM_SUBCATALOGS } from "../../data/piquimSubcatalogs";
 import PriceAccessPrompt from "../../components/PriceAccessPrompt";
 import StoreSkeleton from "../../components/StoreSkeleton";
 const FALLBACK_IMAGE = createPlaceholderImage({ label: "Producto", width: 720, height: 720 });
@@ -554,6 +555,11 @@ export default function CatalogPage() {
     }, [settings?.branding?.catalog_cards]);
 
     const handleCatalogCardClick = useCallback((card) => {
+        const directSlug = normalizeCatalogLabel(card?.categorySlug || card?.slug || card?.category || card?.id);
+        if (PIQUIM_SUBCATALOGS[directSlug]) {
+            applyFilters({ category: directSlug });
+            return;
+        }
         const matchedCategory = findCatalogCardCategory(categories, card);
         const fallback = card?.categorySlug || card?.category || card?.id || card?.title;
         applyFilters({ category: matchedCategory?.id || fallback });
@@ -594,6 +600,13 @@ export default function CatalogPage() {
 
     if (isCatalogLanding) {
         return <PiquimCatalogLanding cards={catalogCards} onSelectCard={handleCatalogCardClick} />;
+    }
+
+    const selectedSubcatalogKey = normalizeCatalogLabel(selectedCategoryEntry?.slug || selectedCategoryEntry?.name || selectedCategory);
+    const selectedSubcatalog = PIQUIM_SUBCATALOGS[selectedSubcatalogKey];
+
+    if (selectedSubcatalog) {
+        return <PiquimSubcatalogPage catalog={selectedSubcatalog} />;
     }
 
     return (
@@ -1037,6 +1050,205 @@ function PiquimFooterColumn({ title, links }) {
                 </button>
             ))}
         </div>
+    );
+}
+
+function PiquimSubcatalogPage({ catalog }) {
+    return (
+        <div className="min-h-screen bg-[#FFFAF6] font-[Inter] text-[#1A1614]">
+            <PiquimCatalogHeader />
+            <main className="flex w-full items-start justify-center gap-0 bg-[#FFFAF6] px-[60px] pb-10 pt-[153px] max-lg:flex-col max-lg:px-5 max-md:pt-[133px]">
+                <PiquimSubcatalogSidebar catalog={catalog} />
+                <section className="flex flex-1 flex-col items-start justify-start gap-[30px] overflow-hidden bg-[#FFFAF6] px-[60px] py-[30px] max-xl:px-8 max-lg:w-full max-md:px-0">
+                    <header className="inline-flex w-full items-end justify-between overflow-hidden">
+                        <div className="inline-flex flex-col items-start justify-start gap-4 overflow-hidden">
+                            <h1 className="text-[56px] font-black leading-[56px] max-md:text-[40px] max-md:leading-[42px]" style={{ fontFamily: 'Gilroy, sans-serif' }}>
+                                <span className="text-[#1A1614]">{catalog.headingBase} </span>
+                                <span className="italic text-[#FF4D00]">{catalog.headingAccent}</span>
+                            </h1>
+                        </div>
+                    </header>
+
+                    {catalog.sections.map((section) => (
+                        <section key={section.title} className="flex w-full flex-col items-start justify-start gap-[25px]">
+                            <h2 className="text-4xl font-bold leading-9 text-[#1A1614]" style={{ fontFamily: 'Gilroy, sans-serif' }}>
+                                {section.title}
+                            </h2>
+                            <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(282px,1fr))] gap-6">
+                                {section.products.map((product) => (
+                                    <PiquimSubcatalogProductCard
+                                        key={product.id}
+                                        product={product}
+                                        accent={catalog.accent}
+                                        mediaGradient={catalog.mediaGradient}
+                                        icon={catalog.icon}
+                                    />
+                                ))}
+                            </div>
+                        </section>
+                    ))}
+                </section>
+            </main>
+            <PiquimCatalogFooter />
+        </div>
+    );
+}
+
+function PiquimSubcatalogSidebar({ catalog }) {
+    return (
+        <aside className="flex min-h-[1850px] w-64 shrink-0 flex-col items-start justify-start gap-2 overflow-hidden rounded-xl border-r border-[#FFDCC1] bg-[#FFD7B6] p-6 shadow-sm max-lg:min-h-0 max-lg:w-full">
+            <div className="flex w-full flex-col items-start justify-start gap-2">
+                <div className="flex w-full flex-col items-start justify-start pb-6">
+                    <h2 className="flex w-full flex-col justify-center text-2xl font-bold leading-8 text-[#A04100]" style={{ fontFamily: 'Epilogue, Gilroy, sans-serif' }}>
+                        {catalog.filters.title}
+                    </h2>
+                    <p className="mt-1 whitespace-pre-line text-sm font-normal leading-5 text-[#5A4136]" style={{ fontFamily: 'Work Sans, Inter, sans-serif' }}>
+                        {catalog.filters.subtitle}
+                    </p>
+                </div>
+
+                <div className="w-full pb-6">
+                    <div className="relative flex w-full flex-col items-start justify-start">
+                        <div className="inline-flex w-full items-start justify-center overflow-hidden rounded-lg bg-[#FFEDDE] py-2.5 pl-3 pr-8">
+                            <span className="flex flex-1 flex-col justify-center text-sm font-normal text-[#6B7280]" style={{ fontFamily: 'Work Sans, Inter, sans-serif' }}>
+                                {catalog.filters.searchPlaceholder}
+                            </span>
+                        </div>
+                        <SearchIcon className="absolute right-2 top-2.5 size-5 text-[#A04100]" />
+                    </div>
+                </div>
+
+                {catalog.filters.groups.map((group) => (
+                    <div key={group.title} className="w-full pb-6">
+                        <div className="flex w-full flex-col items-start justify-start gap-3">
+                            <div className="inline-flex w-full items-center justify-start gap-2">
+                                <FilterDotIcon className="size-4 text-[#A04100]" />
+                                <h3 className="text-sm font-semibold leading-[16.8px] text-[#A04100]" style={{ fontFamily: 'Work Sans, Inter, sans-serif' }}>
+                                    {group.title}
+                                </h3>
+                            </div>
+                            <div className="flex w-full flex-col items-start justify-start gap-2">
+                                {group.items.map((item, index) => (
+                                    <label key={`${group.title}-${item}`} className="inline-flex w-full items-center justify-start gap-2">
+                                        <span className="flex size-4 items-center justify-center rounded border border-[#A04100]/45 bg-[#FFEDDE]" />
+                                        <span className="flex flex-col justify-center text-sm font-normal leading-5 text-[#5A4136]" style={{ fontFamily: 'Work Sans, Inter, sans-serif' }}>
+                                            {item}
+                                        </span>
+                                        {index === 0 ? <ChevronDownSmallIcon className="ml-auto size-4 text-[#5A4136]" /> : null}
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </aside>
+    );
+}
+
+function PiquimSubcatalogProductCard({ product, accent, mediaGradient, icon }) {
+    return (
+        <article className="flex h-[380px] min-w-[282px] flex-col items-start justify-start overflow-hidden rounded-[18px] bg-white outline outline-1 -outline-offset-1 outline-[#E8DFD8]">
+            <div className="relative h-[220px] w-full overflow-hidden" style={{ background: mediaGradient }}>
+                {product.badge ? (
+                    <div
+                        className="absolute left-4 top-4 inline-flex items-start justify-start overflow-hidden rounded-full px-2.5 py-1.5"
+                        style={{ background: product.badgeDark ? '#1A1614' : '#FF4D00' }}
+                    >
+                        <span className="text-[9px] font-bold text-white" style={{ letterSpacing: 0.72 }}>
+                            {product.badge}
+                        </span>
+                    </div>
+                ) : null}
+                <button type="button" className="absolute right-4 top-4 flex size-10 items-center justify-center rounded-full bg-white/85 text-[#1A1614]">
+                    <HeartIcon className="size-5" />
+                </button>
+                <ProductDisplayIcon type={icon} className="absolute left-1/2 top-12 h-[138px] w-[86px] -translate-x-1/2" accent={accent} />
+                <div className="absolute bottom-[17px] right-6 inline-flex h-[35px] w-[87px] items-center justify-center gap-[15px] rounded-[15px] bg-white py-2.5">
+                    <SnowflakeSmallIcon className="size-4" accent={accent} />
+                    <FlameSmallIcon className="size-4 text-[#FF4D00]" />
+                </div>
+            </div>
+            <div className="flex w-full flex-col items-start justify-start gap-1.5 overflow-hidden p-[18px]">
+                <p className="text-[10px] font-bold text-[#FF4D00]" style={{ fontFamily: 'Gilroy, sans-serif', letterSpacing: 1.8 }}>
+                    {product.category}
+                </p>
+                <h3 className="text-base font-bold leading-[20.8px] text-[#1A1614]" style={{ fontFamily: 'Gilroy, sans-serif' }}>
+                    {product.name}
+                </h3>
+                <p className="text-xs font-normal text-[#B5ADA8]" style={{ fontFamily: 'Gilroy, sans-serif' }}>
+                    {product.subtype}
+                </p>
+                <div className="h-2 w-px" />
+                <div className="inline-flex w-full items-center justify-between overflow-hidden">
+                    <p className="text-xl font-black text-[#1A1614]">{product.price}</p>
+                    <button type="button" className="flex size-9 items-center justify-center rounded-full bg-[#FF4D00] text-white">
+                        <CartPlusIcon className="size-5" />
+                    </button>
+                </div>
+            </div>
+        </article>
+    );
+}
+
+function ProductDisplayIcon({ type, className = '', accent = '#6BB8E0' }) {
+    if (type === 'bread') {
+        return (
+            <svg className={className} viewBox="0 0 86 138" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M13 66C13 35 26 16 43 16s30 19 30 50v46c0 7-6 13-13 13H26c-7 0-13-6-13-13V66Z" fill="#fffaf6" stroke="#1A1614" strokeWidth="5" />
+                <path d="M27 50c4-8 9-12 16-12M43 38c7 0 12 4 16 12" stroke={accent} strokeWidth="5" strokeLinecap="round" />
+                <path d="M26 77h34M26 96h34" stroke="#1A1614" strokeWidth="5" strokeLinecap="round" />
+            </svg>
+        );
+    }
+    if (type === 'cake') {
+        return (
+            <svg className={className} viewBox="0 0 86 138" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M20 58h46v55c0 7-6 13-13 13H33c-7 0-13-6-13-13V58Z" fill="#fffaf6" stroke="#1A1614" strokeWidth="5" />
+                <path d="M18 58c0-15 11-27 25-27s25 12 25 27H18Z" fill="#fffaf6" stroke="#1A1614" strokeWidth="5" />
+                <path d="M28 70c4 8 11 8 15 0s11-8 15 0" stroke={accent} strokeWidth="5" strokeLinecap="round" />
+                <path d="M33 92h20" stroke="#1A1614" strokeWidth="5" strokeLinecap="round" />
+            </svg>
+        );
+    }
+    return (
+        <svg className={className} viewBox="0 0 86 138" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M43 12c18 0 31 12 31 29 0 11-6 21-16 26l-8 55c-.5 4-3.8 7-7.9 7s-7.4-3-7.9-7l-8-55C16 62 10 52 10 41c0-17 15-29 33-29Z" fill="#fffaf6" stroke="#1A1614" strokeWidth="5" />
+            <path d="M25 42c7 7 29 7 36 0M31 65h24" stroke={accent} strokeWidth="5" strokeLinecap="round" />
+        </svg>
+    );
+}
+
+function FilterDotIcon({ className = 'size-4' }) {
+    return (
+        <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" />
+            <path d="M5 8h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+    );
+}
+
+function ChevronDownSmallIcon({ className = 'size-4' }) {
+    return (
+        <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+    );
+}
+
+function SnowflakeSmallIcon({ className = 'size-4', accent = '#6BB8E0' }) {
+    return (
+        <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 2v12M3 5l10 6M13 5 3 11" stroke={accent} strokeWidth="1.7" strokeLinecap="round" />
+        </svg>
+    );
+}
+
+function FlameSmallIcon({ className = 'size-4' }) {
+    return (
+        <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8.5 14c2.5-.6 4-2.3 4-4.7 0-2.7-2-4.4-3.1-6.8-.2 2-1.2 3.2-2.7 4.4C5.4 8 4 9.2 4 11.1 4 13 5.7 14.2 8.5 14Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+        </svg>
     );
 }
 
