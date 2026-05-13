@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import { ArrowRight, Flame, Snowflake } from "lucide-react";
 import StoreLayout from "../../components/layout/StoreLayout";
 import { formatCurrency } from "../../utils/format";
 import { getApiBase, getAuthHeaders, getTenantHeaders } from "../../utils/api";
@@ -61,6 +62,38 @@ const normalizeCatalogLabel = (value) =>
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
+
+const formatSearchTerm = (value) =>
+    String(value || "")
+        .trim()
+        .replace(/\s+/g, " ");
+
+const SEARCH_HISTORY_KEY = "piquim_search_terms_v1";
+const SEARCH_HISTORY_LIMIT = 12;
+
+const readSearchHistory = () => {
+    try {
+        const raw = localStorage.getItem(SEARCH_HISTORY_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(parsed)) return [];
+        return parsed
+            .map((item) => ({
+                term: formatSearchTerm(item?.term || item),
+                count: Number(item?.count || 0) || 0,
+            }))
+            .filter((item) => item.term);
+    } catch {
+        return [];
+    }
+};
+
+const writeSearchHistory = (nextHistory) => {
+    try {
+        localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(nextHistory.slice(0, SEARCH_HISTORY_LIMIT)));
+    } catch {
+        // ignore storage errors
+    }
+};
 
 const normalizePriceFilterValue = (value) => {
     const raw = String(value ?? "").trim();
@@ -267,8 +300,8 @@ export default function CatalogPage() {
         const loadMetadata = async () => {
             try {
                 const [categoriesRes, brandsRes] = await Promise.all([
-                    fetch(`${getApiBase()}/public/categories`, { headers: getTenantHeaders() }),
-                    fetch(`${getApiBase()}/public/brands`, { headers: getTenantHeaders() }),
+                    fetch(`${getApiBase()}/categories`, { headers: getTenantHeaders() }),
+                    fetch(`${getApiBase()}/brands`, { headers: getTenantHeaders() }),
                 ]);
 
                 if (active && categoriesRes.ok) {
@@ -599,14 +632,30 @@ export default function CatalogPage() {
         && normalizeSortValue(sort) === DEFAULT_SORT;
 
     if (isCatalogLanding) {
-        return <PiquimCatalogLanding cards={catalogCards} onSelectCard={handleCatalogCardClick} />;
+        return (
+            <StoreLayout>
+                <PiquimCatalogLanding cards={catalogCards} onSelectCard={handleCatalogCardClick} />
+            </StoreLayout>
+        );
     }
 
     const selectedSubcatalogKey = normalizeCatalogLabel(selectedCategoryEntry?.slug || selectedCategoryEntry?.name || selectedCategory);
     const selectedSubcatalog = PIQUIM_SUBCATALOGS[selectedSubcatalogKey];
 
     if (selectedSubcatalog) {
-        return <PiquimSubcatalogPage catalog={selectedSubcatalog} />;
+        const subcatalogLabels = settings?.branding?.subcatalog_filters || {};
+        return (
+            <StoreLayout>
+                <PiquimSubcatalogPage
+                    catalog={selectedSubcatalog}
+                    products={products}
+                    currency={currency}
+                    locale={locale}
+                    onProductClick={(productId) => navigate(`/product/${productId}`)}
+                    labels={subcatalogLabels}
+                />
+            </StoreLayout>
+        );
     }
 
     return (
@@ -862,8 +911,7 @@ function PiquimCatalogLanding({ onSelectCard }) {
     return (
         <div className="min-h-screen bg-[#FFFAF6] font-[Inter] text-[#1A1614]">
             <div className="w-full overflow-hidden bg-[#FFFAF6]">
-                <PiquimCatalogHeader />
-                <section className="w-full overflow-hidden pt-[113px] max-md:pt-[93px]">
+                <section className="w-full overflow-hidden pt-[86px] max-md:pt-[74px]">
                     <div className="grid w-full grid-cols-1 items-stretch gap-0.5 overflow-hidden rounded-t-[45px] bg-[#FF4D00] lg:grid-cols-3">
                         {PIQUIM_EXACT_CARDS.map((card) => (
                             <PiquimExactCatalogCard
@@ -1053,12 +1101,143 @@ function PiquimFooterColumn({ title, links }) {
     );
 }
 
-function PiquimSubcatalogPage({ catalog }) {
+function PiquimSubcatalogPage({ catalog, products, currency, locale, onProductClick, labels }) {
+    const [query, setQuery] = useState("");
+    const [typeFilters, setTypeFilters] = useState([]);
+    const [formatFilters, setFormatFilters] = useState([]);
+    const [stockOnly, setStockOnly] = useState(false);
+    const [recentTerms, setRecentTerms] = useState([]);
+
+    useEffect(() => {
+        setRecentTerms(readSearchHistory());
+    }, []);
+
+    const normalizedProducts = useMemo(() => {
+        const mapped = (Array.isArray(products) ? products : []).map((product) => {
+            const data = product?.data || {};
+            const specs = data?.specifications && typeof data.specifications === "object" ? data.specifications : {};
+            const category = String(product?.category?.name || data?.category || "").trim();
+            const type = String(
+                specs.tipo ||
+                specs.tipo_producto ||
+                data?.subtype ||
+                product?.variation_group_label ||
+                product?.variation_group ||
+                category
+            ).trim();
+            const format = String(
+                specs.presentacion ||
+                specs.envase ||
+                specs.packaging ||
+                data?.presentation ||
+                ""
+            ).trim();
+
+            const variations = Array.isArray(product?.variations) ? product.variations : [];
+            const variationPrices = variations
+                .map((variation) => Number(variation?.price || 0))
+                .filter((value) => Number.isFinite(value) && value > 0);
+            const unitPrice = Number(product?.price || 0);
+            const effectivePrice = variationPrices.length ? Math.min(...variationPrices) : unitPrice;
+
+            return {
+                id: product?.id,
+                name: String(product?.name || "").trim(),
+                category: category || "Sin categoria",
+                subtype: type || "General",
+                format: format || "Sin especificar",
+                priceValue: Number.isFinite(effectivePrice) ? effectivePrice : 0,
+                stock: Number(product?.stock || 0),
+                temperature: `${category} ${type}`.toLowerCase(),
+            };
+        }).filter((item) => item.id && item.name);
+        return mapped;
+    }, [products]);
+
+    const availableTypes = useMemo(
+        () => [...new Set(normalizedProducts.map((item) => item.subtype).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" })),
+        [normalizedProducts]
+    );
+    const availableFormats = useMemo(
+        () => [...new Set(normalizedProducts.map((item) => item.format).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" })),
+        [normalizedProducts]
+    );
+
+    const queryNormalized = normalizeCatalogLabel(query);
+    const productSuggestions = useMemo(() => {
+        if (!queryNormalized) return [];
+        return normalizedProducts
+            .filter((item) => normalizeCatalogLabel(item.name).includes(queryNormalized))
+            .slice(0, 6)
+            .map((item) => item.name);
+    }, [normalizedProducts, queryNormalized]);
+
+    const trendingSuggestions = useMemo(() => {
+        const fromHistory = recentTerms
+            .sort((a, b) => b.count - a.count)
+            .map((item) => item.term)
+            .filter(Boolean);
+        const fallback = ["Chocolate", "Neutro", "Base", "Mousse", "Premezcla"];
+        return [...new Set([...fromHistory, ...fallback])].slice(0, 6);
+    }, [recentTerms]);
+
+    const filteredProducts = useMemo(() => {
+        return normalizedProducts.filter((item) => {
+            const matchText = !queryNormalized || normalizeCatalogLabel(`${item.name} ${item.category} ${item.subtype} ${item.format}`).includes(queryNormalized);
+            const matchType = !typeFilters.length || typeFilters.includes(item.subtype);
+            const matchFormat = !formatFilters.length || formatFilters.includes(item.format);
+            const matchStock = !stockOnly || Number(item.stock || 0) > 0;
+            return matchText && matchType && matchFormat && matchStock;
+        });
+    }, [formatFilters, normalizedProducts, queryNormalized, stockOnly, typeFilters]);
+
+    const sections = useMemo(() => {
+        const byType = new Map();
+        filteredProducts.forEach((item) => {
+            if (!byType.has(item.subtype)) byType.set(item.subtype, []);
+            byType.get(item.subtype).push(item);
+        });
+        return [...byType.entries()].map(([title, items]) => ({ title, products: items }));
+    }, [filteredProducts]);
+
+    const handleSuggestionPick = (value) => setQuery(value);
+
+    const handleSearchCommit = (value) => {
+        const term = formatSearchTerm(value);
+        if (!term) return;
+        const current = readSearchHistory();
+        const index = current.findIndex((item) => normalizeCatalogLabel(item.term) === normalizeCatalogLabel(term));
+        if (index >= 0) {
+            current[index] = { ...current[index], count: current[index].count + 1, term };
+        } else {
+            current.push({ term, count: 1 });
+        }
+        const sorted = current.sort((a, b) => b.count - a.count).slice(0, SEARCH_HISTORY_LIMIT);
+        writeSearchHistory(sorted);
+        setRecentTerms(sorted);
+    };
+
     return (
         <div className="min-h-screen bg-[#FFFAF6] font-[Inter] text-[#1A1614]">
-            <PiquimCatalogHeader />
-            <main className="flex w-full items-start justify-center gap-0 bg-[#FFFAF6] px-[60px] pb-10 pt-[153px] max-lg:flex-col max-lg:px-5 max-md:pt-[133px]">
-                <PiquimSubcatalogSidebar catalog={catalog} />
+            <main className="flex w-full items-start justify-center gap-0 bg-[#FFFAF6] px-[60px] pb-10 pt-[104px] max-lg:flex-col max-lg:px-5 max-md:pt-[86px]">
+                <PiquimSubcatalogSidebar
+                    catalog={catalog}
+                    labels={labels}
+                    query={query}
+                    setQuery={setQuery}
+                    onSearchCommit={handleSearchCommit}
+                    trendingSuggestions={trendingSuggestions}
+                    productSuggestions={productSuggestions}
+                    onSuggestionPick={handleSuggestionPick}
+                    availableTypes={availableTypes}
+                    selectedTypes={typeFilters}
+                    onToggleType={(value) => setTypeFilters((prev) => prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value])}
+                    availableFormats={availableFormats}
+                    selectedFormats={formatFilters}
+                    onToggleFormat={(value) => setFormatFilters((prev) => prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value])}
+                    stockOnly={stockOnly}
+                    setStockOnly={setStockOnly}
+                />
                 <section className="flex flex-1 flex-col items-start justify-start gap-[30px] overflow-hidden bg-[#FFFAF6] px-[60px] py-[30px] max-xl:px-8 max-lg:w-full max-md:px-0">
                     <header className="inline-flex w-full items-end justify-between overflow-hidden">
                         <div className="inline-flex flex-col items-start justify-start gap-4 overflow-hidden">
@@ -1069,7 +1248,13 @@ function PiquimSubcatalogPage({ catalog }) {
                         </div>
                     </header>
 
-                    {catalog.sections.map((section) => (
+                    {!sections.length ? (
+                        <div className="rounded-2xl border border-[#E8DFD8] bg-white p-6 text-sm text-[#6B7280]">
+                            No encontramos productos con esos filtros.
+                        </div>
+                    ) : null}
+
+                    {sections.map((section) => (
                         <section key={section.title} className="flex w-full flex-col items-start justify-start gap-[25px]">
                             <h2 className="text-4xl font-bold leading-9 text-[#1A1614]" style={{ fontFamily: 'Gilroy, sans-serif' }}>
                                 {section.title}
@@ -1082,6 +1267,9 @@ function PiquimSubcatalogPage({ catalog }) {
                                         accent={catalog.accent}
                                         mediaGradient={catalog.mediaGradient}
                                         icon={catalog.icon}
+                                        currency={currency}
+                                        locale={locale}
+                                        onOpen={() => onProductClick(product.id)}
                                     />
                                 ))}
                             </div>
@@ -1094,59 +1282,124 @@ function PiquimSubcatalogPage({ catalog }) {
     );
 }
 
-function PiquimSubcatalogSidebar({ catalog }) {
+function PiquimSubcatalogSidebar({
+    catalog,
+    labels,
+    query,
+    setQuery,
+    onSearchCommit,
+    trendingSuggestions,
+    productSuggestions,
+    onSuggestionPick,
+    availableTypes,
+    selectedTypes,
+    onToggleType,
+    availableFormats,
+    selectedFormats,
+    onToggleFormat,
+    stockOnly,
+    setStockOnly,
+}) {
+    const titleLabel = labels?.title || catalog?.filters?.title || "Filtros";
+    const subtitleLabel = labels?.subtitle || catalog?.filters?.subtitle || "Refina tu busqueda profesional";
+    const searchPlaceholder = labels?.search_placeholder || catalog?.filters?.searchPlaceholder || "Buscar producto...";
+    const topSearchesLabel = labels?.top_searches_label || "Mas buscados";
+    const productMatchesLabel = labels?.product_matches_label || "Autocompletar";
+    const typeLabel = labels?.type_label || catalog?.filters?.groups?.[0]?.title || "Tipo de producto";
+    const formatLabel = labels?.format_label || catalog?.filters?.groups?.[1]?.title || "Presentacion";
+    const stockLabel = labels?.stock_label || "Solo con stock";
+
     return (
         <aside className="flex min-h-[1850px] w-64 shrink-0 flex-col items-start justify-start gap-2 overflow-hidden rounded-xl border-r border-[#FFDCC1] bg-[#FFD7B6] p-6 shadow-sm max-lg:min-h-0 max-lg:w-full">
             <div className="flex w-full flex-col items-start justify-start gap-2">
                 <div className="flex w-full flex-col items-start justify-start pb-6">
                     <h2 className="flex w-full flex-col justify-center text-2xl font-bold leading-8 text-[#A04100]" style={{ fontFamily: 'Epilogue, Gilroy, sans-serif' }}>
-                        {catalog.filters.title}
+                        {titleLabel}
                     </h2>
                     <p className="mt-1 whitespace-pre-line text-sm font-normal leading-5 text-[#5A4136]" style={{ fontFamily: 'Work Sans, Inter, sans-serif' }}>
-                        {catalog.filters.subtitle}
+                        {subtitleLabel}
                     </p>
                 </div>
 
-                <div className="w-full pb-6">
-                    <div className="relative flex w-full flex-col items-start justify-start">
-                        <div className="inline-flex w-full items-start justify-center overflow-hidden rounded-lg bg-[#FFEDDE] py-2.5 pl-3 pr-8">
-                            <span className="flex flex-1 flex-col justify-center text-sm font-normal text-[#6B7280]" style={{ fontFamily: 'Work Sans, Inter, sans-serif' }}>
-                                {catalog.filters.searchPlaceholder}
-                            </span>
-                        </div>
+                <div className="w-full pb-4">
+                    <div className="relative">
+                        <input
+                            value={query}
+                            onChange={(event) => setQuery(event.target.value)}
+                            onBlur={() => onSearchCommit(query)}
+                            placeholder={searchPlaceholder}
+                            className="w-full rounded-lg bg-[#FFEDDE] py-2.5 pl-3 pr-8 text-sm text-[#6B7280] outline-none ring-0"
+                        />
                         <SearchIcon className="absolute right-2 top-2.5 size-5 text-[#A04100]" />
                     </div>
                 </div>
 
-                {catalog.filters.groups.map((group) => (
-                    <div key={group.title} className="w-full pb-6">
-                        <div className="flex w-full flex-col items-start justify-start gap-3">
-                            <div className="inline-flex w-full items-center justify-start gap-2">
-                                <FilterDotIcon className="size-4 text-[#A04100]" />
-                                <h3 className="text-sm font-semibold leading-[16.8px] text-[#A04100]" style={{ fontFamily: 'Work Sans, Inter, sans-serif' }}>
-                                    {group.title}
-                                </h3>
-                            </div>
-                            <div className="flex w-full flex-col items-start justify-start gap-2">
-                                {group.items.map((item, index) => (
-                                    <label key={`${group.title}-${item}`} className="inline-flex w-full items-center justify-start gap-2">
-                                        <span className="flex size-4 items-center justify-center rounded border border-[#A04100]/45 bg-[#FFEDDE]" />
-                                        <span className="flex flex-col justify-center text-sm font-normal leading-5 text-[#5A4136]" style={{ fontFamily: 'Work Sans, Inter, sans-serif' }}>
-                                            {item}
-                                        </span>
-                                        {index === 0 ? <ChevronDownSmallIcon className="ml-auto size-4 text-[#5A4136]" /> : null}
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                ))}
+                <SuggestionGroup title={topSearchesLabel} items={trendingSuggestions} onPick={onSuggestionPick} />
+                <SuggestionGroup title={productMatchesLabel} items={productSuggestions} onPick={onSuggestionPick} />
+
+                <FilterGroup title={typeLabel} options={availableTypes} selected={selectedTypes} onToggle={onToggleType} />
+                <FilterGroup title={formatLabel} options={availableFormats} selected={selectedFormats} onToggle={onToggleFormat} />
+
+                <label className="inline-flex w-full items-center justify-start gap-2 pb-4">
+                    <input type="checkbox" checked={stockOnly} onChange={(event) => setStockOnly(event.target.checked)} />
+                    <span className="text-sm font-normal leading-5 text-[#5A4136]">{stockLabel}</span>
+                </label>
             </div>
         </aside>
     );
 }
 
-function PiquimSubcatalogProductCard({ product, accent, mediaGradient, icon }) {
+function SuggestionGroup({ title, items, onPick }) {
+    if (!items?.length) return null;
+    return (
+        <div className="w-full pb-4">
+            <div className="mb-2 inline-flex w-full items-center justify-start gap-2">
+                <FilterDotIcon className="size-4 text-[#A04100]" />
+                <h3 className="text-sm font-semibold leading-[16.8px] text-[#A04100]">{title}</h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+                {items.map((item) => (
+                    <button
+                        key={`${title}-${item}`}
+                        type="button"
+                        onClick={() => onPick(item)}
+                        className="rounded-full bg-[#FFEDDE] px-2.5 py-1 text-xs text-[#5A4136] hover:bg-white"
+                    >
+                        {item}
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function FilterGroup({ title, options, selected, onToggle }) {
+    if (!options?.length) return null;
+    return (
+        <div className="w-full pb-6">
+            <div className="mb-3 inline-flex w-full items-center justify-start gap-2">
+                <FilterDotIcon className="size-4 text-[#A04100]" />
+                <h3 className="text-sm font-semibold leading-[16.8px] text-[#A04100]">{title}</h3>
+            </div>
+            <div className="flex w-full flex-col items-start justify-start gap-2">
+                {options.map((item) => (
+                    <label key={`${title}-${item}`} className="inline-flex w-full items-center justify-start gap-2">
+                        <input type="checkbox" checked={selected.includes(item)} onChange={() => onToggle(item)} />
+                        <span className="text-sm font-normal leading-5 text-[#5A4136]">{item}</span>
+                    </label>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function PiquimSubcatalogProductCard({ product, accent, mediaGradient, icon, currency, locale, onOpen }) {
+    const temperatureType = String(product?.temperature || icon || "").toLowerCase();
+    const isCold = temperatureType.includes("ice") || temperatureType.includes("cold") || temperatureType.includes("frio") || temperatureType.includes("frío");
+    const isHot = temperatureType.includes("fire") || temperatureType.includes("hot") || temperatureType.includes("calor");
+    const showCold = isCold || (!isCold && !isHot);
+    const showHot = isHot;
+
     return (
         <article className="flex h-[380px] min-w-[282px] flex-col items-start justify-start overflow-hidden rounded-[18px] bg-white outline outline-1 -outline-offset-1 outline-[#E8DFD8]">
             <div className="relative h-[220px] w-full overflow-hidden" style={{ background: mediaGradient }}>
@@ -1164,9 +1417,9 @@ function PiquimSubcatalogProductCard({ product, accent, mediaGradient, icon }) {
                     <HeartIcon className="size-5" />
                 </button>
                 <ProductDisplayIcon type={icon} className="absolute left-1/2 top-12 h-[138px] w-[86px] -translate-x-1/2" accent={accent} />
-                <div className="absolute bottom-[17px] right-6 inline-flex h-[35px] w-[87px] items-center justify-center gap-[15px] rounded-[15px] bg-white py-2.5">
-                    <SnowflakeSmallIcon className="size-4" accent={accent} />
-                    <FlameSmallIcon className="size-4 text-[#FF4D00]" />
+                <div className="absolute bottom-[17px] right-6 inline-flex h-[35px] min-w-[44px] items-center justify-center gap-[10px] rounded-[15px] bg-white px-3 py-2.5">
+                    {showCold ? <Snowflake className="size-4" style={{ color: accent }} /> : null}
+                    {showHot ? <Flame className="size-4 text-[#FF4D00]" /> : null}
                 </div>
             </div>
             <div className="flex w-full flex-col items-start justify-start gap-1.5 overflow-hidden p-[18px]">
@@ -1181,8 +1434,8 @@ function PiquimSubcatalogProductCard({ product, accent, mediaGradient, icon }) {
                 </p>
                 <div className="h-2 w-px" />
                 <div className="inline-flex w-full items-center justify-between overflow-hidden">
-                    <p className="text-xl font-black text-[#1A1614]">{product.price}</p>
-                    <button type="button" className="flex size-9 items-center justify-center rounded-full bg-[#FF4D00] text-white">
+                    <p className="text-xl font-black text-[#1A1614]">{formatCurrency(product.priceValue || 0, currency || "ARS", locale || "es-AR")}</p>
+                    <button type="button" onClick={onOpen} className="flex size-9 items-center justify-center rounded-full bg-[#FF4D00] text-white">
                         <CartPlusIcon className="size-5" />
                     </button>
                 </div>
@@ -1236,21 +1489,6 @@ function ChevronDownSmallIcon({ className = 'size-4' }) {
     );
 }
 
-function SnowflakeSmallIcon({ className = 'size-4', accent = '#6BB8E0' }) {
-    return (
-        <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 2v12M3 5l10 6M13 5 3 11" stroke={accent} strokeWidth="1.7" strokeLinecap="round" />
-        </svg>
-    );
-}
-
-function FlameSmallIcon({ className = 'size-4' }) {
-    return (
-        <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8.5 14c2.5-.6 4-2.3 4-4.7 0-2.7-2-4.4-3.1-6.8-.2 2-1.2 3.2-2.7 4.4C5.4 8 4 9.2 4 11.1 4 13 5.7 14.2 8.5 14Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
-        </svg>
-    );
-}
 
 function SearchIcon({ className = "size-4" }) {
     return (
@@ -1342,7 +1580,9 @@ function CatalogFamilySection({ cards, onSelectCard }) {
                                         onClick={() => onSelectCard(card)}
                                         className="inline-flex w-fit items-center rounded-full bg-[#fffaf6] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-[#ff4d00] transition-transform hover:-translate-y-0.5"
                                     >
-                                        Ver catalogo -&gt;
+                                        <span className="inline-flex items-center">
+                                            Ver catalogo <ArrowRight className="ml-2 size-4" />
+                                        </span>
                                     </button>
                                 </div>
                             </div>

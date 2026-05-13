@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getApiBase, getTenantHeaders } from '../../utils/api';
 import { DEFAULT_ABOUT_SECTIONS, DEFAULT_HOME_SECTIONS } from '../../data/defaultSections';
 import { useTenant } from '../../context/TenantContext';
@@ -45,12 +45,13 @@ const sortCategoriesForCleanup = (items) => {
 
 export function useEditorState(user) {
     const { refreshTenantSettings } = useTenant();
+    const HISTORY_LIMIT = 80;
 
     // Core State
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState('home');
-    const [settings, setSettings] = useState({
+    const [settings, rawSetSettings] = useState({
         branding: {
             name: '',
             logo_url: '',
@@ -95,16 +96,108 @@ export function useEditorState(user) {
             }
         });
 
-    const [pageSections, setPageSections] = useState({
+    const [pageSections, rawSetPageSections] = useState({
         home: DEFAULT_HOME_SECTIONS,
         about: DEFAULT_ABOUT_SECTIONS,
     });
 
-    const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [brands, setBrands] = useState([]);
+    const [products, rawSetProducts] = useState([]);
+    const [categories, rawSetCategories] = useState([]);
+    const [brands, rawSetBrands] = useState([]);
     const [usersList, setUsersList] = useState([]);
     const [offers, setOffers] = useState([]);
+    const [historyPast, setHistoryPast] = useState([]);
+    const [historyFuture, setHistoryFuture] = useState([]);
+    const isApplyingHistoryRef = useRef(false);
+    const settingsRef = useRef(settings);
+    const pageSectionsRef = useRef(pageSections);
+    const productsRef = useRef(products);
+    const categoriesRef = useRef(categories);
+    const brandsRef = useRef(brands);
+
+    useEffect(() => { settingsRef.current = settings; }, [settings]);
+    useEffect(() => { pageSectionsRef.current = pageSections; }, [pageSections]);
+    useEffect(() => { productsRef.current = products; }, [products]);
+    useEffect(() => { categoriesRef.current = categories; }, [categories]);
+    useEffect(() => { brandsRef.current = brands; }, [brands]);
+
+    const deepClone = useCallback((value) => {
+        if (typeof structuredClone === 'function') return structuredClone(value);
+        return JSON.parse(JSON.stringify(value));
+    }, []);
+
+    const snapshotState = useCallback(() => ({
+        settings: deepClone(settingsRef.current),
+        pageSections: deepClone(pageSectionsRef.current),
+        products: deepClone(productsRef.current),
+        categories: deepClone(categoriesRef.current),
+        brands: deepClone(brandsRef.current),
+    }), [deepClone]);
+
+    const applySnapshot = useCallback((snapshot) => {
+        if (!snapshot) return;
+        isApplyingHistoryRef.current = true;
+        rawSetSettings(snapshot.settings);
+        rawSetPageSections(snapshot.pageSections);
+        rawSetProducts(snapshot.products);
+        rawSetCategories(snapshot.categories);
+        rawSetBrands(snapshot.brands);
+        setTimeout(() => {
+            isApplyingHistoryRef.current = false;
+        }, 0);
+    }, []);
+
+    const pushHistorySnapshot = useCallback(() => {
+        if (isApplyingHistoryRef.current) return;
+        const snapshot = snapshotState();
+        setHistoryPast((prev) => [...prev.slice(-(HISTORY_LIMIT - 1)), snapshot]);
+        setHistoryFuture([]);
+    }, [snapshotState]);
+
+    const setSettings = useCallback((updater) => {
+        pushHistorySnapshot();
+        rawSetSettings((prev) => (typeof updater === 'function' ? updater(prev) : updater));
+    }, [pushHistorySnapshot]);
+
+    const setPageSections = useCallback((updater) => {
+        pushHistorySnapshot();
+        rawSetPageSections((prev) => (typeof updater === 'function' ? updater(prev) : updater));
+    }, [pushHistorySnapshot]);
+
+    const setProducts = useCallback((updater) => {
+        pushHistorySnapshot();
+        rawSetProducts((prev) => (typeof updater === 'function' ? updater(prev) : updater));
+    }, [pushHistorySnapshot]);
+
+    const setCategories = useCallback((updater) => {
+        pushHistorySnapshot();
+        rawSetCategories((prev) => (typeof updater === 'function' ? updater(prev) : updater));
+    }, [pushHistorySnapshot]);
+
+    const setBrands = useCallback((updater) => {
+        pushHistorySnapshot();
+        rawSetBrands((prev) => (typeof updater === 'function' ? updater(prev) : updater));
+    }, [pushHistorySnapshot]);
+
+    const undo = useCallback(() => {
+        if (!historyPast.length) return false;
+        const previous = historyPast[historyPast.length - 1];
+        const current = snapshotState();
+        setHistoryPast((prev) => prev.slice(0, -1));
+        setHistoryFuture((prev) => [current, ...prev].slice(0, HISTORY_LIMIT));
+        applySnapshot(previous);
+        return true;
+    }, [applySnapshot, historyPast, snapshotState]);
+
+    const redo = useCallback(() => {
+        if (!historyFuture.length) return false;
+        const next = historyFuture[0];
+        const current = snapshotState();
+        setHistoryFuture((prev) => prev.slice(1));
+        setHistoryPast((prev) => [...prev.slice(-(HISTORY_LIMIT - 1)), current]);
+        applySnapshot(next);
+        return true;
+    }, [applySnapshot, historyFuture, snapshotState]);
 
     const cleanupReservedCatalogEntries = useCallback(async ({ headers, settingsData, categoriesData, brandsData }) => {
         let changed = false;
@@ -254,7 +347,7 @@ export function useEditorState(user) {
 
             if (settingsPayload) {
                 const data = settingsPayload;
-                setSettings(prev => ({
+                rawSetSettings(prev => ({
                     ...prev,
                     ...data.settings,
                     branding: {
@@ -293,21 +386,23 @@ export function useEditorState(user) {
 
             if (homeRes.ok) {
                 const data = await homeRes.json();
-                if (Array.isArray(data.sections)) setPageSections(prev => ({ ...prev, home: data.sections }));
+                if (Array.isArray(data.sections)) rawSetPageSections(prev => ({ ...prev, home: data.sections }));
             }
 
             if (aboutRes.ok) {
                 const data = await aboutRes.json();
-                if (Array.isArray(data.sections)) setPageSections(prev => ({ ...prev, about: data.sections }));
+                if (Array.isArray(data.sections)) rawSetPageSections(prev => ({ ...prev, about: data.sections }));
             }
 
             if (productsRes.ok) {
                 const data = await productsRes.json();
-                setProducts(data.items || []);
+                rawSetProducts(data.items || []);
             }
 
-            setCategories(categoriesPayload || []);
-            setBrands(brandsPayload);
+            rawSetCategories(categoriesPayload || []);
+            rawSetBrands(brandsPayload);
+            setHistoryPast([]);
+            setHistoryFuture([]);
 
         } catch (err) {
             console.error("Failed to load editor data", err);
@@ -467,6 +562,10 @@ export function useEditorState(user) {
         setCategories,
         brands,
         setBrands,
+        undo,
+        redo,
+        canUndo: historyPast.length > 0,
+        canRedo: historyFuture.length > 0,
         handleSaveAll,
         saveCheckoutSettings,
         saveShippingSettings,

@@ -445,7 +445,11 @@ body {
   height: 100%;
   background-color: #f8fafc;
   color: #0f172a;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Gilroy', 'Manrope', sans-serif;
+}
+
+* {
+  font-family: inherit;
 }
 
 .no-scrollbar {
@@ -455,4 +459,9 @@ body {
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }

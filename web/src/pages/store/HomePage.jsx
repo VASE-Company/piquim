@@ -10,6 +10,7 @@ import BrandMarquee from "../../components/blocks/BrandMarquee";
 import FeaturedProducts from "../../components/blocks/FeaturedProducts";
 import Services from "../../components/blocks/Services";
 import { getDefaultSectionsForPage, mergeSectionsWithDefaults } from "../../data/defaultSections";
+import { useTenant } from "../../context/TenantContext";
 
 const buildFeaturedCard = (product, index, isWholesale = false) => {
     const data = product.data || {};
@@ -51,20 +52,25 @@ const buildFeaturedCard = (product, index, isWholesale = false) => {
 
 export default function HomePage() {
     const { isWholesale } = useAuth();
-    const [sections, setSections] = useState(() => getDefaultSectionsForPage('home'));
+    const { settings } = useTenant();
+    const isPiquim = settings?.branding?.design_preset === 'piquim';
+    const pageKey = isPiquim ? 'piquim-home' : 'home';
+    const [sections, setSections] = useState(() =>
+        getDefaultSectionsForPage(pageKey)
+    );
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [featuredLoaded, setFeaturedLoaded] = useState(false);
 
     useEffect(() => {
         async function loadHome() {
             try {
-                const response = await fetch(`${getApiBase()}/public/pages/home`, {
+                const response = await fetch(`${getApiBase()}/pages/home`, {
                     headers: getTenantHeaders(),
                 });
                 if (response.ok) {
                     const data = await response.json();
                     if (data.sections && data.sections.length) {
-                        setSections(mergeSectionsWithDefaults('home', data.sections));
+                        setSections(mergeSectionsWithDefaults(pageKey, data.sections));
                     }
                 }
 
@@ -84,14 +90,19 @@ export default function HomePage() {
             }
         }
         loadHome();
-    }, [isWholesale]);
+    }, [isWholesale, pageKey]);
 
     const finalSections = useMemo(() => {
         if (!sections) return null;
         return sections
-            .filter((section) => section.type !== 'FeaturedProducts' || (featuredLoaded && featuredProducts.length > 0))
+            .filter((section) => {
+                if (section.type === 'FeaturedProducts' || section.type === 'PiquimFeaturedProducts') {
+                    return featuredLoaded && featuredProducts.length > 0;
+                }
+                return true;
+            })
             .map((section) => {
-                if (section.type === 'FeaturedProducts') {
+                if (section.type === 'FeaturedProducts' || section.type === 'PiquimFeaturedProducts') {
                     return { ...section, props: { ...section.props, products: featuredProducts } };
                 }
                 return section;
