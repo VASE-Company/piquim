@@ -129,6 +129,7 @@ export default function Header({
   const [catalogCategories, setCatalogCategories] = useState([]);
   const [catalogBrands, setCatalogBrands] = useState([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [piquimSearchOpen, setPiquimSearchOpen] = useState(false);
   const [expandedMobileCategories, setExpandedMobileCategories] = useState({});
   const [activeMobileTab, setActiveMobileTab] = useState("menu"); // menu, categories, brands
 
@@ -242,6 +243,12 @@ export default function Header({
     if (event.key === "Enter") {
       navigate("/catalog");
     }
+  };
+
+  const handlePiquimSearchSubmit = (event) => {
+    event.preventDefault();
+    setPiquimSearchOpen(true);
+    navigate("/catalog");
   };
 
   const handleAccountClick = () => {
@@ -402,11 +409,45 @@ export default function Header({
               })}
             </nav>
 
-            <div className="flex items-center justify-center gap-3.5 overflow-hidden">
+            <div className="flex items-center justify-center gap-3.5 overflow-visible">
+              <form
+                onSubmit={handlePiquimSearchSubmit}
+                className={`relative flex h-7 items-center overflow-hidden rounded-full bg-white/35 transition-all duration-300 ease-out ${
+                  piquimSearchOpen || search ? "w-[260px] pl-3 pr-9 outline outline-1 -outline-offset-1 outline-[#E8DFD8]" : "w-6"
+                } max-md:hidden`}
+              >
+                <input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Buscar producto..."
+                  className={`h-full min-w-0 flex-1 bg-transparent text-sm font-medium text-[#1A1614] outline-none placeholder:text-[#5A4136]/70 transition-opacity duration-200 ${
+                    piquimSearchOpen || search ? "opacity-100" : "pointer-events-none opacity-0"
+                  }`}
+                  aria-label="Buscar producto"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!piquimSearchOpen && !search) {
+                      setPiquimSearchOpen(true);
+                      return;
+                    }
+                    navigate("/catalog");
+                  }}
+                  className="absolute right-0 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full text-black"
+                  aria-label="Buscar catalogo"
+                >
+                  <SearchIcon className="size-6" />
+                </button>
+              </form>
+
               <button
                 type="button"
-                onClick={() => navigate("/catalog")}
-                className="flex items-center justify-center overflow-hidden rounded-full text-black"
+                onClick={() => {
+                  setPiquimSearchOpen(true);
+                  navigate("/catalog");
+                }}
+                className="hidden items-center justify-center overflow-hidden rounded-full text-black max-md:flex"
                 aria-label="Buscar catalogo"
               >
                 <SearchIcon className="size-6" />
@@ -425,7 +466,7 @@ export default function Header({
                 <button
                   type="button"
                   onClick={() => navigate("/cart")}
-                  className="relative flex items-center justify-center overflow-hidden rounded-full text-black"
+                  className="relative flex items-center justify-center rounded-full text-black"
                   aria-label="Carrito"
                 >
                   <CartIcon className="size-6" />

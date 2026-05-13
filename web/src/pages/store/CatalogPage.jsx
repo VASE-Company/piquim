@@ -881,6 +881,14 @@ function PiquimCatalogLanding({ onSelectCard }) {
 }
 
 function PiquimCatalogHeader() {
+    const { search, setSearch, cartCount } = useStore();
+    const [searchOpen, setSearchOpen] = useState(false);
+    const submitSearch = (event) => {
+        event.preventDefault();
+        setSearchOpen(true);
+        navigate('/catalog');
+    };
+
     return (
         <div className="fixed left-0 right-0 top-0 z-50 flex w-full flex-col items-center justify-center overflow-hidden border-b border-[#E8DFD8]/80 bg-[#FFFAF6]/35 px-[60px] py-[18px] backdrop-blur-2xl max-md:px-4">
             <div className="inline-flex w-full items-center justify-center overflow-hidden rounded-[30px] bg-[linear-gradient(90deg,rgba(255,191,140,0.74)_0%,rgba(255,239,232,0.62)_48%,rgba(255,191,140,0.74)_100%)] px-[60px] py-[18px] shadow-[0_18px_60px_rgba(255,77,0,0.12)] outline outline-1 -outline-offset-1 outline-[#E8DFD8]/90 backdrop-blur-2xl max-md:px-5">
@@ -900,15 +908,58 @@ function PiquimCatalogHeader() {
                     </button>
                 </nav>
 
-                <div className="flex items-center justify-center gap-3.5 overflow-hidden">
-                    <button type="button" onClick={() => navigate('/catalog')} className="flex items-center justify-center overflow-hidden rounded-full" aria-label="Buscar">
+                <div className="flex items-center justify-center gap-3.5 overflow-visible">
+                    <form
+                        onSubmit={submitSearch}
+                        className={`relative flex h-7 items-center overflow-hidden rounded-full bg-white/35 transition-all duration-300 ease-out ${
+                            searchOpen || search ? 'w-[260px] pl-3 pr-9 outline outline-1 -outline-offset-1 outline-[#E8DFD8]' : 'w-6'
+                        } max-md:hidden`}
+                    >
+                        <input
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
+                            placeholder="Buscar producto..."
+                            className={`h-full min-w-0 flex-1 bg-transparent text-sm font-medium text-[#1A1614] outline-none placeholder:text-[#5A4136]/70 transition-opacity duration-200 ${
+                                searchOpen || search ? 'opacity-100' : 'pointer-events-none opacity-0'
+                            }`}
+                            aria-label="Buscar producto"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (!searchOpen && !search) {
+                                    setSearchOpen(true);
+                                    return;
+                                }
+                                navigate('/catalog');
+                            }}
+                            className="absolute right-0 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full"
+                            aria-label="Buscar"
+                        >
+                            <SearchIcon className="size-6 text-black" />
+                        </button>
+                    </form>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setSearchOpen(true);
+                            navigate('/catalog');
+                        }}
+                        className="hidden items-center justify-center overflow-hidden rounded-full max-md:flex"
+                        aria-label="Buscar"
+                    >
                         <SearchIcon className="size-6 text-black" />
                     </button>
                     <button type="button" onClick={() => navigate('/profile')} className="flex items-center justify-center overflow-hidden rounded-full max-sm:hidden" aria-label="Guardados">
                         <BookmarkIcon className="size-6 text-black" />
                     </button>
-                    <button type="button" onClick={() => navigate('/cart')} className="flex items-center justify-center overflow-hidden rounded-full" aria-label="Carrito">
+                    <button type="button" onClick={() => navigate('/cart')} className="relative flex items-center justify-center rounded-full" aria-label="Carrito">
                         <CartIcon className="size-6 text-black" />
+                        {cartCount > 0 ? (
+                            <span className="absolute -right-1 -top-1 min-w-[18px] rounded-full bg-[#FF4D00] px-1.5 text-center text-[10px] font-black leading-[18px] text-white">
+                                {cartCount}
+                            </span>
+                        ) : null}
                     </button>
                     <button
                         type="button"
