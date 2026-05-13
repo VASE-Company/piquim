@@ -306,49 +306,9 @@ export const DEFAULT_ABOUT_SECTIONS = [
     },
 ];
 
-export const PIQUIM_HOME_SECTIONS = [
-    {
-        id: 'piquim-hero',
-        type: 'PiquimHero',
-        enabled: true,
-        props: {},
-    },
-    {
-        id: 'piquim-announce',
-        type: 'PiquimAnnounceBar',
-        enabled: true,
-        props: {},
-    },
-    {
-        id: 'piquim-tres-mundos',
-        type: 'PiquimTresMundos',
-        enabled: true,
-        props: {},
-    },
-    {
-        id: 'piquim-catalog',
-        type: 'PiquimCatalog3Panel',
-        enabled: true,
-        props: {},
-    },
-    {
-        id: 'piquim-featured',
-        type: 'PiquimFeaturedProducts',
-        enabled: true,
-        props: { products: [] },
-    },
-    {
-        id: 'piquim-cta',
-        type: 'PiquimCTABanner',
-        enabled: true,
-        props: {},
-    },
-];
-
 const DEFAULT_SECTIONS_BY_PAGE = {
     home: DEFAULT_HOME_SECTIONS,
     about: DEFAULT_ABOUT_SECTIONS,
-    'piquim-home': PIQUIM_HOME_SECTIONS,
 };
 
 export const getDefaultSectionsForPage = (pageKey = 'home') =>
