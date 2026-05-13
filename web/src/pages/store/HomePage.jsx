@@ -9,7 +9,8 @@ import HeroSlider from "../../components/blocks/HeroSlider";
 import BrandMarquee from "../../components/blocks/BrandMarquee";
 import FeaturedProducts from "../../components/blocks/FeaturedProducts";
 import Services from "../../components/blocks/Services";
-import { getDefaultSectionsForPage, mergeSectionsWithDefaults } from "../../data/defaultSections";
+import { getDefaultSectionsForPage, mergeSectionsWithDefaults, PIQUIM_HOME_SECTIONS } from "../../data/defaultSections";
+import { useTenant } from "../../context/TenantContext";
 
 const buildFeaturedCard = (product, index, isWholesale = false) => {
     const data = product.data || {};
@@ -51,7 +52,11 @@ const buildFeaturedCard = (product, index, isWholesale = false) => {
 
 export default function HomePage() {
     const { isWholesale } = useAuth();
-    const [sections, setSections] = useState(() => getDefaultSectionsForPage('home'));
+    const { settings } = useTenant();
+    const isPiquim = settings?.branding?.design_preset === 'piquim';
+    const [sections, setSections] = useState(() =>
+        isPiquim ? PIQUIM_HOME_SECTIONS : getDefaultSectionsForPage('home')
+    );
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [featuredLoaded, setFeaturedLoaded] = useState(false);
 
@@ -89,9 +94,14 @@ export default function HomePage() {
     const finalSections = useMemo(() => {
         if (!sections) return null;
         return sections
-            .filter((section) => section.type !== 'FeaturedProducts' || (featuredLoaded && featuredProducts.length > 0))
+            .filter((section) => {
+                if (section.type === 'FeaturedProducts' || section.type === 'PiquimFeaturedProducts') {
+                    return featuredLoaded && featuredProducts.length > 0;
+                }
+                return true;
+            })
             .map((section) => {
-                if (section.type === 'FeaturedProducts') {
+                if (section.type === 'FeaturedProducts' || section.type === 'PiquimFeaturedProducts') {
                     return { ...section, props: { ...section.props, products: featuredProducts } };
                 }
                 return section;

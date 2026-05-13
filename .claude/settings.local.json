@@ -25,7 +25,12 @@
       "Bash(powershell -Command \"Expand-Archive -Path 'C:\\\\\\\\Users\\\\\\\\10\\\\\\\\Downloads\\\\\\\\ui-ux-pro-max.skill' -DestinationPath 'C:\\\\\\\\Users\\\\\\\\10\\\\\\\\Documents\\\\\\\\GitHub\\\\\\\\Proyecto-Teflon\\\\\\\\.claude\\\\\\\\skills\\\\\\\\' -Force\")",
       "Bash(powershell -Command \"Copy-Item 'C:\\\\\\\\Users\\\\\\\\10\\\\\\\\Downloads\\\\\\\\ui-ux-pro-max.skill' 'C:\\\\\\\\Users\\\\\\\\10\\\\\\\\Downloads\\\\\\\\ui-ux-pro-max.zip'; Expand-Archive -Path 'C:\\\\\\\\Users\\\\\\\\10\\\\\\\\Downloads\\\\\\\\ui-ux-pro-max.zip' -DestinationPath 'C:\\\\\\\\Users\\\\\\\\10\\\\\\\\Documents\\\\\\\\GitHub\\\\\\\\Proyecto-Teflon\\\\\\\\.claude\\\\\\\\skills\\\\\\\\' -Force; Remove-Item 'C:\\\\\\\\Users\\\\\\\\10\\\\\\\\Downloads\\\\\\\\ui-ux-pro-max.zip'\")",
       "Bash(powershell -Command \"Get-Content 'C:\\\\\\\\Users\\\\\\\\10\\\\\\\\Documents\\\\\\\\GitHub\\\\\\\\Proyecto-Teflon\\\\\\\\.claude\\\\\\\\skills\\\\\\\\ui-ux-pro-max\\\\\\\\SKILL.md' -Head 30\")",
-      "Bash(node --input-type=module)"
+      "Bash(node --input-type=module)",
+      "mcp__claude_ai_Figma__get_design_context",
+      "Bash(npm run *)",
+      "Bash(Test-Path D:\\\\VSPROJECTS\\\\WEBS\\\\piquim\\\\web\\\\node_modules\\\\vite *)",
+      "PowerShell(Test-Path \"D:\\\\VSPROJECTS\\\\WEBS\\\\piquim\\\\web\\\\node_modules\\\\vite\"; Get-ChildItem \"D:\\\\VSPROJECTS\\\\WEBS\\\\piquim\\\\web\\\\node_modules\" -ErrorAction SilentlyContinue | Select-Object -First 5 | ForEach-Object { $_.Name })",
+      "Bash(npm install *)"
     ]
   },
   "hooks": {
