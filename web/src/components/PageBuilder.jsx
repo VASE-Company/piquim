@@ -11,6 +11,11 @@ import AboutTeam from './blocks/AboutTeam';
 import AboutCTA from './blocks/AboutCTA';
 import FeaturesBento from './blocks/FeaturesBento';
 import FeaturesBentoGrid from './blocks/FeaturesBentoGrid';
+import PiquimHero from './blocks/PiquimHero';
+import PiquimAnnounceBar from './blocks/PiquimAnnounceBar';
+import PiquimTresMundos from './blocks/PiquimTresMundos';
+import PiquimFeaturedProducts from './blocks/PiquimFeaturedProducts';
+import PiquimCTABanner from './blocks/PiquimCTABanner';
 
 const COMPONENT_MAP = {
     HeroSlider,
@@ -25,6 +30,11 @@ const COMPONENT_MAP = {
     AboutCTA,
     FeaturesBento,
     FeaturesBentoGrid,
+    PiquimHero,
+    PiquimAnnounceBar,
+    PiquimTresMundos,
+    PiquimFeaturedProducts,
+    PiquimCTABanner,
 };
 
 const ANCHOR_MAP = {
@@ -47,6 +57,10 @@ export default function PageBuilder({ sections = [] }) {
     return (
         <div className="flex flex-col">
             {sections.map((section, index) => {
+                if (section.type === 'PiquimCatalog3Panel') {
+                    return null;
+                }
+
                 const Component = COMPONENT_MAP[section.type];
                 const anchor = section.props?.anchor || ANCHOR_MAP[section.type];
                 const anchorId = anchor && !usedAnchors.has(anchor) ? anchor : null;
