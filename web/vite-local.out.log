@@ -1,0 +1,124 @@
+
+> proyecto-teflon@0.0.0 dev
+> vite --host 127.0.0.1
+
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m566[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5173[22m/[39m
+[2m7:56:20[22m [36m[1m[vite][22m[39m [32m.env changed, restarting server...[39m
+[2m7:56:20[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mindex.html[22m
+[2m7:56:21[22m [36m[1m[vite][22m[39m server restarted.
+[2m7:56:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/blocks/PiquimAnnounceBar.jsx, /src/index.css[22m
+[2m7:56:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/PiquimFooter.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32m.env changed, restarting server...[39m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/AppearanceEditor.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/context/TenantContext.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/store/AboutPage.jsx, /src/pages/admin/evolution/EvolutionAdmin.jsx, /src/pages/store/HomePage.jsx, /src/pages/admin/EditorPage.jsx, /src/components/admin/evolution/PageSectionsEditor.jsx[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/evolution/EvolutionAdmin.jsx[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/Footer.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/Header.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/StoreLayout.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/PageBuilder.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/blocks/PiquimCatalog3Panel.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/blocks/PiquimCTABanner.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/blocks/PiquimFeaturedProducts.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/blocks/PiquimHero.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/blocks/PiquimTresMundos.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/components/layout/PiquimHeader.jsx[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/evolution/EvolutionAdmin.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/CatalogPage.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/context/ThemeContext.jsx, /src/context/TenantContext.jsx, /src/pages/admin/evolution/EvolutionAdmin.jsx, /src/pages/admin/evolution/PreviewPage.jsx, /src/components/admin/evolution/AppearanceEditor.jsx[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32m.env changed, restarting server...[39m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mindex.html[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/AppearanceEditor.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/BlockPropertiesEditor.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/EvolutionCanvas.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/EvolutionInspector.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/EvolutionLayout.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/PageSectionsEditor.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/context/TenantContext.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/store/AboutPage.jsx, /src/pages/admin/evolution/EvolutionAdmin.jsx, /src/pages/store/HomePage.jsx, /src/pages/admin/EditorPage.jsx, /src/components/admin/evolution/PageSectionsEditor.jsx[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/store/CatalogPage.jsx[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/evolution/EvolutionAdmin.jsx[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/HomePage.jsx, /src/index.css[22m
+[2m7:56:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/ProductDetail.jsx, /src/index.css[22m
+[2m7:56:56[22m [36m[1m[vite][22m[39m server restarted.
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2mindex.html[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/PageBuilder.jsx, /src/index.css[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/AppearanceEditor.jsx, /src/index.css[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/Footer.jsx, /src/index.css[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/context/TenantContext.jsx, /src/index.css[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/store/AboutPage.jsx, /src/pages/store/HomePage.jsx, /src/pages/admin/EditorPage.jsx, /src/pages/admin/evolution/EvolutionAdmin.jsx, /src/components/admin/evolution/PageSectionsEditor.jsx[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/evolution/EvolutionAdmin.jsx[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/evolution/EvolutionAdmin.jsx, /src/index.css[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/CatalogPage.jsx, /src/index.css[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/PageBuilder.jsx, /src/index.css[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/AppearanceEditor.jsx, /src/index.css[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/BlockPropertiesEditor.jsx, /src/index.css[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/EvolutionCanvas.jsx, /src/index.css[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/EvolutionInspector.jsx, /src/index.css[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/EvolutionLayout.jsx, /src/index.css[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/PageSectionsEditor.jsx, /src/index.css[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/context/TenantContext.jsx, /src/context/ThemeContext.jsx, /src/pages/admin/evolution/PreviewPage.jsx, /src/pages/admin/evolution/EvolutionAdmin.jsx, /src/components/admin/evolution/AppearanceEditor.jsx[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/Footer.jsx, /src/index.css[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/Header.jsx, /src/index.css[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/StoreLayout.jsx, /src/index.css[22m
+[2m7:58:50[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/HomePage.jsx, /src/index.css[22m
+[2m7:59:06[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/Header.jsx, /src/index.css[22m
+[2m7:59:06[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/Header.jsx, /src/index.css[22m
+[2m7:59:06[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/CatalogPage.jsx, /src/index.css[22m
+[2m7:59:06[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/CatalogPage.jsx, /src/index.css[22m
+[2m7:59:20[22m [36m[1m[vite][22m[39m [32m✨ new dependencies optimized: [33mlucide-react[32m[39m
+[2m7:59:20[22m [36m[1m[vite][22m[39m [32m✨ optimized dependencies changed. reloading[39m
+[2m8:02:35[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/evolution/EvolutionAdmin.jsx[22m
+[2m8:03:06[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/evolution/EvolutionAdmin.jsx, /src/index.css[22m
+[2m8:03:13[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/evolution/EvolutionAdmin.jsx, /src/index.css[22m
+[2m8:03:18[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/PageSectionsEditor.jsx, /src/index.css[22m
+[2m8:03:26[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/HomePage.jsx, /src/index.css[22m
+[2m8:03:40[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/CategoriesEditor.jsx, /src/index.css[22m
+[2m8:03:46[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/CatalogEditor.jsx, /src/index.css[22m
+[2m8:03:51[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/context/AuthContext.jsx, /src/index.css[22m
+[2m8:03:52[22m [36m[1m[vite][22m[39m [33mhmr invalidate [39m[2m/src/context/AuthContext.jsx[22m Could not Fast Refresh ("useAuth" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m8:03:52[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css, /src/context/StoreContext.jsx, /src/pages/store/LoginPage.jsx, /src/pages/store/ProductDetail.jsx, /src/pages/store/SignupPage.jsx, /src/pages/store/CheckoutPage.jsx, /src/pages/store/HomePage.jsx, /src/pages/store/CartPage.jsx, /src/pages/store/ProfilePage.jsx, /src/pages/admin/evolution/EvolutionAdmin.jsx, /src/pages/store/CatalogPage.jsx, /src/pages/admin/EditorPage.jsx, /src/components/layout/StoreLayout.jsx, /src/components/blocks/FeaturedProducts.jsx, /src/components/admin/evolution/UsersEditor.jsx, /src/components/admin/evolution/UsersInspectorPanel.jsx, /src/components/layout/AdminLayout.jsx, /src/components/ProductCard.jsx, /src/components/admin/evolution/EvolutionCanvas.jsx, /src/components/layout/Header.jsx[22m
+[2m8:03:54[22m [36m[1m[vite][22m[39m [33mhmr invalidate [39m[2m/src/context/StoreContext.jsx[22m Could not Fast Refresh ("useStore" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m8:03:54[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css, /src/pages/store/ProductDetail.jsx, /src/pages/store/CheckoutPage.jsx, /src/pages/store/CartPage.jsx, /src/pages/store/ProfilePage.jsx, /src/pages/store/CatalogPage.jsx, /src/components/layout/StoreLayout.jsx, /src/components/blocks/FeaturedProducts.jsx, /src/components/ProductCard.jsx, /src/components/layout/Header.jsx[22m
+[2m8:04:00[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/LoginPage.jsx, /src/index.css[22m
+[2m8:06:42[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/main.jsx[22m
+[2m8:08:14[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/Header.jsx, /src/index.css[22m
+[2m14:18:13[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/HomePage.jsx, /src/index.css[22m
+[2m14:18:13[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/HomePage.jsx, /src/index.css[22m
+[2m14:46:11[22m [36m[1m[vite][22m[39m [32m.env changed, restarting server...[39m
+[2m14:46:11[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css[22m
+[2m14:46:11[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/CatalogEditor.jsx, /src/index.css[22m
+[2m14:46:11[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/CategoriesEditor.jsx, /src/index.css[22m
+[2m14:46:11[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/CheckoutEditor.jsx, /src/index.css[22m
+[2m14:46:11[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/blocks/HeroSlider.jsx, /src/index.css[22m
+[2m14:46:11[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/Header.jsx, /src/index.css[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/PageSectionsEditor.jsx, /src/index.css[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/blocks/PiquimHero.jsx, /src/index.css[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/CheckoutEditor.jsx, /src/index.css[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/context/AuthContext.jsx, /src/index.css[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/StoreLayout.jsx, /src/index.css[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/CheckoutEditor.jsx, /src/index.css[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/store/ProductDetail.jsx, /src/pages/store/CatalogPage.jsx[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/context/TenantContext.jsx, /src/index.css[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/evolution/EvolutionAdmin.jsx[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/store/ProductDetail.jsx, /src/pages/store/CatalogPage.jsx[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/evolution/EvolutionAdmin.jsx, /src/index.css[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/HomePage.jsx, /src/index.css[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/evolution/EvolutionAdmin.jsx[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/store/SignupPage.jsx, /src/pages/store/CheckoutPage.jsx, /src/pages/store/ProfilePage.jsx[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/main.jsx[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/store/SignupPage.jsx, /src/pages/store/CheckoutPage.jsx, /src/pages/store/ProfilePage.jsx[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/evolution/EvolutionAdmin.jsx, /src/index.css[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/HomePage.jsx, /src/index.css[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/LoginPage.jsx, /src/index.css[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/ProductDetail.jsx, /src/index.css[22m
+[2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/SignupPage.jsx, /src/index.css[22m
+[2m14:46:13[22m [36m[1m[vite][22m[39m server restarted.
