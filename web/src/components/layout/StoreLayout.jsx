@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from './Header';
 import Footer from './Footer';
+import PiquimFooter from './PiquimFooter';
 import { useStore } from '../../context/StoreContext';
 import { useAuth } from '../../context/AuthContext';
 import { useTenant } from '../../context/TenantContext';
@@ -10,6 +11,7 @@ export default function StoreLayout({ children }) {
     const { toast } = useStore();
     const { isWholesalePending } = useAuth();
     const { settings } = useTenant();
+    const isPiquim = settings?.branding?.design_preset === 'piquim';
 
     const defaultNavLinks = [
         { label: 'Inicio', href: '/' },
@@ -32,6 +34,7 @@ export default function StoreLayout({ children }) {
             href: normalizeInternalPath(rawHref, '/'),
         };
     });
+    const navbarConfig = settings?.branding?.navbar || {};
 
     return (
         <div className="bg-background-light dark:bg-background-dark font-[var(--font-family)] text-[color:var(--color-text,#181411)] dark:text-[#f8f7f5] min-h-screen flex flex-col">
@@ -46,7 +49,16 @@ export default function StoreLayout({ children }) {
                     </div>
                 </div>
             </div>
-            <Header navLinks={navLinks} />
+            <Header
+                navLinks={navLinks}
+                isPiquimPreset={isPiquim}
+                showSearch={navbarConfig.show_search !== false}
+                showWishlist={navbarConfig.show_wishlist !== false}
+                showCart={navbarConfig.show_cart !== false}
+                showAccount={navbarConfig.show_account !== false}
+                registerLabel={navbarConfig.register_label || 'Registrarse'}
+                registerHref={navbarConfig.register_href || '/register'}
+            />
             {isWholesalePending ? (
                 <div className="w-full border-b border-amber-200 bg-amber-50 text-amber-800 text-xs font-semibold px-4 md:px-10 py-2 dark:border-amber-700/40 dark:bg-amber-950/30 dark:text-amber-200">
                     Tu cuenta mayorista esta pendiente de aprobacion. Mientras tanto ves precios minoristas.
@@ -55,7 +67,7 @@ export default function StoreLayout({ children }) {
             <main className="flex-grow">
                 {children}
             </main>
-            <Footer />
+            {isPiquim ? <PiquimFooter /> : <Footer />}
         </div>
     );
 }

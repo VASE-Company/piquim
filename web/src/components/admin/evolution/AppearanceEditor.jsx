@@ -162,8 +162,11 @@ const AppearanceEditor = ({ settings, setSettings, onSave, isSaving }) => {
     const theme = settings?.theme || {};
     const adminBranding = branding?.admin_panel || {};
     const adminTheme = theme?.admin_panel || {};
+    const navbar = branding?.navbar || {};
+    const navbarLinks = Array.isArray(navbar?.links) ? navbar.links : [];
     const footer = branding?.footer || {};
     const socials = footer?.socials || {};
+    const socialLinks = Array.isArray(footer?.socialLinks) ? footer.socialLinks : [];
     const contact = footer?.contact || {};
     const quickLinks = Array.isArray(footer?.quickLinks) ? footer.quickLinks : [];
     const shopLinks = Array.isArray(footer?.shopLinks) ? footer.shopLinks : PIQUIM_FOOTER_DEFAULTS.shopLinks;
@@ -224,6 +227,34 @@ const AppearanceEditor = ({ settings, setSettings, onSave, isSaving }) => {
         }));
     };
 
+    const updateNavbar = (patch) => {
+        setSettings((prev) => ({
+            ...prev,
+            branding: {
+                ...(prev.branding || {}),
+                navbar: {
+                    ...((prev.branding || {}).navbar || {}),
+                    ...patch,
+                },
+            },
+        }));
+    };
+
+    const updateNavbarLink = (index, field, value) => {
+        const next = [...navbarLinks];
+        if (!next[index]) return;
+        next[index] = { ...next[index], [field]: value };
+        updateNavbar({ links: next });
+    };
+
+    const addNavbarLink = () => {
+        updateNavbar({ links: [...navbarLinks, { label: 'Nuevo link', href: '/' }] });
+    };
+
+    const removeNavbarLink = (index) => {
+        updateNavbar({ links: navbarLinks.filter((_, idx) => idx !== index) });
+    };
+
     const applyStorefrontThemePreset = (mode) => {
         updateTheme(getStorefrontThemePreset(mode));
     };
@@ -273,6 +304,26 @@ const AppearanceEditor = ({ settings, setSettings, onSave, isSaving }) => {
                 },
             },
         }));
+    };
+
+    const updateFooterSocialLink = (index, field, value) => {
+        const next = [...socialLinks];
+        if (!next[index]) return;
+        next[index] = { ...next[index], [field]: value };
+        updateFooter({ socialLinks: next });
+    };
+
+    const addFooterSocialLink = () => {
+        updateFooter({
+            socialLinks: [
+                ...socialLinks,
+                { label: 'Instagram', type: 'instagram', href: 'https://instagram.com/' },
+            ],
+        });
+    };
+
+    const removeFooterSocialLink = (index) => {
+        updateFooter({ socialLinks: socialLinks.filter((_, idx) => idx !== index) });
     };
 
     const updateFooterContact = (field, value) => {
@@ -601,6 +652,116 @@ const AppearanceEditor = ({ settings, setSettings, onSave, isSaving }) => {
                                     />
                                 </div>
                             ) : null}
+                        </div>
+                    </div>
+                </section>
+
+                <section className="space-y-6 rounded-2xl border border-white/10 bg-white/5 p-4 xl:col-span-2">
+                    <div className="space-y-1">
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400">Navbar publico</h3>
+                        <p className="text-xs text-zinc-500">Configura links, iconos y CTA del header compartido en todas las paginas.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <EvolutionInput
+                            label="Texto boton registro"
+                            value={navbar?.register_label || 'Registrarse'}
+                            onChange={(e) => updateNavbar({ register_label: e.target.value })}
+                            placeholder="Registrarse"
+                        />
+                        <EvolutionInput
+                            label="Link boton registro"
+                            value={navbar?.register_href || '/register'}
+                            onChange={(e) => updateNavbar({ register_href: e.target.value })}
+                            placeholder="/register"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">Redes visibles (iconos en footer)</p>
+                            <button
+                                type="button"
+                                onClick={addFooterSocialLink}
+                                className="rounded-lg border border-white/15 px-2 py-1 text-[11px] font-bold text-zinc-300"
+                            >
+                                + Anadir red
+                            </button>
+                        </div>
+                        <div className="space-y-2">
+                            {socialLinks.map((item, idx) => (
+                                <div key={`social-link-${idx}`} className="grid grid-cols-[1fr_1fr_2fr_auto] gap-2">
+                                    <input
+                                        type="text"
+                                        value={item.label || ''}
+                                        placeholder="Etiqueta"
+                                        onChange={(e) => updateFooterSocialLink(idx, 'label', e.target.value)}
+                                        className={fieldClass}
+                                    />
+                                    <select
+                                        value={item.type || 'website'}
+                                        onChange={(e) => updateFooterSocialLink(idx, 'type', e.target.value)}
+                                        className={fieldClass}
+                                    >
+                                        <option value="instagram">Instagram</option>
+                                        <option value="facebook">Facebook</option>
+                                        <option value="youtube">YouTube</option>
+                                        <option value="tiktok">TikTok</option>
+                                        <option value="whatsapp">WhatsApp</option>
+                                        <option value="linkedin">LinkedIn</option>
+                                        <option value="website">Web</option>
+                                    </select>
+                                    <input
+                                        type="text"
+                                        value={item.href || ''}
+                                        placeholder="https://..."
+                                        onChange={(e) => updateFooterSocialLink(idx, 'href', e.target.value)}
+                                        className={fieldClass}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => removeFooterSocialLink(idx)}
+                                        className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-2 py-1.5 text-xs font-bold text-rose-300"
+                                    >
+                                        X
+                                    </button>
+                                </div>
+                            ))}
+                            {!socialLinks.length ? (
+                                <p className="text-xs text-zinc-500">Sin redes configuradas en lista dinamica. Puedes agregarlas arriba.</p>
+                            ) : null}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                        <button type="button" onClick={() => updateNavbar({ show_search: navbar.show_search === false })} className="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs font-bold text-zinc-200">
+                            Busqueda: {navbar.show_search === false ? 'OFF' : 'ON'}
+                        </button>
+                        <button type="button" onClick={() => updateNavbar({ show_wishlist: navbar.show_wishlist === false })} className="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs font-bold text-zinc-200">
+                            Guardados: {navbar.show_wishlist === false ? 'OFF' : 'ON'}
+                        </button>
+                        <button type="button" onClick={() => updateNavbar({ show_cart: navbar.show_cart === false })} className="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs font-bold text-zinc-200">
+                            Carrito: {navbar.show_cart === false ? 'OFF' : 'ON'}
+                        </button>
+                        <button type="button" onClick={() => updateNavbar({ show_account: navbar.show_account === false })} className="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs font-bold text-zinc-200">
+                            Cuenta/CTA: {navbar.show_account === false ? 'OFF' : 'ON'}
+                        </button>
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">Links de navegacion</p>
+                            <button type="button" onClick={addNavbarLink} className="rounded-lg border border-white/15 px-2 py-1 text-[11px] font-bold text-zinc-300">+ Anadir</button>
+                        </div>
+                        <div className="space-y-2">
+                            {navbarLinks.map((link, idx) => (
+                                <div key={`navbar-link-${idx}`} className="grid grid-cols-[1fr_1fr_auto] gap-2">
+                                    <input type="text" value={link.label || ''} placeholder="Etiqueta" onChange={(e) => updateNavbarLink(idx, 'label', e.target.value)} className={fieldClass} />
+                                    <input type="text" value={link.href || ''} placeholder="Link" onChange={(e) => updateNavbarLink(idx, 'href', e.target.value)} className={fieldClass} />
+                                    <button type="button" onClick={() => removeNavbarLink(idx)} className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-2 py-1.5 text-xs font-bold text-rose-300">X</button>
+                                </div>
+                            ))}
+                            {!navbarLinks.length ? <p className="text-xs text-zinc-500">Sin links configurados.</p> : null}
                         </div>
                     </div>
                 </section>

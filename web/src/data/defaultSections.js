@@ -1,4 +1,5 @@
 import { getDefaultBrandMarqueeProps } from './brandMarqueeDefaults';
+import { PIQUIM_CATALOG_CARDS } from './piquimBranding';
 
 const cloneValue = (value) => {
     try {
@@ -306,9 +307,116 @@ export const DEFAULT_ABOUT_SECTIONS = [
     },
 ];
 
+export const PIQUIM_HOME_SECTIONS = [
+    {
+        id: 'piquim-hero',
+        type: 'PiquimHero',
+        enabled: true,
+        props: {
+            badgeText: 'Heladeria | Panaderia | Confiteria',
+            preTitle: 'Materia prima',
+            titleHighlight: 'que inspira',
+            postTitle: 'cada receta.',
+            primaryLabel: 'Comprar ahora',
+            primaryHref: '/catalog',
+            secondaryLabel: 'Ver catalogo',
+            secondaryHref: '/catalog',
+            statProducts: '+200',
+            statCategories: '3',
+            statYears: '+30',
+            mediaType: 'video',
+            image: '',
+            videoUrl: '',
+            videoUrlDesktop: '',
+            videoUrlMobile: '',
+            videoPoster: '',
+            videoAutoplay: true,
+            videoLoop: true,
+            videoMuted: true,
+            videoControls: false,
+        },
+    },
+    {
+        id: 'piquim-announce',
+        type: 'PiquimAnnounceBar',
+        enabled: true,
+        props: {
+            text: 'ENVIO GRATUITO en pedidos +$50.000 ARG · 10% OFF en tu primera compra · Industria Argentina · Hecho en Mar del Plata',
+        },
+    },
+    {
+        id: 'piquim-tres-mundos',
+        type: 'PiquimTresMundos',
+        enabled: true,
+        props: {
+            title: 'Tres mundos, una misma calidad',
+            subtitle: 'Elegi tu rubro y encontra productos pensados para tu operacion.',
+            items: [
+                {
+                    id: 'heladeria',
+                    title: 'Heladeria',
+                    description: 'Bases, pulpas y coberturas para un mostrador con sabor constante.',
+                    image: '/piquim/catalog-heladeria.jpg',
+                    href: '/catalog?category=heladeria',
+                },
+                {
+                    id: 'panaderia',
+                    title: 'Panaderia',
+                    description: 'Mejoradores, rellenos y materias primas para produccion diaria.',
+                    image: '/piquim/catalog-panaderia.jpg',
+                    href: '/catalog?category=panaderia',
+                },
+                {
+                    id: 'confiteria',
+                    title: 'Confiteria',
+                    description: 'Cremas, decoraciones y soluciones para piezas premium.',
+                    image: '/piquim/catalog-confiteria.jpg',
+                    href: '/catalog?category=confiteria',
+                },
+            ],
+        },
+    },
+    {
+        id: 'piquim-catalog',
+        type: 'PiquimCatalog3Panel',
+        enabled: true,
+        props: {
+            title: 'Catalogos por especialidad',
+            subtitle: 'Accede rapido a cada linea de productos.',
+            cards: PIQUIM_CATALOG_CARDS,
+        },
+    },
+    {
+        id: 'piquim-featured',
+        type: 'PiquimFeaturedProducts',
+        enabled: true,
+        props: {
+            title: 'Productos destacados',
+            subtitle: 'Una seleccion para compra agil y rendimiento constante.',
+            ctaLabel: 'Ver catalogo completo',
+            ctaLink: '/catalog',
+            products: [],
+        },
+    },
+    {
+        id: 'piquim-cta',
+        type: 'PiquimCTABanner',
+        enabled: true,
+        props: {
+            title: 'Necesitas ayuda para elegir materia prima?',
+            subtitle: 'Nuestro equipo comercial te acompana para armar pedidos segun tu produccion.',
+            primaryLabel: 'Hablar con ventas',
+            primaryHref: '/about',
+            secondaryLabel: 'Ver catalogo',
+            secondaryHref: '/catalog',
+        },
+    },
+];
+
 const DEFAULT_SECTIONS_BY_PAGE = {
     home: DEFAULT_HOME_SECTIONS,
     about: DEFAULT_ABOUT_SECTIONS,
+    'piquim-home': PIQUIM_HOME_SECTIONS,
 };
 
 export const getDefaultSectionsForPage = (pageKey = 'home') =>

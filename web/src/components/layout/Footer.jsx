@@ -1,20 +1,50 @@
 import React, { useId, useMemo, useState } from "react";
+import { Instagram, Facebook, Youtube, Music2, MessageCircle, Linkedin, Globe } from "lucide-react";
 import { useTenant } from "../../context/TenantContext";
 import { navigate } from "../../utils/navigation";
 import { PIQUIM_FOOTER_DEFAULTS } from "../../data/piquimBranding";
 
 const toArray = (value, fallback = []) => (Array.isArray(value) ? value : fallback);
+const SOCIAL_ICON_MAP = {
+    instagram: Instagram,
+    facebook: Facebook,
+    youtube: Youtube,
+    tiktok: Music2,
+    whatsapp: MessageCircle,
+    linkedin: Linkedin,
+    website: Globe,
+};
+
+const detectSocialType = (value = "") => {
+    const raw = String(value || "").toLowerCase();
+    if (raw.includes("instagram")) return "instagram";
+    if (raw.includes("facebook")) return "facebook";
+    if (raw.includes("youtube") || raw.includes("youtu.be")) return "youtube";
+    if (raw.includes("tiktok")) return "tiktok";
+    if (raw.includes("wa.me") || raw.includes("whatsapp")) return "whatsapp";
+    if (raw.includes("linkedin")) return "linkedin";
+    return "website";
+};
 
 const normalizeSocials = (footer) => {
     const explicit = toArray(footer.socialLinks, []);
-    if (explicit.length) return explicit;
+    if (explicit.length) {
+        return explicit.map((item) => {
+            const type = item?.type || detectSocialType(item?.href || "");
+            return {
+                label: item?.label || type,
+                type,
+                href: item?.href || "",
+            };
+        });
+    }
 
     const socials = footer.socials || {};
     return [
-        { label: "Instagram", short: "IG", href: socials.instagram || "" },
-        { label: "Facebook", short: "FB", href: socials.facebook || "" },
-        { label: "YouTube", short: "YT", href: socials.youtube || "" },
-        { label: "TikTok", short: "TK", href: socials.tiktok || "" },
+        { label: "Instagram", type: "instagram", href: socials.instagram || "" },
+        { label: "Facebook", type: "facebook", href: socials.facebook || "" },
+        { label: "YouTube", type: "youtube", href: socials.youtube || "" },
+        { label: "TikTok", type: "tiktok", href: socials.tiktok || "" },
     ];
 };
 
@@ -89,7 +119,7 @@ export default function Footer() {
     return (
         <footer className="mt-0 w-full bg-[#1a1614] text-[#fffaf6]">
             <div className="mx-auto max-w-[1440px] px-5 py-14 md:px-10 md:py-20 xl:px-[120px]">
-                <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr] xl:gap-[90px]">
+                <div className="grid gap-8 md:gap-10 lg:grid-cols-2 xl:grid-cols-[1.1fr_0.75fr_0.75fr_0.75fr_1fr] xl:gap-12">
                     <div className="space-y-7">
                         <button
                             type="button"
@@ -103,35 +133,47 @@ export default function Footer() {
                         </p>
                         <div className="flex flex-wrap gap-3">
                             {socialLinks.map((item, index) => (
-                                <a
-                                    key={`${item.label}-${index}`}
-                                    href={item.href || "#"}
-                                    onClick={(event) => {
-                                        if (!item.href) event.preventDefault();
-                                    }}
-                                    target={item.href?.startsWith("http") ? "_blank" : undefined}
-                                    rel={item.href?.startsWith("http") ? "noopener noreferrer" : undefined}
-                                    className="flex h-10 w-10 items-center justify-center rounded-full border border-[#3a2d27] bg-[#241d1a] text-xs font-black text-[#fffaf6] transition-colors hover:border-[#ff4d00] hover:text-[#ff4d00]"
-                                    aria-label={item.label}
-                                >
-                                    {item.short || item.label.slice(0, 2).toUpperCase()}
-                                </a>
+                                (() => {
+                                    const Icon = SOCIAL_ICON_MAP[item?.type] || Globe;
+                                    return (
+                                        <a
+                                            key={`${item.label}-${index}`}
+                                            href={item.href || "#"}
+                                            onClick={(event) => {
+                                                if (!item.href) event.preventDefault();
+                                            }}
+                                            target={item.href?.startsWith("http") ? "_blank" : undefined}
+                                            rel={item.href?.startsWith("http") ? "noopener noreferrer" : undefined}
+                                            className="flex h-10 w-10 items-center justify-center rounded-full border border-[#3a2d27] bg-[#241d1a] text-[#fffaf6] transition-colors hover:border-[#ff4d00] hover:text-[#ff4d00]"
+                                            aria-label={item.label}
+                                        >
+                                            <Icon size={16} strokeWidth={2.4} />
+                                        </a>
+                                    );
+                                })()
                             ))}
                         </div>
                     </div>
 
-                    <FooterColumn title="Tienda" links={shopLinks} />
-                    <FooterColumn title="Ayuda" links={helpLinks} />
+                    <div className="lg:pt-1">
+                        <FooterColumn title="Tienda" links={shopLinks} />
+                    </div>
+                    <div className="lg:pt-1">
+                        <FooterColumn title="Ayuda" links={helpLinks} />
+                    </div>
 
-                    <div className="space-y-6">
+                    <div className="lg:pt-1">
                         <FooterColumn title="Legal" links={legalLinks} compact />
+                    </div>
+
+                    <div className="space-y-4 lg:pt-1">
                         {newsletter.enabled !== false ? (
                             <form onSubmit={handleNewsletterSubmit} className="rounded-[24px] border border-[#332822] bg-[#211b18] p-4">
                                 <label htmlFor={emailId} className="block text-xs font-black uppercase tracking-[0.16em] text-[#ffbe8b]">
                                     {newsletter.title}
                                 </label>
                                 <p className="mt-2 text-sm leading-5 text-[#b9aaa2]">{newsletter.description}</p>
-                                <div className="mt-4 flex gap-2">
+                                <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                                     <input
                                         id={emailId}
                                         type="email"

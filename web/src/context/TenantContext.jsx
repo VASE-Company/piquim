@@ -22,6 +22,12 @@ const DEFAULT_SETTINGS = {
                 { label: 'Catalogo', href: '/catalog' },
                 { label: 'Nosotros', href: '/about' },
             ],
+            show_search: true,
+            show_wishlist: true,
+            show_cart: true,
+            show_account: true,
+            register_label: 'Registrarse',
+            register_href: '/register',
         },
         footer: {
             ...PIQUIM_FOOTER_DEFAULTS,

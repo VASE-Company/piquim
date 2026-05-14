@@ -22,7 +22,7 @@ export const DEFAULT_STOREFRONT_DARK_THEME = {
     background: '#071317',
     text: '#ecfeff',
     secondary: '#94a3b8',
-    font_family: 'Manrope, sans-serif',
+    font_family: 'Gilroy, Manrope, sans-serif',
     catalog: {
         panel_bg: '#0b1b21',
         surface_bg: '#0f2229',

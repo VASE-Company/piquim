@@ -1,4 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Search as LucideSearch,
+  ShoppingCart as LucideShoppingCart,
+  Heart as LucideHeart,
+  User as LucideUser,
+  ChevronDown as LucideChevronDown,
+  Menu as LucideMenu,
+  X as LucideX,
+} from "lucide-react";
 import { useTenant } from "../../context/TenantContext";
 import { useStore } from "../../context/StoreContext";
 import { useAuth } from "../../context/AuthContext";
@@ -7,6 +16,8 @@ import { getApiBase, getTenantHeaders } from "../../utils/api";
 
 const DEFAULT_PLACEHOLDER = "Busca productos, categorias o materia prima";
 const HIDDEN_TOPICS = new Set(["buscador de tapas", "donde comprar", "mis proyectos", "messi"]);
+const SEARCH_HISTORY_KEY = "piquim_search_terms_v1";
+const SEARCH_HISTORY_LIMIT = 12;
 
 const normalizeLabel = (value) =>
   String(value || "")
@@ -14,6 +25,53 @@ const normalizeLabel = (value) =>
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
+
+const formatSearchTerm = (value) =>
+  String(value || "")
+    .trim()
+    .replace(/\s+/g, " ");
+
+const normalizeCompact = (value) =>
+  normalizeLabel(value).replace(/[^a-z0-9]/g, "");
+
+const matchesQuery = (candidate, query) => {
+  const normalizedCandidate = normalizeLabel(candidate);
+  const normalizedQuery = normalizeLabel(query);
+  if (!normalizedQuery) return true;
+  if (normalizedCandidate.includes(normalizedQuery)) return true;
+
+  const compactCandidate = normalizeCompact(candidate);
+  const compactQuery = normalizeCompact(query);
+  if (compactQuery && compactCandidate.includes(compactQuery)) return true;
+
+  const tokens = normalizedQuery.split(" ").filter(Boolean);
+  if (!tokens.length) return false;
+  return tokens.every((token) => normalizedCandidate.includes(token) || compactCandidate.includes(token));
+};
+
+const readSearchHistory = () => {
+  try {
+    const raw = localStorage.getItem(SEARCH_HISTORY_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((item) => ({
+        term: formatSearchTerm(item?.term || item),
+        count: Number(item?.count || 0) || 0,
+      }))
+      .filter((item) => item.term);
+  } catch {
+    return [];
+  }
+};
+
+const writeSearchHistory = (items) => {
+  try {
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(items.slice(0, SEARCH_HISTORY_LIMIT)));
+  } catch {
+    // ignore
+  }
+};
 
 const BrandMark = ({ className = "size-8" }) => (
   <svg
@@ -28,59 +86,32 @@ const BrandMark = ({ className = "size-8" }) => (
   </svg>
 );
 
-const SearchIcon = ({ className = "size-4" }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="11" cy="11" r="7" />
-    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-  </svg>
+const SearchIcon = ({ className = "size-5" }) => (
+  <LucideSearch className={className} strokeWidth={2.7} />
 );
 
-const CartIcon = ({ className = "size-4" }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="9" cy="20" r="1.2" />
-    <circle cx="18" cy="20" r="1.2" />
-    <path d="M2 3h3l2.2 11h10.7l2-8.5H6.2" />
-  </svg>
+const CartIcon = ({ className = "size-5" }) => (
+  <LucideShoppingCart className={className} strokeWidth={2.6} />
 );
 
-const HeartIcon = ({ className = "size-4" }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6l1.2 1.2L12 21l7.6-7.6 1.2-1.2a5.4 5.4 0 0 0 0-7.6Z" />
-  </svg>
+const HeartIcon = ({ className = "size-5" }) => (
+  <LucideHeart className={className} strokeWidth={2.6} />
 );
 
-const BookmarkIcon = ({ className = "size-4" }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M19 21L12 17L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z" />
-  </svg>
-);
-
-const UserIcon = ({ className = "size-4" }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 21v-1a6 6 0 0 0-6-6H10a6 6 0 0 0-6 6v1" />
-    <circle cx="12" cy="8" r="4" />
-  </svg>
+const UserIcon = ({ className = "size-5" }) => (
+  <LucideUser className={className} strokeWidth={2.6} />
 );
 
 const ChevronDown = ({ className = "size-3" }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="6 9 12 15 18 9" />
-  </svg>
+  <LucideChevronDown className={className} strokeWidth={2.2} />
 );
 
-const MenuIcon = ({ className = "size-4" }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="3" y1="6" x2="21" y2="6" />
-    <line x1="3" y1="12" x2="21" y2="12" />
-    <line x1="3" y1="18" x2="21" y2="18" />
-  </svg>
+const MenuIcon = ({ className = "size-5" }) => (
+  <LucideMenu className={className} strokeWidth={2.8} />
 );
 
-const CloseIcon = ({ className = "size-4" }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
+const CloseIcon = ({ className = "size-5" }) => (
+  <LucideX className={className} strokeWidth={2.8} />
 );
 
 function MenuAnchor({ href, label, active = false, external = false, className = "" }) {
@@ -117,9 +148,13 @@ export default function Header({
   searchPlaceholder = DEFAULT_PLACEHOLDER,
   brandName,
   brandUppercase = false,
+  isPiquimPreset: isPiquimPresetProp,
   showSearch = true,
+  showWishlist = true,
   showCart = true,
   showAccount = true,
+  registerLabel = "Registrarse",
+  registerHref = "/register",
   containerClassName = "max-w-[1408px]",
 }) {
   const { tenant, settings } = useTenant();
@@ -129,9 +164,16 @@ export default function Header({
   const [catalogCategories, setCatalogCategories] = useState([]);
   const [catalogBrands, setCatalogBrands] = useState([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [piquimSearchOpen, setPiquimSearchOpen] = useState(false);
   const [expandedMobileCategories, setExpandedMobileCategories] = useState({});
   const [activeMobileTab, setActiveMobileTab] = useState("menu"); // menu, categories, brands
+  const [isDesktopSearchPinned, setIsDesktopSearchPinned] = useState(false);
+  const [desktopSearchError, setDesktopSearchError] = useState(false);
+  const [searchHistory, setSearchHistory] = useState([]);
+  const [productSuggestions, setProductSuggestions] = useState([]);
+  const [productIndex, setProductIndex] = useState([]);
+  const [searchSuggestionsOpen, setSearchSuggestionsOpen] = useState(false);
+  const desktopSearchInputRef = useRef(null);
+  const searchBoxRef = useRef(null);
 
   const resolvedBrand = brandName || settings?.branding?.name || tenant?.name || "Mi Negocio";
   const logoUrl = settings?.branding?.logo_url;
@@ -152,8 +194,99 @@ export default function Header({
   }, []);
 
   useEffect(() => {
+    setSearchHistory(readSearchHistory());
+  }, []);
+
+  useEffect(() => {
     setMobileMenuOpen(false);
+    setIsDesktopSearchPinned(false);
+    setDesktopSearchError(false);
+    setSearchSuggestionsOpen(false);
   }, [activeRoute]);
+
+  useEffect(() => {
+    if (!searchSuggestionsOpen) return undefined;
+    const handleClickOutside = (event) => {
+      if (searchBoxRef.current && !searchBoxRef.current.contains(event.target)) {
+        setSearchSuggestionsOpen(false);
+      }
+    };
+    window.addEventListener("mousedown", handleClickOutside);
+    return () => window.removeEventListener("mousedown", handleClickOutside);
+  }, [searchSuggestionsOpen]);
+
+  useEffect(() => {
+    const term = formatSearchTerm(search);
+    if (!term || term.length < 2) {
+      setProductSuggestions([]);
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const url = new URL(`${getApiBase()}/public/products`);
+        url.searchParams.set("q", term);
+        url.searchParams.set("limit", "6");
+        url.searchParams.set("page", "1");
+        url.searchParams.set("grouped", "true");
+
+        const response = await fetch(url.toString(), { headers: getTenantHeaders(), signal: controller.signal });
+        if (!response.ok) return;
+        const data = await response.json();
+        const items = Array.isArray(data?.items) ? data.items : [];
+        const fromApi = [...new Set(items.map((item) => String(item?.name || "").trim()).filter(Boolean))];
+        const compactTerm = normalizeCompact(term);
+        const fromIndex = productIndex.filter((name) => normalizeCompact(name).includes(compactTerm));
+        setProductSuggestions([...new Set([...fromApi, ...fromIndex])].slice(0, 6));
+      } catch (error) {
+        if (error?.name !== "AbortError") {
+          const compactTerm = normalizeCompact(term);
+          const fromIndex = productIndex.filter((name) => normalizeCompact(name).includes(compactTerm));
+          setProductSuggestions(fromIndex.slice(0, 6));
+        }
+      }
+    }, 180);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [search, productIndex]);
+
+  useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
+
+    const loadProductIndex = async () => {
+      try {
+        const url = new URL(`${getApiBase()}/public/products`);
+        url.searchParams.set("limit", "200");
+        url.searchParams.set("page", "1");
+        url.searchParams.set("grouped", "true");
+        const response = await fetch(url.toString(), { headers: getTenantHeaders(), signal: controller.signal });
+        if (!response.ok || !active) return;
+        const data = await response.json();
+        const items = Array.isArray(data?.items) ? data.items : [];
+        const names = [...new Set(items.map((item) => String(item?.name || "").trim()).filter(Boolean))];
+        setProductIndex(names);
+      } catch {
+        // ignore index load failures
+      }
+    };
+
+    loadProductIndex();
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!desktopSearchError) return undefined;
+    const timer = setTimeout(() => setDesktopSearchError(false), 1800);
+    return () => clearTimeout(timer);
+  }, [desktopSearchError]);
 
   useEffect(() => {
     let active = true;
@@ -162,11 +295,11 @@ export default function Header({
     const loadCatalogMeta = async () => {
       try {
         const [categoriesRes, brandsRes] = await Promise.all([
-          fetch(`${getApiBase()}/public/categories`, {
+          fetch(`${getApiBase()}/categories`, {
             headers: getTenantHeaders(),
             signal: controller.signal,
           }),
-          fetch(`${getApiBase()}/public/brands`, {
+          fetch(`${getApiBase()}/brands`, {
             headers: getTenantHeaders(),
             signal: controller.signal,
           }),
@@ -241,15 +374,56 @@ export default function Header({
 
   const handleSearchKey = (event) => {
     if (event.key === "Enter") {
+      const term = formatSearchTerm(search);
+      if (term) {
+        const next = readSearchHistory();
+        const idx = next.findIndex((item) => normalizeLabel(item.term) === normalizeLabel(term));
+        if (idx >= 0) {
+          next[idx] = { ...next[idx], count: next[idx].count + 1, term };
+        } else {
+          next.push({ term, count: 1 });
+        }
+        const sorted = next.sort((a, b) => b.count - a.count).slice(0, SEARCH_HISTORY_LIMIT);
+        writeSearchHistory(sorted);
+        setSearchHistory(sorted);
+      }
+      setSearchSuggestionsOpen(false);
       navigate("/catalog");
+    }
+    if (event.key === "Escape") {
+      setIsDesktopSearchPinned(false);
+      setSearchSuggestionsOpen(false);
     }
   };
 
-  const handlePiquimSearchSubmit = (event) => {
-    event.preventDefault();
-    setPiquimSearchOpen(true);
-    navigate("/catalog");
-  };
+  const topSearches = useMemo(
+    () => searchHistory.slice().sort((a, b) => b.count - a.count).map((item) => item.term).slice(0, 6),
+    [searchHistory]
+  );
+
+  const categorySuggestions = useMemo(() => {
+    const q = formatSearchTerm(search);
+    if (!q) return [];
+    const names = categoryTree.flatMap((parent) => [parent.name, ...parent.children.map((child) => `${parent.name} / ${child.name}`)]);
+    return [...new Set(names.filter((name) => matchesQuery(name, q)))].slice(0, 6);
+  }, [categoryTree, search]);
+
+  const suggestionItems = useMemo(() => {
+    const q = formatSearchTerm(search);
+    const popular = topSearches.filter((item) => !q || matchesQuery(item, q));
+    const products = productSuggestions.filter((item) => !q || matchesQuery(item, q));
+    return {
+      popular: popular.slice(0, 6),
+      products: products.slice(0, 6),
+      categories: categorySuggestions.slice(0, 6),
+    };
+  }, [categorySuggestions, productSuggestions, search, topSearches]);
+
+  const applySuggestion = useCallback((value) => {
+    setSearch(value);
+    setSearchSuggestionsOpen(false);
+    setTimeout(() => navigate("/catalog"), 0);
+  }, [setSearch]);
 
   const handleAccountClick = () => {
     if (user) {
@@ -340,7 +514,9 @@ export default function Header({
 
   const productsActive = activeRoute.startsWith("/catalog");
   const accountLabel = user ? "Mi cuenta" : "Ingresar";
-  const isPiquimPreset = settings?.branding?.design_preset === "piquim" || normalizeLabel(resolvedBrand).includes("piquim");
+  const isPiquimPreset = typeof isPiquimPresetProp === "boolean"
+    ? isPiquimPresetProp
+    : (settings?.branding?.design_preset === "piquim" || normalizeLabel(resolvedBrand).includes("piquim"));
 
   const mobilePrimaryLinks = useMemo(() => {
     const seen = new Set();
@@ -369,26 +545,28 @@ export default function Header({
 
     return (
       <>
-      <header className="fixed left-0 right-0 top-0 z-50 flex w-full flex-col items-center justify-center overflow-hidden border-b border-[#E8DFD8]/80 bg-[#FFFAF6]/35 font-[var(--font-family)] px-[60px] py-[18px] backdrop-blur-2xl max-md:px-4">
-        <div className="w-full">
-          <div className="inline-flex w-full items-center justify-center overflow-hidden rounded-[30px] bg-[linear-gradient(90deg,rgba(255,191,140,0.74)_0%,rgba(255,239,232,0.62)_48%,rgba(255,191,140,0.74)_100%)] px-[60px] py-[18px] shadow-[0_18px_60px_rgba(255,77,0,0.12)] outline outline-1 -outline-offset-1 outline-[#E8DFD8]/90 backdrop-blur-2xl max-md:px-5">
+      <header className="fixed left-0 right-0 top-0 z-50 w-full font-[var(--font-family)]">
+        <div className="w-full px-[60px] py-[18px] max-md:px-4">
+          <div className="relative flex min-h-[68px] items-center justify-between gap-3 overflow-visible rounded-[30px] bg-[linear-gradient(90deg,rgba(255,191,140,0.74)_0%,rgba(255,239,232,0.62)_48%,rgba(255,191,140,0.74)_100%)] px-[60px] py-[18px] shadow-[0_18px_60px_rgba(255,77,0,0.12)] outline outline-1 -outline-offset-1 outline-[#E8DFD8]/90 backdrop-blur-2xl max-md:px-5">
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="shrink-0"
+              className="flex shrink-0 items-center gap-3 text-[#ff4d00]"
               aria-label="Ir a inicio"
             >
               {logoUrl ? (
-                <img src={logoUrl} alt={resolvedBrand} className="h-[31px] w-auto max-w-[150px] object-contain" />
+                <img src={logoUrl} alt={resolvedBrand} className="h-10 w-auto max-w-[150px] object-contain" />
               ) : (
-                <img src="/piquim/catalogo/logo-navbar.png" alt={resolvedBrand} style={{ width: 108, height: 31 }} />
+                <img src="/piquim/catalogo/logo-navbar.png" alt={resolvedBrand} className="h-[31px] w-[108px] object-contain" />
               )}
             </button>
 
-            <nav className="flex flex-1 items-center justify-center gap-8 overflow-hidden max-md:hidden">
-              {primaryLinks.slice(0, 3).map((item) => {
+            <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center justify-center gap-2 rounded-full bg-[#fffaf6]/45 px-2 py-1 lg:flex">
+              {primaryLinks.slice(0, 5).map((item) => {
                 const target = item.href || "/";
                 const isExternalTarget = isExternalPath(target);
+                const normalizedTarget = isExternalTarget ? target : normalizeRoute(target);
+                const active = !isExternalTarget && (normalizeRoute(activeRoute) === normalizedTarget || (target === "/catalog" && productsActive));
                 return (
                   <a
                     key={`${item.label}-${target}`}
@@ -400,8 +578,9 @@ export default function Header({
                     }}
                     target={isExternalTarget ? "_blank" : undefined}
                     rel={isExternalTarget ? "noopener noreferrer" : undefined}
-                    className="text-sm font-medium text-[#1A1614]"
-                    style={{ fontFamily: "Helvetica Neue Medium Extended, Gilroy, sans-serif" }}
+                    className={`rounded-full px-5 py-2 text-sm font-bold transition-colors ${
+                      active ? "bg-[#1a1614] text-[#fffaf6]" : "text-[#1a1614] hover:bg-white/60"
+                    }`}
                   >
                     {item.label}
                   </a>
@@ -409,67 +588,120 @@ export default function Header({
               })}
             </nav>
 
-            <div className="flex items-center justify-center gap-3.5 overflow-visible">
-              <form
-                onSubmit={handlePiquimSearchSubmit}
-                className={`relative flex h-7 items-center overflow-hidden rounded-full bg-white/35 transition-all duration-300 ease-out ${
-                  piquimSearchOpen || search ? "w-[260px] pl-3 pr-9 outline outline-1 -outline-offset-1 outline-[#E8DFD8]" : "w-6"
-                } max-md:hidden`}
-              >
-                <input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Buscar producto..."
-                  className={`h-full min-w-0 flex-1 bg-transparent text-sm font-medium text-[#1A1614] outline-none placeholder:text-[#5A4136]/70 transition-opacity duration-200 ${
-                    piquimSearchOpen || search ? "opacity-100" : "pointer-events-none opacity-0"
+            <div className="hidden min-w-0 flex-1 justify-end gap-2 md:flex">
+              {showSearch ? (
+                <div
+                  ref={searchBoxRef}
+                  className={`group relative hidden h-12 items-center overflow-visible rounded-full transition-all duration-300 xl:flex ${
+                    isDesktopSearchPinned ? "w-[320px] bg-[#fffaf6]/95" : "w-11 bg-transparent hover:w-[320px] hover:bg-[#fffaf6]/95"
+                  } ${
+                    desktopSearchError ? "ring-2 ring-[#ff4d00] ring-offset-2 ring-offset-transparent" : ""
                   }`}
-                  aria-label="Buscar producto"
-                />
+                >
+                  <input
+                    ref={desktopSearchInputRef}
+                    className={`h-11 w-full bg-transparent pl-4 pr-11 text-sm font-semibold text-[#1a1614] placeholder:text-[#7b665d] focus:outline-none ${
+                      isDesktopSearchPinned ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                    }`}
+                    placeholder={searchPlaceholder}
+                    type="text"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    onKeyDown={handleSearchKey}
+                    onFocus={() => {
+                      setIsDesktopSearchPinned(true);
+                      setDesktopSearchError(false);
+                      setSearchSuggestionsOpen(true);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isDesktopSearchPinned) {
+                        setIsDesktopSearchPinned(true);
+                        setTimeout(() => desktopSearchInputRef.current?.focus(), 0);
+                        return;
+                      }
+                      if (!String(search || "").trim()) {
+                        setDesktopSearchError(true);
+                        desktopSearchInputRef.current?.focus();
+                        return;
+                      }
+                      setDesktopSearchError(false);
+                      navigate("/catalog");
+                    }}
+                    className="absolute right-0.5 top-0.5 flex h-10 w-10 items-center justify-center text-[#1a1614]"
+                    aria-label="Buscar"
+                  >
+                    <SearchIcon />
+                  </button>
+                  {searchSuggestionsOpen && (suggestionItems.popular.length || suggestionItems.products.length || suggestionItems.categories.length) ? (
+                    <div className="absolute left-0 top-[calc(100%+10px)] z-50 w-[320px] rounded-2xl border border-[#E8DFD8] bg-white p-3 shadow-xl">
+                      {suggestionItems.popular.length ? (
+                        <div className="mb-2">
+                          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#A04100]">Mas buscados</p>
+                          <div className="flex flex-wrap gap-2">
+                            {suggestionItems.popular.map((item) => (
+                              <button key={`popular-${item}`} type="button" onClick={() => applySuggestion(item)} className="rounded-full bg-[#FFEDDE] px-2.5 py-1 text-xs text-[#5A4136] hover:bg-[#FFDCC1]">
+                                {item}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
+                      {suggestionItems.products.length ? (
+                        <div>
+                          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#A04100]">Autocompletar</p>
+                          <div className="flex flex-col gap-1">
+                            {suggestionItems.products.map((item) => (
+                              <button key={`product-${item}`} type="button" onClick={() => applySuggestion(item)} className="rounded-lg px-2 py-1.5 text-left text-sm text-[#1A1614] hover:bg-[#FFF5ED]">
+                                {item}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
+                      {suggestionItems.categories.length ? (
+                        <div className="mt-2">
+                          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#A04100]">Categorias</p>
+                          <div className="flex flex-col gap-1">
+                            {suggestionItems.categories.map((item) => (
+                              <button key={`category-${item}`} type="button" onClick={() => applySuggestion(item)} className="rounded-lg px-2 py-1.5 text-left text-sm text-[#1A1614] hover:bg-[#FFF5ED]">
+                                {item}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  {desktopSearchError ? (
+                    <span className="pointer-events-none absolute left-4 top-[calc(100%+2px)] text-[11px] font-bold text-[#b42318]">
+                      Escribi algo para buscar
+                    </span>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {showWishlist ? (
                 <button
                   type="button"
-                  onClick={() => {
-                    if (!piquimSearchOpen && !search) {
-                      setPiquimSearchOpen(true);
-                      return;
-                    }
-                    navigate("/catalog");
-                  }}
-                  className="absolute right-0 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full text-black"
-                  aria-label="Buscar catalogo"
+                  onClick={() => navigate(user ? "/profile" : "/login")}
+                  className="flex h-12 w-12 items-center justify-center text-[#1a1614] transition-colors hover:text-[#ff4d00]"
+                  aria-label="Guardados"
                 >
-                  <SearchIcon className="size-6" />
+                  <HeartIcon />
                 </button>
-              </form>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setPiquimSearchOpen(true);
-                  navigate("/catalog");
-                }}
-                className="hidden items-center justify-center overflow-hidden rounded-full text-black max-md:flex"
-                aria-label="Buscar catalogo"
-              >
-                <SearchIcon className="size-6" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => navigate("/profile")}
-                className="flex items-center justify-center overflow-hidden rounded-full text-black max-sm:hidden"
-                aria-label="Guardados"
-              >
-                <BookmarkIcon className="size-6" />
-              </button>
+              ) : null}
 
               {showCart ? (
                 <button
                   type="button"
                   onClick={() => navigate("/cart")}
-                  className="relative flex items-center justify-center rounded-full text-black"
+                  className="relative flex h-12 w-12 items-center justify-center text-[#1a1614] transition-colors hover:text-[#ff4d00]"
                   aria-label="Carrito"
                 >
-                  <CartIcon className="size-6" />
+                  <CartIcon />
                   {cartCount > 0 ? (
                     <span className="absolute -right-1 -top-1 min-w-[18px] rounded-full bg-[#ff4d00] px-1.5 text-center text-[10px] font-black leading-[18px] text-white">
                       {cartCount}
@@ -481,26 +713,36 @@ export default function Header({
               {showAccount ? (
                 <button
                   type="button"
-                  onClick={() => navigate("/register")}
-                  className="flex h-6 w-[100px] items-center justify-center gap-5 overflow-hidden rounded-full bg-[#FF4D00] text-sm font-bold text-[#FFFAF6] max-sm:hidden"
-                  style={{ fontFamily: "Gilroy, sans-serif" }}
+                  onClick={() => (user ? handleAccountClick() : navigate(registerHref || "/register"))}
+                  className="hidden items-center justify-center rounded-full bg-[#ff4d00] px-5 py-3 text-center text-sm font-black leading-none text-white shadow-[0_12px_28px_rgba(255,77,0,0.24)] transition-transform hover:-translate-y-0.5 xl:inline-flex"
                 >
-                  Registrarse
+                  {user ? "Mi cuenta" : registerLabel}
                 </button>
               ) : null}
             </div>
 
-            <div className="ml-auto flex items-center gap-2 lg:hidden">
+            <div className="ml-auto flex items-center gap-1.5 rounded-full border border-[#dab6a6] bg-[#fffaf6]/70 px-1.5 py-1 lg:hidden">
+              {showWishlist ? (
+                <button
+                  type="button"
+                  onClick={() => navigate(user ? "/profile" : "/login")}
+                  className="group relative flex h-9 w-9 items-center justify-center rounded-full text-[#1a1614] transition-colors hover:bg-[#fffaf6] hover:text-[#ff4d00]"
+                  aria-label="Favoritos"
+                  title="Favoritos"
+                >
+                  <HeartIcon className="size-5 transition-transform group-active:scale-90" />
+                </button>
+              ) : null}
               {showCart ? (
                 <button
                   type="button"
                   onClick={() => navigate("/cart")}
-                  className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#fffaf6]/85 text-[#1a1614]"
+                  className="group relative flex h-9 w-9 items-center justify-center rounded-full text-[#1a1614] transition-colors hover:bg-[#fffaf6] hover:text-[#ff4d00]"
                   aria-label="Carrito"
                 >
-                  <CartIcon />
+                  <CartIcon className="size-5 transition-transform group-active:scale-90" />
                   {cartCount > 0 ? (
-                    <span className="absolute -right-1 -top-1 min-w-[16px] rounded-full bg-[#ff4d00] px-1 text-center text-[9px] font-bold leading-[16px] text-white">
+                    <span className="absolute -right-1 -top-1 min-w-[16px] rounded-full bg-[#ff4d00] px-1 text-center text-[9px] font-bold leading-[16px] text-white shadow-[0_6px_14px_rgba(255,77,0,0.35)]">
                       {cartCount}
                     </span>
                   ) : null}
@@ -509,7 +751,9 @@ export default function Header({
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen((current) => !current)}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1a1614] text-[#fffaf6]"
+                className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
+                  mobileMenuOpen ? "bg-[#1a1614] text-[#fffaf6]" : "text-[#1a1614] hover:bg-[#fffaf6] hover:text-[#ff4d00]"
+                }`}
                 aria-label={mobileMenuOpen ? "Cerrar menu" : "Abrir menu"}
               >
                 {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
@@ -591,7 +835,7 @@ export default function Header({
           </button>
 
           {showSearch ? (
-            <label className="relative order-3 w-full md:order-none md:flex-1 md:max-w-[520px]">
+            <label ref={searchBoxRef} className="relative order-3 w-full md:order-none md:flex-1 md:max-w-[520px]">
               <input
                 className="h-11 w-full rounded-none border border-[#e4e9ef] bg-[#f7f8fa] pl-4 pr-12 text-sm text-[#1f2937] placeholder:text-[#9ca3af] focus:border-[color:var(--color-primary,#0099e5)] focus:outline-none dark:border-[#3d2f21] dark:bg-[#1a130c] dark:text-[#f8f7f5] dark:placeholder:text-[#a59280]"
                 placeholder={searchPlaceholder}
@@ -599,6 +843,7 @@ export default function Header({
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 onKeyDown={handleSearchKey}
+                onFocus={() => setSearchSuggestionsOpen(true)}
               />
               <button
                 type="button"
@@ -608,6 +853,46 @@ export default function Header({
               >
                 <SearchIcon />
               </button>
+              {searchSuggestionsOpen && (suggestionItems.popular.length || suggestionItems.products.length || suggestionItems.categories.length) ? (
+                <div className="absolute left-0 top-[calc(100%+8px)] z-50 w-full rounded-xl border border-[#E8DFD8] bg-white p-3 shadow-xl">
+                  {suggestionItems.popular.length ? (
+                    <div className="mb-2">
+                      <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#A04100]">Mas buscados</p>
+                      <div className="flex flex-wrap gap-2">
+                        {suggestionItems.popular.map((item) => (
+                          <button key={`std-popular-${item}`} type="button" onClick={() => applySuggestion(item)} className="rounded-full bg-[#FFEDDE] px-2.5 py-1 text-xs text-[#5A4136] hover:bg-[#FFDCC1]">
+                            {item}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                  {suggestionItems.products.length ? (
+                    <div>
+                      <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#A04100]">Autocompletar</p>
+                      <div className="flex flex-col gap-1">
+                        {suggestionItems.products.map((item) => (
+                          <button key={`std-product-${item}`} type="button" onClick={() => applySuggestion(item)} className="rounded-lg px-2 py-1.5 text-left text-sm text-[#1A1614] hover:bg-[#FFF5ED]">
+                            {item}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                  {suggestionItems.categories.length ? (
+                    <div className="mt-2">
+                      <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#A04100]">Categorias</p>
+                      <div className="flex flex-col gap-1">
+                        {suggestionItems.categories.map((item) => (
+                          <button key={`std-category-${item}`} type="button" onClick={() => applySuggestion(item)} className="rounded-lg px-2 py-1.5 text-left text-sm text-[#1A1614] hover:bg-[#FFF5ED]">
+                            {item}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
             </label>
           ) : (
             <div className="hidden md:block md:flex-1" />

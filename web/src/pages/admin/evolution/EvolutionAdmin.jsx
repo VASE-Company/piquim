@@ -626,6 +626,10 @@ const EvolutionAdmin = () => {
             settings={editor.settings}
             onDataChange={handleDataChange}
             onSave={handleSave}
+            onUndo={editor.undo}
+            onRedo={editor.redo}
+            canUndo={editor.canUndo}
+            canRedo={editor.canRedo}
             onAddItem={handleAddItem}
             isSaving={editor.saving}
             catalogContext={catalog}
