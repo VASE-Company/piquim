@@ -214,7 +214,7 @@ export const TenantProvider = ({ children }) => {
             setLoading(true);
         }
         try {
-            const response = await fetch(`${getApiBase()}/public/tenant`, {
+            const response = await fetch(`${getApiBase()}/tenant`, {
                 headers: getTenantHeaders(),
             });
 

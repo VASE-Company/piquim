@@ -176,6 +176,58 @@ export const AuthProvider = ({ children }) => {
         return data;
     };
 
+    const requestLoginCode = async (email) => {
+        if (isExternalAuthEnabled()) {
+            throw new Error('external_auth_enabled');
+        }
+        const rawEmail = String(email || '').trim();
+        const normalizedEmail = rawEmail.toLowerCase() === 'admin'
+            ? 'admin@teflon.local'
+            : rawEmail.toLowerCase();
+
+        const response = await fetch(`${getApiBase()}/auth/request-login-code`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: normalizedEmail,
+                tenant_id: import.meta.env.VITE_TENANT_ID
+            }),
+        });
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.error || 'request_login_code_failed');
+        }
+        return response.json();
+    };
+
+    const loginWithCode = async (email, code) => {
+        if (isExternalAuthEnabled()) {
+            throw new Error('external_auth_enabled');
+        }
+        const rawEmail = String(email || '').trim();
+        const normalizedEmail = rawEmail.toLowerCase() === 'admin'
+            ? 'admin@teflon.local'
+            : rawEmail.toLowerCase();
+        const response = await fetch(`${getApiBase()}/auth/login-with-code`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: normalizedEmail,
+                code: String(code || '').trim(),
+                tenant_id: import.meta.env.VITE_TENANT_ID
+            }),
+        });
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.error || 'login_with_code_failed');
+        }
+        const data = await response.json();
+        setUser(data.user);
+        localStorage.setItem('teflon_token', data.token);
+        localStorage.setItem('teflon_user', JSON.stringify(data.user));
+        return data;
+    };
+
     const signup = async (input = {}) => {
         if (isExternalAuthEnabled()) {
             throw new Error('external_auth_enabled');
@@ -359,7 +411,7 @@ export const AuthProvider = ({ children }) => {
     const isAdmin = user?.role === 'tenant_admin' || user?.role === 'master_admin';
 
     return (
-        <AuthContext.Provider value={{ user, login, signup, verifyEmailCode, resendVerificationCode, logout, isWholesale, isWholesalePending, isAdmin, loading, refreshUser, updateProfile, uploadProfilePhoto }}>
+        <AuthContext.Provider value={{ user, login, signup, verifyEmailCode, resendVerificationCode, requestLoginCode, loginWithCode, logout, isWholesale, isWholesalePending, isAdmin, loading, refreshUser, updateProfile, uploadProfilePhoto }}>
             {children}
         </AuthContext.Provider>
     );

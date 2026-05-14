@@ -13,6 +13,7 @@ import PriceAccessPrompt from "../../components/PriceAccessPrompt";
 import StoreSkeleton from "../../components/StoreSkeleton";
 import ProductDetailMinimal from "./ProductDetailMinimal";
 import ProductDetailImmersive from "./ProductDetailImmersive";
+import { ArrowRight } from "lucide-react";
 
 const FALLBACK_IMAGE = createPlaceholderImage({ label: "Producto", width: 900, height: 900 });
 
@@ -756,9 +757,9 @@ export default function ProductDetail() {
                                 <button
                                     type="button"
                                     onClick={() => navigate("/catalog")}
-                                    className="text-[11px] font-bold uppercase tracking-widest text-[#8a7560] hover:text-primary"
+                                    className="inline-flex items-center text-[11px] font-bold uppercase tracking-widest text-[#8a7560] hover:text-primary"
                                 >
-                                    Ver catálogo
+                                    Ver catálogo <ArrowRight className="ml-2 size-4" />
                                 </button>
                             </div>
 

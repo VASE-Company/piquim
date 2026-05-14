@@ -93,9 +93,9 @@ export default function PiquimHero(props) {
                         <button
                             type="button"
                             onClick={() => navigate(data.secondaryHref || '/catalog')}
-                            className="py-[16px] text-[15px] font-semibold text-[#fff0e8]"
+                            className="inline-flex items-center py-[16px] text-[15px] font-semibold text-[#fff0e8]"
                         >
-                            {data.secondaryLabel}
+                            {data.secondaryLabel} <ArrowRight className="ml-2 size-4" />
                         </button>
                     </div>
 

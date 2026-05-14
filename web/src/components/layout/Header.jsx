@@ -154,7 +154,7 @@ export default function Header({
   showCart = true,
   showAccount = true,
   registerLabel = "Registrarse",
-  registerHref = "/register",
+  registerHref = "/signup",
   containerClassName = "max-w-[1408px]",
 }) {
   const { tenant, settings } = useTenant();
@@ -401,6 +401,35 @@ export default function Header({
     [searchHistory]
   );
 
+  const categoryTree = useMemo(() => {
+    if (!Array.isArray(catalogCategories) || !catalogCategories.length) return [];
+
+    const byId = new Map();
+    catalogCategories.forEach((item) => {
+      byId.set(item.id, {
+        id: item.id,
+        slug: item.slug || null,
+        name: item.name,
+        parent_id: item.parent_id || null,
+        children: [],
+      });
+    });
+
+    const roots = [];
+    byId.forEach((node) => {
+      if (node.parent_id && byId.has(node.parent_id)) {
+        byId.get(node.parent_id).children.push(node);
+      } else {
+        roots.push(node);
+      }
+    });
+
+    const sorter = (a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" });
+    roots.sort(sorter);
+    roots.forEach((item) => item.children.sort(sorter));
+    return roots;
+  }, [catalogCategories]);
+
   const categorySuggestions = useMemo(() => {
     const q = formatSearchTerm(search);
     if (!q) return [];
@@ -441,35 +470,6 @@ export default function Header({
   const whatsappRaw = settings?.branding?.footer?.socials?.whatsapp || settings?.commerce?.whatsapp_number || "";
   const whatsappCleaned = String(whatsappRaw).replace(/\D/g, "");
   const whatsappHref = whatsappCleaned ? `https://wa.me/${whatsappCleaned}` : null;
-
-  const categoryTree = useMemo(() => {
-    if (!Array.isArray(catalogCategories) || !catalogCategories.length) return [];
-
-    const byId = new Map();
-    catalogCategories.forEach((item) => {
-      byId.set(item.id, {
-        id: item.id,
-        slug: item.slug || null,
-        name: item.name,
-        parent_id: item.parent_id || null,
-        children: [],
-      });
-    });
-
-    const roots = [];
-    byId.forEach((node) => {
-      if (node.parent_id && byId.has(node.parent_id)) {
-        byId.get(node.parent_id).children.push(node);
-      } else {
-        roots.push(node);
-      }
-    });
-
-    const sorter = (a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" });
-    roots.sort(sorter);
-    roots.forEach((item) => item.children.sort(sorter));
-    return roots;
-  }, [catalogCategories]);
 
   useEffect(() => {
     setExpandedMobileCategories((prev) => {
@@ -713,7 +713,7 @@ export default function Header({
               {showAccount ? (
                 <button
                   type="button"
-                  onClick={() => (user ? handleAccountClick() : navigate(registerHref || "/register"))}
+                  onClick={() => (user ? handleAccountClick() : navigate(registerHref || "/signup"))}
                   className="hidden items-center justify-center rounded-full bg-[#ff4d00] px-5 py-3 text-center text-sm font-black leading-none text-white shadow-[0_12px_28px_rgba(255,77,0,0.24)] transition-transform hover:-translate-y-0.5 xl:inline-flex"
                 >
                   {user ? "Mi cuenta" : registerLabel}

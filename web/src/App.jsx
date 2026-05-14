@@ -90,7 +90,7 @@ function AppContent() {
     else if (route === '/terms') Component = TermsPage;
     else if (route.startsWith('/product')) Component = ProductDetail;
     else if (route === '/login') Component = LoginPage;
-    else if (route === '/signup') Component = SignupPage;
+    else if (route === '/signup' || route === '/register') Component = SignupPage;
 
     return (
         <div className="w-full min-h-screen bg-gray-50 text-[#181411] transition-colors duration-200 dark:bg-[#090b0f] dark:text-[#e6edf7]">

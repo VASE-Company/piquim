@@ -24,14 +24,15 @@ function getVerificationDeliveryNotice(verification, email) {
 }
 
 export default function LoginPage() {
-    const { login, verifyEmailCode, resendVerificationCode } = useAuth();
+    const { loginWithCode, requestLoginCode, verifyEmailCode, resendVerificationCode } = useAuth();
     const externalAuthEnabled = isExternalAuthEnabled();
     const externalLaunchUrl = getExternalBusinessLaunchUrl();
     const externalLoginUrl = getExternalLoginUrl();
     const externalSignupUrl = getExternalSignupUrl();
     const externalAccessUrl = externalLaunchUrl || externalLoginUrl;
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [loginCode, setLoginCode] = useState('');
+    const [codeRequested, setCodeRequested] = useState(false);
     const [error, setError] = useState('');
     const [notice, setNotice] = useState('');
     const [loading, setLoading] = useState(false);
@@ -51,6 +52,12 @@ export default function LoginPage() {
     const mapLoginError = (code) => {
         const dictionary = {
             invalid_credentials: 'Credenciales invalidas.',
+            invalid_code: 'Codigo invalido.',
+            code_not_found: 'Primero solicita un codigo.',
+            code_expired: 'El codigo expiro. Solicita uno nuevo.',
+            code_locked: 'Superaste los intentos permitidos. Solicita un nuevo codigo.',
+            user_not_found: 'No encontramos una cuenta con ese email.',
+            request_login_code_failed: 'No pudimos enviar el codigo.',
             pending_approval: 'Tu cuenta esta pendiente de aprobacion por el administrador.',
             user_inactive: 'Tu cuenta esta inactiva. Contacta al administrador.',
             no_tenant_access: 'No tienes acceso a este tenant.',
@@ -95,7 +102,14 @@ export default function LoginPage() {
         setError('');
         setLoading(true);
         try {
-            const data = await login(email, password);
+            if (!codeRequested) {
+                await requestLoginCode(email);
+                setCodeRequested(true);
+                setNotice(`Te enviamos un codigo a ${getNormalizedLoginEmail()}.`);
+                setError('');
+                return;
+            }
+            const data = await loginWithCode(email, loginCode);
             const role = data?.user?.role;
             if (consumePostLoginRedirect()) {
                 return;
@@ -210,7 +224,7 @@ export default function LoginPage() {
                 <div className="max-w-md w-full bg-white dark:bg-[#1a130c] p-10 rounded-2xl shadow-xl border border-[#e5e1de] dark:border-[#3d2f21]">
                     <div className="text-center mb-8">
                         <h2 className="text-3xl font-black text-[#181411] dark:text-white">Bienvenido</h2>
-                        <p className="text-[#8a7560] mt-2">Ingresa a tu cuenta mayorista o retail</p>
+                        <p className="text-[#8a7560] mt-2">Ingresa con codigo enviado por email</p>
                     </div>
 
                     {error && (
@@ -236,25 +250,50 @@ export default function LoginPage() {
                                 required
                             />
                         </div>
+                        {codeRequested ? (
                         <div>
-                            <label className="block text-sm font-bold text-[#181411] dark:text-white mb-2">Contrasena</label>
+                            <label className="block text-sm font-bold text-[#181411] dark:text-white mb-2">Codigo de acceso</label>
                             <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                type="text"
+                                inputMode="numeric"
+                                maxLength={6}
+                                value={loginCode}
+                                onChange={(e) => setLoginCode(e.target.value.replace(/\D/g, ''))}
                                 className="w-full px-4 py-3 rounded-lg border border-[#e5e1de] dark:border-[#3d2f21] bg-transparent focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all dark:text-white"
-                                placeholder="********"
+                                placeholder="Codigo de 6 digitos"
                                 required
                             />
                         </div>
+                        ) : null}
 
                         <button
                             type="submit"
                             disabled={loading}
                             className="w-full bg-primary hover:bg-orange-600 text-white font-bold py-4 rounded-lg shadow-lg shadow-primary/20 transition-all active:scale-[0.98] disabled:opacity-70"
                         >
-                            {loading ? 'Ingresando...' : 'Iniciar sesion'}
+                            {loading ? 'Procesando...' : (codeRequested ? 'Ingresar con codigo' : 'Enviar codigo')}
                         </button>
+                        {codeRequested ? (
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    setError('');
+                                    setNotice('');
+                                    setLoading(true);
+                                    try {
+                                        await requestLoginCode(email);
+                                        setNotice(`Te reenviamos un codigo a ${getNormalizedLoginEmail()}.`);
+                                    } catch (err) {
+                                        setError(mapLoginError(String(err?.message || '')));
+                                    } finally {
+                                        setLoading(false);
+                                    }
+                                }}
+                                className="w-full border border-[#e5e1de] dark:border-[#3d2f21] text-[#181411] dark:text-white font-bold py-3 rounded-lg transition-all active:scale-[0.98]"
+                            >
+                                Reenviar codigo de acceso
+                            </button>
+                        ) : null}
                     </form>
 
                     {pendingVerificationEmail ? (
