@@ -272,7 +272,7 @@ authRouter.post('/login', async (req, res, next) => {
 
     const rawEmail = String(email).trim();
     const normalizedEmail =
-      rawEmail.toLowerCase() === 'admin' ? 'admin@teflon.local' : normalizeEmailInput(rawEmail);
+      rawEmail.toLowerCase() === 'admin' ? 'admin@piquim.local' : normalizeEmailInput(rawEmail);
 
     const userRes = await pool.query(
       [

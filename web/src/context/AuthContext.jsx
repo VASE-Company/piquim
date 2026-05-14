@@ -151,7 +151,7 @@ export const AuthProvider = ({ children }) => {
 
         const rawEmail = String(email || '').trim();
         const normalizedEmail = rawEmail.toLowerCase() === 'admin'
-            ? 'admin@teflon.local'
+            ? 'admin@piquim.local'
             : rawEmail;
 
         const response = await fetch(`${getApiBase()}/auth/login`, {

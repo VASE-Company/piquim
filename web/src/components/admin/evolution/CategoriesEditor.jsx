@@ -52,9 +52,9 @@ const CategoriesEditor = ({ manager, categories = [], brands = [] }) => {
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tight text-white">Categorias y marcas</h2>
+                <h2 className="text-3xl font-bold tracking-tight text-white">Categorias Piquim y marcas</h2>
                 <p className="text-sm text-zinc-400">
-                    Crea categorias principales, subcategorias y mantene el listado de marcas separado de productos.
+                    Organiza las tres lineas principales de Piquim: Heladeria, Panaderia y Confiteria, con subcategorias para cada familia de materia prima.
                 </p>
             </div>
 
@@ -65,15 +65,15 @@ const CategoriesEditor = ({ manager, categories = [], brands = [] }) => {
                 </div>
 
                 <div className="space-y-1">
-                    <p className={sectionLabelClass}>Categorias</p>
-                    <p className="text-[11px] text-zinc-400">Crea categorias principales y subcategorias.</p>
+                    <p className={sectionLabelClass}>Lineas y familias</p>
+                    <p className="text-[11px] text-zinc-400">Usa raiz para Heladeria, Panaderia o Confiteria. Usa una categoria padre para crear familias internas.</p>
                 </div>
 
                 <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_auto]">
                     <input
                         type="text"
                         value={newCategoryName}
-                        placeholder="Ej: Accesorios"
+                        placeholder="Ej: Variegattos"
                         onChange={(e) => setNewCategoryName(e.target.value)}
                         className={fieldClass}
                     />
@@ -82,7 +82,7 @@ const CategoriesEditor = ({ manager, categories = [], brands = [] }) => {
                         onChange={(e) => setNewCategoryParentId(e.target.value)}
                         className={fieldClass}
                     >
-                        <option value="">Raiz</option>
+                        <option value="">Raiz Piquim</option>
                         {parentCategories.map((parent) => (
                             <option key={parent.id} value={parent.id} className="bg-zinc-900">
                                 {parent.name}
@@ -145,14 +145,14 @@ const CategoriesEditor = ({ manager, categories = [], brands = [] }) => {
 
                 <div className="space-y-1">
                     <p className={sectionLabelClass}>Marcas</p>
-                    <p className="text-[11px] text-zinc-400">Ejemplo: Nova, Atlas, Vertex.</p>
+                    <p className="text-[11px] text-zinc-400">Ejemplo: PIQUIM, Linea Profesional, Ingredientes MDQ.</p>
                 </div>
 
                 <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
                     <input
                         type="text"
                         value={newBrandName}
-                        placeholder="Ej: Nova"
+                        placeholder="Ej: PIQUIM"
                         onChange={(e) => setNewBrandName(e.target.value)}
                         className={fieldClass}
                     />

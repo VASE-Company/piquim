@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { getApiBase, getTenantHeaders } from '../../utils/api';
-import { DEFAULT_ABOUT_SECTIONS, DEFAULT_HOME_SECTIONS } from '../../data/defaultSections';
+import {
+    DEFAULT_ABOUT_SECTIONS,
+    DEFAULT_HOME_SECTIONS,
+    PIQUIM_HOME_SECTIONS,
+    mergeSectionsWithDefaults,
+} from '../../data/defaultSections';
 import { useTenant } from '../../context/TenantContext';
 import {
     DEFAULT_ADMIN_PANEL_BRANDING,
@@ -20,6 +25,25 @@ const normalizePlaceholderValue = (value) =>
         .replace(/[\u0300-\u036f]/g, '');
 
 const isReservedPlaceholder = (value) => RESERVED_PLACEHOLDER_TERMS.has(normalizePlaceholderValue(value));
+
+const PIQUIM_SECTION_TYPES = new Set(PIQUIM_HOME_SECTIONS.map((section) => section.type));
+
+const isPiquimBranding = (settings = {}) =>
+    settings?.branding?.design_preset === 'piquim' ||
+    String(settings?.branding?.name || '').toLowerCase().includes('piquim');
+
+const normalizeHomeSectionsForBrand = (settings = {}, sections = []) => {
+    const source = Array.isArray(sections) ? sections : [];
+    if (!isPiquimBranding(settings)) {
+        return source.length ? mergeSectionsWithDefaults('home', source) : DEFAULT_HOME_SECTIONS;
+    }
+
+    const hasPiquimBlocks = source.some((section) => PIQUIM_SECTION_TYPES.has(section?.type));
+    if (!source.length || !hasPiquimBlocks) {
+        return PIQUIM_HOME_SECTIONS;
+    }
+    return mergeSectionsWithDefaults('piquim-home', source);
+};
 
 const getNavbarLinkLabel = (link) => {
     if (typeof link === 'string') return link;
@@ -97,7 +121,7 @@ export function useEditorState(user) {
         });
 
     const [pageSections, rawSetPageSections] = useState({
-        home: DEFAULT_HOME_SECTIONS,
+        home: PIQUIM_HOME_SECTIONS,
         about: DEFAULT_ABOUT_SECTIONS,
     });
 
@@ -345,6 +369,8 @@ export function useEditorState(user) {
                 await refreshTenantSettings();
             }
 
+            const loadedSettings = settingsPayload?.settings || settingsRef.current;
+
             if (settingsPayload) {
                 const data = settingsPayload;
                 rawSetSettings(prev => ({
@@ -386,7 +412,12 @@ export function useEditorState(user) {
 
             if (homeRes.ok) {
                 const data = await homeRes.json();
-                if (Array.isArray(data.sections)) rawSetPageSections(prev => ({ ...prev, home: data.sections }));
+                if (Array.isArray(data.sections)) {
+                    rawSetPageSections(prev => ({
+                        ...prev,
+                        home: normalizeHomeSectionsForBrand(loadedSettings, data.sections),
+                    }));
+                }
             }
 
             if (aboutRes.ok) {

@@ -50,6 +50,21 @@ const buildFeaturedCard = (product, index, isWholesale = false) => {
     };
 };
 
+const PIQUIM_SECTION_TYPES = new Set([
+    'PiquimHero',
+    'PiquimAnnounceBar',
+    'PiquimTresMundos',
+    'PiquimCatalog3Panel',
+    'PiquimFeaturedProducts',
+    'PiquimCTABanner',
+]);
+
+const shouldUseFetchedSections = (pageKey, sections = []) => {
+    if (!Array.isArray(sections) || !sections.length) return false;
+    if (pageKey !== 'piquim-home') return true;
+    return sections.some((section) => PIQUIM_SECTION_TYPES.has(section?.type));
+};
+
 export default function HomePage() {
     const { isWholesale } = useAuth();
     const { settings } = useTenant();
@@ -64,12 +79,12 @@ export default function HomePage() {
     useEffect(() => {
         async function loadHome() {
             try {
-                const response = await fetch(`${getApiBase()}/pages/home`, {
+                const response = await fetch(`${getApiBase()}/public/pages/home`, {
                     headers: getTenantHeaders(),
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.sections && data.sections.length) {
+                    if (shouldUseFetchedSections(pageKey, data.sections)) {
                         setSections(mergeSectionsWithDefaults(pageKey, data.sections));
                     }
                 }

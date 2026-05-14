@@ -325,21 +325,29 @@ WITH home_page AS (
     AND slug = 'home'
 )
 INSERT INTO page_sections (page_id, state, type, enabled, sort_order, props)
-SELECT id, 'published', 'HeroSlider', true, 1, '{}'::jsonb FROM home_page
+SELECT id, 'published', 'PiquimHero', true, 1, '{}'::jsonb FROM home_page
 UNION ALL
-SELECT id, 'published', 'BrandMarquee', true, 2, '{}'::jsonb FROM home_page
+SELECT id, 'published', 'PiquimAnnounceBar', true, 2, '{}'::jsonb FROM home_page
 UNION ALL
-SELECT id, 'published', 'FeaturedProducts', true, 3, '{}'::jsonb FROM home_page
+SELECT id, 'published', 'PiquimTresMundos', true, 3, '{}'::jsonb FROM home_page
 UNION ALL
-SELECT id, 'published', 'Services', true, 4, '{}'::jsonb FROM home_page
+SELECT id, 'published', 'PiquimCatalog3Panel', true, 4, '{}'::jsonb FROM home_page
 UNION ALL
-SELECT id, 'draft', 'HeroSlider', true, 1, '{}'::jsonb FROM home_page
+SELECT id, 'published', 'PiquimFeaturedProducts', true, 5, '{}'::jsonb FROM home_page
 UNION ALL
-SELECT id, 'draft', 'BrandMarquee', true, 2, '{}'::jsonb FROM home_page
+SELECT id, 'published', 'PiquimCTABanner', true, 6, '{}'::jsonb FROM home_page
 UNION ALL
-SELECT id, 'draft', 'FeaturedProducts', true, 3, '{}'::jsonb FROM home_page
+SELECT id, 'draft', 'PiquimHero', true, 1, '{}'::jsonb FROM home_page
 UNION ALL
-SELECT id, 'draft', 'Services', true, 4, '{}'::jsonb FROM home_page;
+SELECT id, 'draft', 'PiquimAnnounceBar', true, 2, '{}'::jsonb FROM home_page
+UNION ALL
+SELECT id, 'draft', 'PiquimTresMundos', true, 3, '{}'::jsonb FROM home_page
+UNION ALL
+SELECT id, 'draft', 'PiquimCatalog3Panel', true, 4, '{}'::jsonb FROM home_page
+UNION ALL
+SELECT id, 'draft', 'PiquimFeaturedProducts', true, 5, '{}'::jsonb FROM home_page
+UNION ALL
+SELECT id, 'draft', 'PiquimCTABanner', true, 6, '{}'::jsonb FROM home_page;
 
 WITH seed AS (
   SELECT '636736e2-e135-44cd-ac5c-5d4ccb839a73'::uuid AS tenant_id

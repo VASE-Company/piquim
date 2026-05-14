@@ -85,12 +85,12 @@ const CatalogEditor = ({ products, onAddItem, onEditProduct }) => {
                             <Package size={18} weight="bold" />
                         </div>
                         <div>
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Catalogo</p>
-                            <p className="text-sm font-bold text-white">Productos</p>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Catalogo Piquim</p>
+                            <p className="text-sm font-bold text-white">Materia prima</p>
                         </div>
                     </div>
                     <p className="text-[11px] text-zinc-500">
-                        Categorias y marcas ahora se gestionan desde el apartado `Categorias`.
+                        Los productos se publican dentro de Heladeria, Panaderia o Confiteria desde el inspector.
                     </p>
                 </div>
 

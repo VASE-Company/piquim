@@ -75,7 +75,7 @@ export default function LoginPage() {
     const getNormalizedLoginEmail = () => {
         const rawEmail = String(email || '').trim();
         if (!rawEmail) return '';
-        return rawEmail.toLowerCase() === 'admin' ? 'admin@teflon.local' : rawEmail.toLowerCase();
+        return rawEmail.toLowerCase() === 'admin' ? 'admin@piquim.local' : rawEmail.toLowerCase();
     };
 
     const consumePostLoginRedirect = () => {

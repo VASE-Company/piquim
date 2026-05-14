@@ -5,6 +5,7 @@ let schemaPromise = null;
 export async function ensureUserProfileSchema() {
   if (schemaPromise) return schemaPromise;
   schemaPromise = (async () => {
+    await pool.query("alter table users add column if not exists display_name text");
     await pool.query("alter table users add column if not exists phone text");
     await pool.query("alter table users add column if not exists address text");
     await pool.query("alter table users add column if not exists address_extra text");

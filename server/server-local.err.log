@@ -1,0 +1,32 @@
+error: no existe la columna u.display_name
+    at C:\Users\10\Documents\GitHub\piquim\server\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///C:/Users/10/Documents/GitHub/piquim/server/src/routes/tenant.js:1606:22
+error: no existe la columna u.display_name
+    at C:\Users\10\Documents\GitHub\piquim\server\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///C:/Users/10/Documents/GitHub/piquim/server/src/routes/tenant.js:1606:22
+error: no existe la columna «display_name»
+    at C:\Users\10\Documents\GitHub\piquim\server\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async getMeHandler (file:///C:/Users/10/Documents/GitHub/piquim/server/src/routes/auth.js:629:21)
+error: no existe la columna «display_name»
+    at C:\Users\10\Documents\GitHub\piquim\server\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async getMeHandler (file:///C:/Users/10/Documents/GitHub/piquim/server/src/routes/auth.js:629:21)
+Error: ENOENT: no such file or directory, stat 'C:\Users\10\Documents\GitHub\piquim\web\dist\index.html'
+Error: ENOENT: no such file or directory, stat 'C:\Users\10\Documents\GitHub\piquim\web\dist\index.html'
+Error: ENOENT: no such file or directory, stat 'C:\Users\10\Documents\GitHub\piquim\web\dist\index.html'
+Error: ENOENT: no such file or directory, stat 'C:\Users\10\Documents\GitHub\piquim\web\dist\index.html'
+error: no existe la columna u.display_name
+    at C:\Users\10\Documents\GitHub\piquim\server\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///C:/Users/10/Documents/GitHub/piquim/server/src/routes/tenant.js:1606:22
+error: no existe la columna u.display_name
+    at C:\Users\10\Documents\GitHub\piquim\server\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///C:/Users/10/Documents/GitHub/piquim/server/src/routes/tenant.js:1606:22
+error: no existe la columna «display_name»
+    at C:\Users\10\Documents\GitHub\piquim\server\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async getMeHandler (file:///C:/Users/10/Documents/GitHub/piquim/server/src/routes/auth.js:629:21)

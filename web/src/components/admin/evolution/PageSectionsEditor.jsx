@@ -144,7 +144,8 @@ const PageSectionsEditor = ({
                 .filter((section) => section?.enabled !== false)
                 .map((section) => {
                     const baseProps = section.props || {};
-                    const isFeaturedProducts = section.type === 'FeaturedProducts';
+                    const isFeaturedProducts =
+                        section.type === 'FeaturedProducts' || section.type === 'PiquimFeaturedProducts';
 
                     return {
                         ...section,
@@ -237,7 +238,11 @@ const PageSectionsEditor = ({
                 <div className="mb-4 flex items-center justify-between gap-2">
                     <div>
                         <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
-                            {pageKey === 'about' ? 'Sobre Nosotros' : 'Inicio'}
+                            {pageKey === 'about'
+                                ? 'Sobre Nosotros'
+                                : pageKey === 'piquim-home'
+                                    ? 'Inicio Piquim'
+                                    : 'Inicio'}
                         </p>
                         <h2 className="text-xl font-bold text-white">Bloques</h2>
                     </div>
