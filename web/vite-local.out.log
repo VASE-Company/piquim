@@ -122,3 +122,20 @@
 [2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/ProductDetail.jsx, /src/index.css[22m
 [2m14:46:12[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/SignupPage.jsx, /src/index.css[22m
 [2m14:46:13[22m [36m[1m[vite][22m[39m server restarted.
+[2m14:56:17[22m [36m[1m[vite][22m[39m [32m.env changed, restarting server...[39m
+[2m14:56:17[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/CatalogEditor.jsx, /src/index.css[22m
+[2m14:56:17[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/CategoriesEditor.jsx, /src/index.css[22m
+[2m14:56:17[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css[22m
+[2m14:56:17[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/context/AuthContext.jsx, /src/index.css[22m
+[2m14:56:17[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/store/CatalogPage.jsx[22m
+[2m14:56:17[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/PageSectionsEditor.jsx, /src/index.css[22m
+[2m14:56:17[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/evolution/EvolutionAdmin.jsx[22m
+[2m14:56:17[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/admin/evolution/CategoriesEditor.jsx, /src/index.css[22m
+[2m14:56:17[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/evolution/EvolutionAdmin.jsx, /src/index.css[22m
+[2m14:56:17[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/store/HomePage.jsx, /src/index.css[22m
+[2m14:56:17[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/main.jsx[22m
+[2m14:56:17[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/main.jsx[22m
+[2m14:56:17[22m [36m[1m[vite][22m[39m server restarted.
+[2m14:56:17[22m [36m[1m[vite][22m[39m [32m.env changed, restarting server...[39m
+[2m14:56:18[22m [36m[1m[vite][22m[39m [32m.env changed, restarting server...[39m
+[2m14:56:19[22m [36m[1m[vite][22m[39m server restarted.
