@@ -295,11 +295,11 @@ export default function Header({
     const loadCatalogMeta = async () => {
       try {
         const [categoriesRes, brandsRes] = await Promise.all([
-          fetch(`${getApiBase()}/categories`, {
+          fetch(`${getApiBase()}/public/categories`, {
             headers: getTenantHeaders(),
             signal: controller.signal,
           }),
-          fetch(`${getApiBase()}/brands`, {
+          fetch(`${getApiBase()}/public/brands`, {
             headers: getTenantHeaders(),
             signal: controller.signal,
           }),

@@ -4,6 +4,18 @@ import { isExternalAuthEnabled } from '../utils/vaseAuth';
 
 const AuthContext = createContext(null);
 
+async function readJsonResponse(response, fallbackError = 'request_failed') {
+    const text = await response.text();
+    if (!text) {
+        return null;
+    }
+    try {
+        return JSON.parse(text);
+    } catch (err) {
+        throw new Error(`${fallbackError}_${response.status}_invalid_json`);
+    }
+}
+
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -151,7 +163,7 @@ export const AuthProvider = ({ children }) => {
 
         const rawEmail = String(email || '').trim();
         const normalizedEmail = rawEmail.toLowerCase() === 'admin'
-            ? 'admin@teflon.local'
+            ? 'admin@piquim.local'
             : rawEmail;
 
         const response = await fetch(`${getApiBase()}/auth/login`, {
@@ -164,12 +176,16 @@ export const AuthProvider = ({ children }) => {
             }),
         });
 
+        const data = await readJsonResponse(response, 'login_failed');
+
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Login failed');
+            throw new Error(data?.error || `login_failed_${response.status}`);
         }
 
-        const data = await response.json();
+        if (!data?.token || !data?.user) {
+            throw new Error(`login_empty_response_${response.status}`);
+        }
+
         setUser(data.user);
         localStorage.setItem('teflon_token', data.token);
         localStorage.setItem('teflon_user', JSON.stringify(data.user));
@@ -182,7 +198,7 @@ export const AuthProvider = ({ children }) => {
         }
         const rawEmail = String(email || '').trim();
         const normalizedEmail = rawEmail.toLowerCase() === 'admin'
-            ? 'admin@teflon.local'
+            ? 'admin@piquim.local'
             : rawEmail.toLowerCase();
 
         const response = await fetch(`${getApiBase()}/auth/request-login-code`, {
@@ -206,7 +222,7 @@ export const AuthProvider = ({ children }) => {
         }
         const rawEmail = String(email || '').trim();
         const normalizedEmail = rawEmail.toLowerCase() === 'admin'
-            ? 'admin@teflon.local'
+            ? 'admin@piquim.local'
             : rawEmail.toLowerCase();
         const response = await fetch(`${getApiBase()}/auth/login-with-code`, {
             method: 'POST',

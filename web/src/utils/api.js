@@ -27,6 +27,12 @@ export function getApiBase() {
     const configuredBase = String(import.meta.env.VITE_API_URL || DEFAULT_API_BASE).trim();
     if (!configuredBase) {
         if (typeof window !== 'undefined') {
+            const isLocalVite =
+                ['localhost', '127.0.0.1'].includes(window.location.hostname) &&
+                ['5173', '5174', '5175'].includes(window.location.port);
+            if (isLocalVite) {
+                return 'http://localhost:4000';
+            }
             return window.location.origin.replace(/\/+$/, '');
         }
         return '';

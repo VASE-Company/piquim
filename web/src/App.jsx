@@ -31,6 +31,8 @@ function AppContent() {
     const [route, setRoute] = useState(window.location.pathname);
     const { isAdmin, loading: authLoading, user } = useAuth();
     const isEditorHost = resolveIsEditorHost();
+    const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    const allowLocalAdmin = isEditorHost || isLocalHost || import.meta.env.VITE_ALLOW_LOCAL_ADMIN === 'true';
     const isPreviewRoute = route === '/admin/preview';
     const isAdminRoute = route === '/admin' || route === '/admin/evolution' || route === '/admin/legacy';
 
@@ -49,20 +51,20 @@ function AppContent() {
     }, []);
 
     useEffect(() => {
-        if (!isEditorHost) return;
+        if (!allowLocalAdmin) return;
         if (route !== '/') return;
         navigate('/admin/evolution');
-    }, [isEditorHost, route]);
+    }, [allowLocalAdmin, route]);
 
     useEffect(() => {
-        if (isEditorHost) return;
+        if (allowLocalAdmin) return;
         if (!isPreviewRoute && !isAdminRoute) return;
         navigate('/');
-    }, [isAdminRoute, isEditorHost, isPreviewRoute]);
+    }, [allowLocalAdmin, isAdminRoute, isPreviewRoute]);
 
     let Component = HomePage;
 
-    if ((isPreviewRoute || isAdminRoute) && !isEditorHost) {
+    if ((isPreviewRoute || isAdminRoute) && !allowLocalAdmin) {
         Component = HomePage;
     } else if (isPreviewRoute) {
         Component = PreviewPage;

@@ -265,3 +265,9 @@ DB Connection OK
 Pricing schema ready
 User profile schema ready
 Completed running 'src/index.js'. Waiting for file changes before restarting...
+Restarting 'src/index.js'
+Checking DB connection to: aws-1-us-east-1.pooler.supabase.com:5432/postgres
+DB Connection OK
+Pricing schema ready
+User profile schema ready
+Completed running 'src/index.js'. Waiting for file changes before restarting...

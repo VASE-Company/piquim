@@ -24,15 +24,14 @@ function getVerificationDeliveryNotice(verification, email) {
 }
 
 export default function LoginPage() {
-    const { loginWithCode, requestLoginCode, verifyEmailCode, resendVerificationCode } = useAuth();
+    const { login, verifyEmailCode, resendVerificationCode } = useAuth();
     const externalAuthEnabled = isExternalAuthEnabled();
     const externalLaunchUrl = getExternalBusinessLaunchUrl();
     const externalLoginUrl = getExternalLoginUrl();
     const externalSignupUrl = getExternalSignupUrl();
     const externalAccessUrl = externalLaunchUrl || externalLoginUrl;
     const [email, setEmail] = useState('');
-    const [loginCode, setLoginCode] = useState('');
-    const [codeRequested, setCodeRequested] = useState(false);
+    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [notice, setNotice] = useState('');
     const [loading, setLoading] = useState(false);
@@ -63,8 +62,12 @@ export default function LoginPage() {
             no_tenant_access: 'No tienes acceso a este tenant.',
             email_password_required: 'Completa email y contrasena.',
             email_not_verified: 'Debes verificar tu email antes de iniciar sesion.',
+            external_auth_enabled: 'El login externo esta activado.',
+            failed_to_fetch: 'No se pudo conectar con el backend. Verifica que el server este corriendo.',
+            login_failed: 'No se pudo iniciar sesion.',
         };
-        return dictionary[code] || 'No se pudo iniciar sesion.';
+        const normalizedCode = code.toLowerCase().replace(/\s+/g, '_');
+        return dictionary[normalizedCode] || `No se pudo iniciar sesion (${code}).`;
     };
 
     const mapVerificationError = (code) => {
@@ -82,7 +85,7 @@ export default function LoginPage() {
     const getNormalizedLoginEmail = () => {
         const rawEmail = String(email || '').trim();
         if (!rawEmail) return '';
-        return rawEmail.toLowerCase() === 'admin' ? 'admin@teflon.local' : rawEmail.toLowerCase();
+        return rawEmail.toLowerCase() === 'admin' ? 'admin@piquim.local' : rawEmail.toLowerCase();
     };
 
     const consumePostLoginRedirect = () => {
@@ -102,14 +105,7 @@ export default function LoginPage() {
         setError('');
         setLoading(true);
         try {
-            if (!codeRequested) {
-                await requestLoginCode(email);
-                setCodeRequested(true);
-                setNotice(`Te enviamos un codigo a ${getNormalizedLoginEmail()}.`);
-                setError('');
-                return;
-            }
-            const data = await loginWithCode(email, loginCode);
+            const data = await login(getNormalizedLoginEmail(), password);
             const role = data?.user?.role;
             if (consumePostLoginRedirect()) {
                 return;
@@ -221,10 +217,15 @@ export default function LoginPage() {
     return (
         <StoreLayout>
             <div className="min-h-[80vh] flex items-center justify-center px-4">
-                <div className="max-w-md w-full bg-white dark:bg-[#1a130c] p-10 rounded-2xl shadow-xl border border-[#e5e1de] dark:border-[#3d2f21]">
-                    <div className="text-center mb-8">
-                        <h2 className="text-3xl font-black text-[#181411] dark:text-white">Bienvenido</h2>
-                        <p className="text-[#8a7560] mt-2">Ingresa con codigo enviado por email</p>
+                <div className="relative max-w-md w-full overflow-hidden rounded-[32px] border border-[#f0d0bf] bg-[#fffaf6] p-8 shadow-[0_24px_80px_rgba(255,77,0,0.16)] dark:border-[#3d2f21] dark:bg-[#1a130c]">
+                    <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[#ff4d00]/15 blur-2xl" />
+                    <div className="relative text-center mb-8">
+                        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ff4d00] text-xl font-black text-white shadow-[0_16px_35px_rgba(255,77,0,0.35)]">
+                            P
+                        </div>
+                        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#ff4d00]">Panel Piquim</p>
+                        <h2 className="mt-2 text-3xl font-black text-[#181411] dark:text-white">Iniciar sesion</h2>
+                        <p className="text-[#8a7560] mt-2">Ingresa con usuario y contrasena</p>
                     </div>
 
                     {error && (
@@ -250,50 +251,25 @@ export default function LoginPage() {
                                 required
                             />
                         </div>
-                        {codeRequested ? (
                         <div>
-                            <label className="block text-sm font-bold text-[#181411] dark:text-white mb-2">Codigo de acceso</label>
+                            <label className="block text-sm font-bold text-[#181411] dark:text-white mb-2">Contrasena</label>
                             <input
-                                type="text"
-                                inputMode="numeric"
-                                maxLength={6}
-                                value={loginCode}
-                                onChange={(e) => setLoginCode(e.target.value.replace(/\D/g, ''))}
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                                 className="w-full px-4 py-3 rounded-lg border border-[#e5e1de] dark:border-[#3d2f21] bg-transparent focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all dark:text-white"
-                                placeholder="Codigo de 6 digitos"
+                                placeholder="Tu contrasena"
                                 required
                             />
                         </div>
-                        ) : null}
 
                         <button
                             type="submit"
                             disabled={loading}
                             className="w-full bg-primary hover:bg-orange-600 text-white font-bold py-4 rounded-lg shadow-lg shadow-primary/20 transition-all active:scale-[0.98] disabled:opacity-70"
                         >
-                            {loading ? 'Procesando...' : (codeRequested ? 'Ingresar con codigo' : 'Enviar codigo')}
+                            {loading ? 'Ingresando...' : 'Ingresar'}
                         </button>
-                        {codeRequested ? (
-                            <button
-                                type="button"
-                                onClick={async () => {
-                                    setError('');
-                                    setNotice('');
-                                    setLoading(true);
-                                    try {
-                                        await requestLoginCode(email);
-                                        setNotice(`Te reenviamos un codigo a ${getNormalizedLoginEmail()}.`);
-                                    } catch (err) {
-                                        setError(mapLoginError(String(err?.message || '')));
-                                    } finally {
-                                        setLoading(false);
-                                    }
-                                }}
-                                className="w-full border border-[#e5e1de] dark:border-[#3d2f21] text-[#181411] dark:text-white font-bold py-3 rounded-lg transition-all active:scale-[0.98]"
-                            >
-                                Reenviar codigo de acceso
-                            </button>
-                        ) : null}
                     </form>
 
                     {pendingVerificationEmail ? (

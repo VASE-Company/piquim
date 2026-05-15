@@ -300,8 +300,8 @@ export default function CatalogPage() {
         const loadMetadata = async () => {
             try {
                 const [categoriesRes, brandsRes] = await Promise.all([
-                    fetch(`${getApiBase()}/categories`, { headers: getTenantHeaders() }),
-                    fetch(`${getApiBase()}/brands`, { headers: getTenantHeaders() }),
+                    fetch(`${getApiBase()}/public/categories`, { headers: getTenantHeaders() }),
+                    fetch(`${getApiBase()}/public/brands`, { headers: getTenantHeaders() }),
                 ]);
 
                 if (active && categoriesRes.ok) {
