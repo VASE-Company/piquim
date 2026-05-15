@@ -51,10 +51,10 @@ function AppContent() {
     }, []);
 
     useEffect(() => {
-        if (!allowLocalAdmin) return;
+        if (!isEditorHost) return;
         if (route !== '/') return;
         navigate('/admin/evolution');
-    }, [allowLocalAdmin, route]);
+    }, [isEditorHost, route]);
 
     useEffect(() => {
         if (allowLocalAdmin) return;
