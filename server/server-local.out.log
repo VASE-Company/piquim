@@ -252,3 +252,22 @@ Saving 6 sections for slug: home
  - Section: PiquimFeaturedProducts, Props: {}
  - Section: PiquimCTABanner, Props: {}
 Resolved tenant: PIQUIM (636736e2-e135-44cd-ac5c-5d4ccb839a73)
+Restarting 'src/index.js'
+Checking DB connection to: aws-1-us-east-1.pooler.supabase.com:5432/postgres
+DB Connection OK
+Pricing schema ready
+User profile schema ready
+Completed running 'src/index.js'. Waiting for file changes before restarting...
+Restarting 'src/index.js'
+Restarting 'src/index.js'
+Checking DB connection to: aws-1-us-east-1.pooler.supabase.com:5432/postgres
+DB Connection OK
+Pricing schema ready
+User profile schema ready
+Completed running 'src/index.js'. Waiting for file changes before restarting...
+Restarting 'src/index.js'
+Checking DB connection to: aws-1-us-east-1.pooler.supabase.com:5432/postgres
+DB Connection OK
+Pricing schema ready
+User profile schema ready
+Completed running 'src/index.js'. Waiting for file changes before restarting...

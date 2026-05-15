@@ -13,7 +13,7 @@ import PriceAccessPrompt from "../../components/PriceAccessPrompt";
 import StoreSkeleton from "../../components/StoreSkeleton";
 import ProductDetailMinimal from "./ProductDetailMinimal";
 import ProductDetailImmersive from "./ProductDetailImmersive";
-import { findPiquimProductById, getRelatedPiquimProducts } from "../../data/piquimSubcatalogs";
+import { ArrowRight } from "lucide-react";
 
 const FALLBACK_IMAGE = createPlaceholderImage({ label: "Producto", width: 900, height: 900 });
 
@@ -53,8 +53,6 @@ export default function ProductDetail() {
         rating: 5,
         comment: "",
     });
-    const piquimProduct = useMemo(() => findPiquimProductById(productId), [productId]);
-    const piquimRelatedProducts = useMemo(() => getRelatedPiquimProducts(productId, 4), [productId]);
 
     useEffect(() => {
         const update = () => setProductId(getProductId());
@@ -89,12 +87,6 @@ export default function ProductDetail() {
             setLoading(true);
             setError("");
 
-            if (piquimProduct) {
-                setProduct(null);
-                setLoading(false);
-                return;
-            }
-
             try {
                 const response = await fetch(`${getApiBase()}/public/products/${productId}`, {
                     headers: { ...getTenantHeaders(), ...getAuthHeaders() },
@@ -125,17 +117,11 @@ export default function ProductDetail() {
         return () => {
             active = false;
         };
-    }, [productId, piquimProduct]);
+    }, [productId]);
 
     useEffect(() => {
         let active = true;
         if (!productId) return () => { };
-        if (piquimProduct) {
-            setReviews([]);
-            setReviewsError("");
-            setReviewsLoading(false);
-            return () => { };
-        }
 
         const loadReviews = async () => {
             setReviewsLoading(true);
@@ -168,16 +154,11 @@ export default function ProductDetail() {
         return () => {
             active = false;
         };
-    }, [productId, piquimProduct]);
+    }, [productId]);
 
     useEffect(() => {
         let active = true;
         if (!productId) return () => { };
-        if (piquimProduct) {
-            setRelatedProducts([]);
-            setRelatedLoading(false);
-            return () => { };
-        }
 
         const loadRelated = async () => {
             setRelatedLoading(true);
@@ -207,7 +188,7 @@ export default function ProductDetail() {
         return () => {
             active = false;
         };
-    }, [productId, piquimProduct]);
+    }, [productId]);
 
     const view = useMemo(() => {
         if (!product) return null;
@@ -411,19 +392,6 @@ export default function ProductDetail() {
             variant: view.extra?.variant || "",
         }, safeQty);
     };
-
-    if (piquimProduct) {
-        return (
-            <PiquimProductCarta
-                product={piquimProduct}
-                relatedProducts={piquimRelatedProducts}
-                addToCart={addToCart}
-                toggleFavorite={toggleFavorite}
-                isFavorite={isFavorite}
-                showToast={showToast}
-            />
-        );
-    }
 
     const layoutProps = {
         view, loading, error, images, activeImage, setActiveImage, qty, setQty, addToCart,
@@ -789,9 +757,9 @@ export default function ProductDetail() {
                                 <button
                                     type="button"
                                     onClick={() => navigate("/catalog")}
-                                    className="text-[11px] font-bold uppercase tracking-widest text-[#8a7560] hover:text-primary"
+                                    className="inline-flex items-center text-[11px] font-bold uppercase tracking-widest text-[#8a7560] hover:text-primary"
                                 >
-                                    Ver catálogo
+                                    Ver catálogo <ArrowRight className="ml-2 size-4" />
                                 </button>
                             </div>
 
@@ -867,326 +835,3 @@ export default function ProductDetail() {
     );
 }
 
-function PiquimProductCarta({ product, relatedProducts, addToCart, toggleFavorite, isFavorite, showToast }) {
-    const [qty, setQty] = useState(1);
-    const productImage = product.mediaKind === "image" ? product.imageSrc : "/piquim/carta/image-1.png";
-    const cartPrice = Number(String(product.price || "").replace(/[^\d]/g, "")) || 0;
-    const favoriteActive = isFavorite(product.id);
-
-    const cartProduct = {
-        id: product.id,
-        sku: product.id.toUpperCase(),
-        name: product.name,
-        price: cartPrice,
-        image: productImage,
-        alt: product.name,
-        stock: 999,
-        variant: product.subtype,
-    };
-
-    const handleAdd = () => {
-        addToCart(cartProduct, qty);
-    };
-
-    return (
-        <div className="min-h-screen bg-[#FFFAF6] text-[#1A1614]">
-            <PiquimCartaHeader />
-            <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-12 px-6 pb-16 pt-[142px] md:px-[84px]">
-                <nav className="flex flex-wrap items-center gap-2 text-sm font-semibold leading-[16.8px] text-[#5A4136]" style={{ fontFamily: "Work Sans, Inter, sans-serif" }}>
-                    <button type="button" onClick={() => navigate("/catalog")} className="hover:text-[#FF4D00]">Productos</button>
-                    <CartaChevron />
-                    <button type="button" onClick={() => navigate(`/catalog?category=${product.catalogSlug}`)} className="hover:text-[#FF4D00]">{product.catalogTitle}</button>
-                    <CartaChevron />
-                    <span>{product.section}</span>
-                    <CartaChevron />
-                    <span className="text-[#A04100]">{product.name}</span>
-                </nav>
-
-                <section className="grid gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]">
-                    <div className="relative min-h-[520px] overflow-hidden rounded-3xl bg-[#FFD7B6] outline outline-1 -outline-offset-1 outline-[rgba(226,191,176,0.30)]">
-                        <img
-                            src={productImage}
-                            alt={product.name}
-                            className={`h-full min-h-[520px] w-full ${product.mediaKind === "image" ? "object-cover" : "object-contain p-10"}`}
-                        />
-                        {product.badge ? (
-                            <span
-                                className="absolute left-6 top-6 rounded-full px-4 py-2 text-xs font-normal uppercase leading-[18px] text-white"
-                                style={{ background: product.badgeDark ? "#1A1614" : "#FF4D00", fontFamily: "Work Sans, Inter, sans-serif", letterSpacing: 0.6 }}
-                            >
-                                {product.badge}
-                            </span>
-                        ) : null}
-                    </div>
-
-                    <aside className="flex flex-col gap-7 rounded-3xl border border-[#E8DFD8] bg-white p-8 shadow-[0_18px_45px_rgba(26,22,20,0.08)]">
-                        <div className="flex flex-col gap-3">
-                            <p className="text-base font-normal uppercase leading-6 text-[#FF4D00]" style={{ fontFamily: "Gilroy, sans-serif", letterSpacing: 1.6 }}>
-                                {product.category}
-                            </p>
-                            <h1 className="text-[52px] font-bold leading-[58px] text-[#261812] max-md:text-4xl max-md:leading-10" style={{ fontFamily: "Gilroy, sans-serif" }}>
-                                {product.name}
-                            </h1>
-                            <p className="text-base leading-7 text-[#5A4136]">
-                                {product.subtype}. Producto profesional Piquim para mantener rendimiento, textura y terminacion estable en produccion.
-                            </p>
-                        </div>
-
-                        <div className="h-px w-full bg-[#E8DFD8]" />
-
-                        <div className="flex flex-wrap items-end justify-between gap-4">
-                            <div>
-                                <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#B5ADA8]">Precio</p>
-                                <p className="text-[42px] font-black leading-none text-[#1A1614]" style={{ fontFamily: "Inter, sans-serif" }}>{product.price}</p>
-                            </div>
-                            <div className="inline-flex items-center overflow-hidden rounded-full border border-[#E8DFD8] bg-[#FFFAF6]">
-                                <button type="button" onClick={() => setQty((value) => Math.max(1, value - 1))} className="flex size-11 items-center justify-center text-xl font-bold">-</button>
-                                <span className="flex w-10 items-center justify-center text-sm font-black">{qty}</span>
-                                <button type="button" onClick={() => setQty((value) => value + 1)} className="flex size-11 items-center justify-center text-xl font-bold">+</button>
-                            </div>
-                        </div>
-
-                        <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-                            <button
-                                type="button"
-                                onClick={handleAdd}
-                                className="flex h-12 items-center justify-center rounded-full bg-[#FF4D00] px-8 text-sm font-bold uppercase tracking-[0.08em] text-white"
-                            >
-                                Agregar al carrito
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    const added = toggleFavorite(cartProduct);
-                                    showToast(added ? "Producto anadido a favoritos" : "Producto quitado de favoritos");
-                                }}
-                                className="flex h-12 items-center justify-center rounded-full border border-[#E8DFD8] px-6 text-sm font-bold uppercase tracking-[0.08em] text-[#1A1614]"
-                            >
-                                {favoriteActive ? "Guardado" : "Guardar"}
-                            </button>
-                        </div>
-
-                        <div className="grid gap-3 text-sm leading-6 text-[#5A4136]">
-                            <CartaSpec label="Linea" value={product.catalogTitle} />
-                            <CartaSpec label="Formato" value="Bolsa / balde segun producto" />
-                            <CartaSpec label="Uso" value="Produccion profesional" />
-                        </div>
-                    </aside>
-                </section>
-
-                <section className="flex flex-col gap-6">
-                    <div className="flex flex-wrap items-end justify-between gap-4">
-                        <div>
-                            <p className="text-base font-normal uppercase leading-6 text-[#FF4D00]" style={{ fontFamily: "Gilroy, sans-serif", letterSpacing: 1.6 }}>
-                                Completa tu linea
-                            </p>
-                            <h2 className="text-[32px] font-bold leading-[41.6px] text-[#261812]" style={{ fontFamily: "Gilroy, sans-serif" }}>
-                                Productos Relacionados
-                            </h2>
-                        </div>
-                        <button type="button" onClick={() => navigate(`/catalog?category=${product.catalogSlug}`)} className="border-b-2 border-[#FF4D00] pb-1 text-base leading-6 text-[#FF4D00]">
-                            Ver todos
-                        </button>
-                    </div>
-                    <div className="grid grid-cols-[repeat(auto-fill,minmax(282px,1fr))] gap-6">
-                        {relatedProducts.map((item) => (
-                            <PiquimCartaRelatedCard key={item.id} product={item} />
-                        ))}
-                    </div>
-                </section>
-            </main>
-            <PiquimCartaFooter />
-        </div>
-    );
-}
-
-function PiquimCartaHeader() {
-    const { search, setSearch, cartCount } = useStore();
-    const [searchOpen, setSearchOpen] = useState(false);
-    const submitSearch = (event) => {
-        event.preventDefault();
-        setSearchOpen(true);
-        navigate("/catalog");
-    };
-
-    return (
-        <header className="fixed left-0 right-0 top-0 z-50 flex w-full flex-col items-center justify-center overflow-hidden border-b border-[#E8DFD8]/80 bg-[#FFFAF6]/35 px-[60px] py-[18px] backdrop-blur-2xl max-md:px-4">
-            <div className="inline-flex w-full items-center justify-center overflow-hidden rounded-[30px] bg-[linear-gradient(90deg,rgba(255,191,140,0.74)_0%,rgba(255,239,232,0.62)_48%,rgba(255,191,140,0.74)_100%)] px-[60px] py-[18px] shadow-[0_18px_60px_rgba(255,77,0,0.12)] outline outline-1 -outline-offset-1 outline-[#E8DFD8]/90 backdrop-blur-2xl max-md:px-5">
-                <button type="button" onClick={() => navigate("/")} className="shrink-0" aria-label="Ir a inicio">
-                    <img src="/piquim/catalogo/logo-navbar.png" alt="Piquim" style={{ width: 108, height: 31 }} />
-                </button>
-
-                <nav className="flex flex-1 items-center justify-center gap-8 overflow-hidden max-md:hidden">
-                    <button type="button" onClick={() => navigate("/")} className="text-sm font-medium text-[#1A1614]" style={{ fontFamily: "Helvetica Neue Medium Extended, Gilroy, sans-serif" }}>
-                        Inicio
-                    </button>
-                    <button type="button" onClick={() => navigate("/catalog")} className="text-sm font-medium text-[#1A1614]" style={{ fontFamily: "Helvetica Neue Medium Extended, Gilroy, sans-serif" }}>
-                        Catalogos
-                    </button>
-                    <button type="button" onClick={() => navigate("/about")} className="text-sm font-medium text-[#1A1614]" style={{ fontFamily: "Helvetica Neue Medium Extended, Gilroy, sans-serif" }}>
-                        Nosotros
-                    </button>
-                </nav>
-
-                <div className="flex items-center justify-center gap-3.5 overflow-visible">
-                    <form
-                        onSubmit={submitSearch}
-                        className={`relative flex h-7 items-center overflow-hidden rounded-full bg-white/35 transition-all duration-300 ease-out ${
-                            searchOpen || search ? "w-[260px] pl-3 pr-9 outline outline-1 -outline-offset-1 outline-[#E8DFD8]" : "w-6"
-                        } max-md:hidden`}
-                    >
-                        <input
-                            value={search}
-                            onChange={(event) => setSearch(event.target.value)}
-                            placeholder="Buscar producto..."
-                            className={`h-full min-w-0 flex-1 bg-transparent text-sm font-medium text-[#1A1614] outline-none placeholder:text-[#5A4136]/70 transition-opacity duration-200 ${
-                                searchOpen || search ? "opacity-100" : "pointer-events-none opacity-0"
-                            }`}
-                            aria-label="Buscar producto"
-                        />
-                        <button
-                            type="button"
-                            onClick={() => {
-                                if (!searchOpen && !search) {
-                                    setSearchOpen(true);
-                                    return;
-                                }
-                                navigate("/catalog");
-                            }}
-                            className="absolute right-0 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full"
-                            aria-label="Buscar"
-                        >
-                            <SearchMiniIcon />
-                        </button>
-                    </form>
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setSearchOpen(true);
-                            navigate("/catalog");
-                        }}
-                        className="hidden items-center justify-center overflow-hidden rounded-full max-md:flex"
-                        aria-label="Buscar"
-                    >
-                        <SearchMiniIcon />
-                    </button>
-                    <button type="button" onClick={() => navigate("/profile")} className="max-sm:hidden" aria-label="Guardados"><BookmarkMiniIcon /></button>
-                    <button type="button" onClick={() => navigate("/cart")} className="relative flex items-center justify-center" aria-label="Carrito">
-                        <CartMiniIcon />
-                        {cartCount > 0 ? (
-                            <span className="absolute -right-1 -top-1 min-w-[18px] rounded-full bg-[#FF4D00] px-1.5 text-center text-[10px] font-black leading-[18px] text-white">
-                                {cartCount}
-                            </span>
-                        ) : null}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => navigate("/register")}
-                        className="hidden h-6 w-[100px] items-center justify-center gap-5 overflow-hidden rounded-full bg-[#FF4D00] text-sm font-bold text-[#FFFAF6] sm:flex"
-                        style={{ fontFamily: "Gilroy, sans-serif" }}
-                    >
-                        Registrarse
-                    </button>
-                </div>
-            </div>
-        </header>
-    );
-}
-
-function PiquimCartaFooter() {
-    return (
-        <footer className="bg-[#1A1614] px-8 py-12 text-[#FFFAF6]">
-            <div className="mx-auto flex max-w-[1200px] flex-wrap items-start justify-between gap-10">
-                <div className="max-w-[280px]">
-                    <img src="/piquim/catalogo/logo-footer.png" alt="Piquim" className="mb-5 h-[41px] w-[142px] object-contain" />
-                    <p className="text-[13px] leading-[22px] text-[#B5ADA8]">Materia prima premium para heladerias, panaderias y confiterias.</p>
-                </div>
-                <button type="button" onClick={() => navigate("/catalog")} className="border-b border-[#FF4D00] pb-1 text-sm font-bold text-[#FF4D00]">
-                    Volver al catalogo
-                </button>
-            </div>
-        </footer>
-    );
-}
-
-function PiquimCartaRelatedCard({ product }) {
-    return (
-        <article
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate(`/product/${product.id}`)}
-            onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    navigate(`/product/${product.id}`);
-                }
-            }}
-            className="flex h-[380px] min-w-[282px] cursor-pointer flex-col overflow-hidden rounded-[18px] bg-white outline outline-1 -outline-offset-1 outline-[#E8DFD8] transition-transform duration-200 hover:-translate-y-1"
-        >
-            <div className="relative h-[220px] overflow-hidden" style={{ background: product.mediaGradient }}>
-                {product.badge ? (
-                    <span className="absolute left-4 top-4 rounded-full px-2.5 py-1.5 text-[9px] font-bold text-white" style={{ background: product.badgeDark ? "#1A1614" : "#FF4D00", letterSpacing: 0.72 }}>
-                        {product.badge}
-                    </span>
-                ) : null}
-                <span className="absolute left-[227px] top-4 flex h-[23px] w-[35px] items-center justify-center rounded-[10px] bg-white"><BookmarkMiniIcon small /></span>
-                {product.mediaKind === "image" ? (
-                    <img src={product.imageSrc} alt={product.name} className="h-full w-full object-cover" />
-                ) : (
-                    <img src="/piquim/carta/image-1.png" alt={product.name} className="h-full w-full object-contain p-6" />
-                )}
-            </div>
-            <div className="flex flex-1 flex-col gap-1.5 p-[18px]">
-                <p className="text-[10px] font-bold uppercase text-[#FF4D00]" style={{ fontFamily: "Gilroy, sans-serif", letterSpacing: 1.8 }}>{product.category}</p>
-                <h3 className="text-base font-bold leading-[20.8px] text-[#1A1614]" style={{ fontFamily: "Gilroy, sans-serif" }}>{product.name}</h3>
-                <p className="text-xs text-[#B5ADA8]" style={{ fontFamily: "Gilroy, sans-serif" }}>{product.subtype}</p>
-                <div className="mt-auto flex items-center justify-between">
-                    <p className="text-xl font-black text-[#1A1614]">{product.price}</p>
-                    <span className="flex size-10 items-center justify-center rounded-full bg-[#FF4D00] text-white"><CartMiniIcon white /></span>
-                </div>
-            </div>
-        </article>
-    );
-}
-
-function CartaSpec({ label, value }) {
-    return (
-        <div className="flex items-center justify-between gap-4 border-b border-[#E8DFD8] pb-2">
-            <span className="font-bold text-[#1A1614]">{label}</span>
-            <span className="text-right">{value}</span>
-        </div>
-    );
-}
-
-function CartaChevron() {
-    return (
-        <svg width="5" height="8" viewBox="0 0 5 8" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M3.06667 4L0 0.933333L0.933333 0L4.93333 4L0.933333 8L0 7.06667L3.06667 4Z" fill="#5A4136" />
-        </svg>
-    );
-}
-
-function SearchMiniIcon() {
-    return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M21 21L16.66 16.66M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-    );
-}
-
-function BookmarkMiniIcon({ small = false }) {
-    const size = small ? 18 : 24;
-    return (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M17 3C17.5304 3 18.0391 3.21071 18.4142 3.58579C18.7893 3.96086 19 4.46957 19 5V20C18.9999 20.1751 18.9539 20.3472 18.8665 20.4989C18.7791 20.6506 18.6533 20.7767 18.5019 20.8646C18.3504 20.9525 18.1785 20.9991 18.0034 20.9997C17.8283 21.0003 17.6561 20.9549 17.504 20.868L12.992 18.29C12.6899 18.1174 12.3479 18.0266 12 18.0266C11.6521 18.0266 11.3101 18.1174 11.008 18.29L6.496 20.868C6.34394 20.9549 6.17174 21.0003 5.99662 20.9997C5.8215 20.9991 5.64961 20.9525 5.49814 20.8646C5.34667 20.7767 5.22094 20.6506 5.13352 20.4989C5.0461 20.3472 5.00006 20.1751 5 20V5C5 4.46957 5.21071 3.96086 5.58579 3.58579C5.96086 3.21071 6.46957 3 7 3H17Z" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-    );
-}
-
-function CartMiniIcon({ white = false }) {
-    return (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M2.0498 2.05005H4.0498L6.7098 14.47C6.80738 14.9249 7.06048 15.3315 7.42552 15.6199C7.79056 15.9083 8.24471 16.0604 8.7098 16.05H18.4898C18.945 16.0493 19.3863 15.8933 19.7408 15.6079C20.0954 15.3224 20.3419 14.9246 20.4398 14.48L22.0898 7.05005H5.1198M8.9998 21C8.9998 21.5523 8.55209 22 7.9998 22C7.44752 22 6.9998 21.5523 6.9998 21C6.9998 20.4478 7.44752 20 7.9998 20C8.55209 20 8.9998 20.4478 8.9998 21ZM19.9998 21C19.9998 21.5523 19.5521 22 18.9998 22C18.4475 22 17.9998 21.5523 17.9998 21C17.9998 20.4478 18.4475 20 18.9998 20C19.5521 20 19.9998 20.4478 19.9998 21Z" stroke={white ? "white" : "black"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-    );
-}

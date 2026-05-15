@@ -57,7 +57,7 @@ export default function StoreLayout({ children }) {
                 showCart={navbarConfig.show_cart !== false}
                 showAccount={navbarConfig.show_account !== false}
                 registerLabel={navbarConfig.register_label || 'Registrarse'}
-                registerHref={navbarConfig.register_href || '/register'}
+                registerHref={navbarConfig.register_href || '/signup'}
             />
             {isWholesalePending ? (
                 <div className="w-full border-b border-amber-200 bg-amber-50 text-amber-800 text-xs font-semibold px-4 md:px-10 py-2 dark:border-amber-700/40 dark:bg-amber-950/30 dark:text-amber-200">

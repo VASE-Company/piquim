@@ -277,6 +277,12 @@ WHERE NOT EXISTS (
 WITH seed AS (
   SELECT '636736e2-e135-44cd-ac5c-5d4ccb839a73'::uuid AS tenant_id
 )
+DELETE FROM categories
+WHERE tenant_id = (SELECT tenant_id FROM seed);
+
+WITH seed AS (
+  SELECT '636736e2-e135-44cd-ac5c-5d4ccb839a73'::uuid AS tenant_id
+)
 INSERT INTO categories (tenant_id, name, slug, data)
 SELECT tenant_id, 'Heladeria', 'heladeria', '{}'::jsonb FROM seed
 UNION ALL
@@ -284,10 +290,7 @@ SELECT tenant_id, 'Panaderia', 'panaderia', '{}'::jsonb FROM seed
 UNION ALL
 SELECT tenant_id, 'Confiteria', 'confiteria', '{}'::jsonb
 FROM seed
-ON CONFLICT (tenant_id, slug) DO UPDATE
-SET
-  name = EXCLUDED.name,
-  data = EXCLUDED.data;
+ON CONFLICT (tenant_id, slug) DO NOTHING;
 
 WITH seed AS (
   SELECT '636736e2-e135-44cd-ac5c-5d4ccb839a73'::uuid AS tenant_id

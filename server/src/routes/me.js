@@ -53,6 +53,9 @@ meRouter.put('/profile', async (req, res, next) => {
     setFieldCoalesce('province', profile.province);
     setFieldCoalesce('city', profile.city);
     setFieldCoalesce('postal_code', profile.postal_code);
+    setFieldCoalesce('business_name', profile.business_name);
+    setFieldCoalesce('business_activity', profile.business_activity);
+    setFieldCoalesce('cuil', profile.cuil);
 
     if (billingInfo !== undefined) {
       if (billingInfo === null && req.body?.billing_info !== null) {

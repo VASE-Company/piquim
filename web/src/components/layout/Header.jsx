@@ -154,7 +154,7 @@ export default function Header({
   showCart = true,
   showAccount = true,
   registerLabel = "Registrarse",
-  registerHref = "/register",
+  registerHref = "/signup",
   containerClassName = "max-w-[1408px]",
 }) {
   const { tenant, settings } = useTenant();
@@ -295,11 +295,11 @@ export default function Header({
     const loadCatalogMeta = async () => {
       try {
         const [categoriesRes, brandsRes] = await Promise.all([
-          fetch(`${getApiBase()}/categories`, {
+          fetch(`${getApiBase()}/public/categories`, {
             headers: getTenantHeaders(),
             signal: controller.signal,
           }),
-          fetch(`${getApiBase()}/brands`, {
+          fetch(`${getApiBase()}/public/brands`, {
             headers: getTenantHeaders(),
             signal: controller.signal,
           }),
@@ -713,7 +713,7 @@ export default function Header({
               {showAccount ? (
                 <button
                   type="button"
-                  onClick={() => (user ? handleAccountClick() : navigate(registerHref || "/register"))}
+                  onClick={() => (user ? handleAccountClick() : navigate(registerHref || "/signup"))}
                   className="hidden items-center justify-center rounded-full bg-[#ff4d00] px-5 py-3 text-center text-sm font-black leading-none text-white shadow-[0_12px_28px_rgba(255,77,0,0.24)] transition-transform hover:-translate-y-0.5 xl:inline-flex"
                 >
                   {user ? "Mi cuenta" : registerLabel}

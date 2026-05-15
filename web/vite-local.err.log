@@ -86,3 +86,233 @@ X [ERROR] The build was canceled
  [90m 102 |[39m [36mconst[39m [33mBookmarkIcon[39m [33m=[39m ({ className [33m=[39m [32m"size-4"[39m }) [33m=>[39m (
  [90m 103 |[39m   [33m<[39m[33msvg[39m className[33m=[39m{className} viewBox[33m=[39m[32m"0 0 24 24"[39m fill[33m=[39m[32m"none"[39m stroke[33m=[39m[32m"currentColor"[39m strokeWidth[33m=[39m[32m"2"[39m strokeLinecap[33m=[39m[32m"round"[39m strokeLinejoin[33m=[39m[32m"round"[39m[33m>[39m
  [90m 104 |[39m     [33m<[39m[33mpath[39m d[33m=[39m[32m"M19 21L12 17L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z"[39m [33m/[39m[33m>[39m[0m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?page=1&limit=9&grouped=true&sort=name-asc[33m, use [36m/products?page=1&limit=9&grouped=true&sort=name-asc[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?page=1&limit=9&grouped=true&sort=name-asc[33m, use [36m/products?page=1&limit=9&grouped=true&sort=name-asc[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=24[33m, use [36m/products?limit=24[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=24[33m, use [36m/products?limit=24[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/tenant[33m, use [36m/tenant[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/tenant[33m, use [36m/tenant[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/pages/home[33m, use [36m/pages/home[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/pages/home[33m, use [36m/pages/home[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/pages/home[33m, use [36m/pages/home[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/pages/home[33m, use [36m/pages/home[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/categories[33m, use [36m/categories[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/brands[33m, use [36m/brands[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/brands[33m, use [36m/brands[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/categories[33m, use [36m/categories[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/tenant[33m, use [36m/tenant[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/tenant[33m, use [36m/tenant[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/categories[33m, use [36m/categories[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/brands[33m, use [36m/brands[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/pages/home[33m, use [36m/pages/home[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/categories[33m, use [36m/categories[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/pages/home[33m, use [36m/pages/home[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/brands[33m, use [36m/brands[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/categories[33m, use [36m/categories[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/pages/home[33m, use [36m/pages/home[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/brands[33m, use [36m/brands[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/brands[33m, use [36m/brands[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/categories[33m, use [36m/categories[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/pages/home[33m, use [36m/pages/home[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/tenant[33m, use [36m/tenant[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/tenant[33m, use [36m/tenant[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/categories[33m, use [36m/categories[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/brands[33m, use [36m/brands[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/pages/home[33m, use [36m/pages/home[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/categories[33m, use [36m/categories[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/categories[33m, use [36m/categories[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/brands[33m, use [36m/brands[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/pages/home[33m, use [36m/pages/home[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/pages/home[33m, use [36m/pages/home[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/pages/home[33m, use [36m/pages/home[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/tenant[33m, use [36m/tenant[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/tenant[33m, use [36m/tenant[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/categories[33m, use [36m/categories[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/brands[33m, use [36m/brands[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/pages/home[33m, use [36m/pages/home[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/products?limit=200&page=1&grouped=true[33m, use [36m/products?limit=200&page=1&grouped=true[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/categories[33m, use [36m/categories[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/brands[33m, use [36m/brands[33m.[39m
+[33mFiles in the public directory are served at the root path.
+Instead of [36m/public/pages/home[33m, use [36m/pages/home[33m.[39m

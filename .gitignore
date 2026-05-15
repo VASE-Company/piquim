@@ -1,3 +1,2 @@
 node_modules
-web/vite-piquim.err.log
-web/vite-piquim.log
+server/server-local.err.log
