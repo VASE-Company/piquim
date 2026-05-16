@@ -30,8 +30,8 @@ export default function LoginPage() {
     const externalLoginUrl = getExternalLoginUrl();
     const externalSignupUrl = getExternalSignupUrl();
     const externalAccessUrl = externalLaunchUrl || externalLoginUrl;
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('admin');
+    const [password, setPassword] = useState('admin123');
     const [error, setError] = useState('');
     const [notice, setNotice] = useState('');
     const [loading, setLoading] = useState(false);
