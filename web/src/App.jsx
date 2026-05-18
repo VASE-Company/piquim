@@ -51,12 +51,6 @@ function AppContent() {
     }, []);
 
     useEffect(() => {
-        if (!allowLocalAdmin) return;
-        if (route !== '/') return;
-        navigate('/admin/evolution');
-    }, [allowLocalAdmin, route]);
-
-    useEffect(() => {
         if (allowLocalAdmin) return;
         if (!isPreviewRoute && !isAdminRoute) return;
         navigate('/');
