@@ -3,6 +3,7 @@ import { getApiBase, getTenantHeaders } from '../../utils/api';
 import {
     DEFAULT_ABOUT_SECTIONS,
     DEFAULT_HOME_SECTIONS,
+    PIQUIM_ABOUT_SECTIONS,
     PIQUIM_HOME_SECTIONS,
     mergeSectionsWithDefaults,
 } from '../../data/defaultSections';
@@ -27,6 +28,7 @@ const normalizePlaceholderValue = (value) =>
 const isReservedPlaceholder = (value) => RESERVED_PLACEHOLDER_TERMS.has(normalizePlaceholderValue(value));
 
 const PIQUIM_SECTION_TYPES = new Set(PIQUIM_HOME_SECTIONS.map((section) => section.type));
+const PIQUIM_ABOUT_SECTION_TYPES = new Set(PIQUIM_ABOUT_SECTIONS.map((section) => section.type));
 
 const isPiquimBranding = (settings = {}) =>
     settings?.branding?.design_preset === 'piquim' ||
@@ -43,6 +45,19 @@ const normalizeHomeSectionsForBrand = (settings = {}, sections = []) => {
         return PIQUIM_HOME_SECTIONS;
     }
     return mergeSectionsWithDefaults('piquim-home', source);
+};
+
+const normalizeAboutSectionsForBrand = (settings = {}, sections = []) => {
+    const source = Array.isArray(sections) ? sections : [];
+    if (!isPiquimBranding(settings)) {
+        return source.length ? mergeSectionsWithDefaults('about', source) : DEFAULT_ABOUT_SECTIONS;
+    }
+
+    const hasPiquimBlocks = source.some((section) => PIQUIM_ABOUT_SECTION_TYPES.has(section?.type));
+    if (!source.length || !hasPiquimBlocks) {
+        return PIQUIM_ABOUT_SECTIONS;
+    }
+    return mergeSectionsWithDefaults('piquim-about', source);
 };
 
 const getNavbarLinkLabel = (link) => {
@@ -422,7 +437,12 @@ export function useEditorState(user) {
 
             if (aboutRes.ok) {
                 const data = await aboutRes.json();
-                if (Array.isArray(data.sections)) rawSetPageSections(prev => ({ ...prev, about: data.sections }));
+                if (Array.isArray(data.sections)) {
+                    rawSetPageSections(prev => ({
+                        ...prev,
+                        about: normalizeAboutSectionsForBrand(loadedSettings, data.sections),
+                    }));
+                }
             }
 
             if (productsRes.ok) {

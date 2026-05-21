@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { resolveRequestBaseUrl, resolveUploadsPublicBaseUrl } from './uploadPublicUrl.js';
 
 const PRICE_TIER_FIELDS = Array.from({ length: 10 }, (_, index) => ({
   key: `price_${index + 1}`,
@@ -113,6 +114,20 @@ const SAMPLE_PAYLOAD = {
   ],
 };
 
+const FTP_IMAGES_SAMPLE_PAYLOAD = {
+  host: 'ftp.cliente.com',
+  user: 'ftp_user',
+  password: 'ftp_password',
+  remote_dir: '/imagenes-productos',
+  options: {
+    dry_run: false,
+    replace_existing_images: false,
+    delete_remote_after_sync: false,
+    skip_admin_locked: true,
+    max_files: 300,
+  },
+};
+
 const LEGACY_SAMPLE_PAYLOAD = {
   source_system: 'gestion-escritorio',
     producto: {
@@ -160,9 +175,7 @@ export const resolveServerBaseUrl = (req) => {
     return String(envBase).replace(/\/+$/, '');
   }
 
-  const protocol = req.get('x-forwarded-proto') || req.protocol || 'http';
-  const host = req.get('x-forwarded-host') || req.get('host') || 'localhost:4000';
-  return `${protocol}://${host}`.replace(/\/+$/, '');
+  return resolveRequestBaseUrl(req);
 };
 
 export const buildProductSyncSchema = (baseUrl) => ({
@@ -172,6 +185,8 @@ export const buildProductSyncSchema = (baseUrl) => ({
   endpoints: {
     ping_url: `${baseUrl}/api/v1/integrations/ping`,
     sync_products_url: `${baseUrl}/api/v1/integrations/products/sync`,
+    upload_image_url: `${baseUrl}/api/v1/integrations/images/upload`,
+    sync_ftp_images_url: `${baseUrl}/api/v1/integrations/images/ftp/sync`,
     schema_product_url: `${baseUrl}/api/v1/integrations/schema/product`,
   },
   auth: {
@@ -185,13 +200,42 @@ export const buildProductSyncSchema = (baseUrl) => ({
     'El contrato publicado recomienda enviar solo price_1 hasta price_10; los aliases legacy siguen aceptandose solo por compatibilidad interna.',
     'Usa category_path para enviar el arbol Categoria > Gran Familia > Familia. category_id queda reservado para un UUID real de categoria del ecommerce.',
     'Si envias category_path, evita duplicarlo con campos legacy como family, grand_family, familia o gran_familia.',
+    'Para imagenes, el flujo recomendado es subir cada archivo por /images/upload y mandar la URL devuelta en images del producto.',
+    'El sync FTP de imagenes queda disponible solo como compatibilidad legacy.',
   ],
   fields: PRODUCT_FIELDS,
   sample_payload: SAMPLE_PAYLOAD,
+  ftp_image_sync: {
+    endpoint_url: `${baseUrl}/api/v1/integrations/images/ftp/sync`,
+    required_scope: 'products:sync',
+    file_naming: {
+      recommended: 'SKU_orden.ext',
+      examples: ['ABC-100_1.jpg', 'ABC-100_2.webp', '789__principal.png'],
+      regex_group_hint: 'Si usas filename_regex, el codigo debe salir en grupo sku, code, codigo o primer grupo.',
+    },
+    sample_payload: FTP_IMAGES_SAMPLE_PAYLOAD,
+  },
+  http_image_upload: {
+    endpoint_url: `${baseUrl}/api/v1/integrations/images/upload`,
+    method: 'POST',
+    content_type: 'multipart/form-data',
+    field_name: 'file',
+    accepted_mime_types: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'],
+    max_file_size_mb: 50,
+    response_url_field: 'url',
+  },
 });
 
-export const buildTenantIntegrationManifest = ({ baseUrl, tenantId, tokenRecord = null }) => {
-  const schema = buildProductSyncSchema(baseUrl);
+export const buildProductSyncSchemaForRequest = (req) => ({
+  ...buildProductSyncSchema(resolveServerBaseUrl(req)),
+  uploads_public_base_url: resolveUploadsPublicBaseUrl(req),
+});
+
+export const buildTenantIntegrationManifest = ({ baseUrl, uploadsBaseUrl = null, tenantId, tokenRecord = null }) => {
+  const schema = {
+    ...buildProductSyncSchema(baseUrl),
+    uploads_public_base_url: uploadsBaseUrl || baseUrl,
+  };
   const consumerKey = tokenRecord?.token_hash || null;
   const consumerSecret = buildProductSyncCompatibilitySecret({
     tenantId,
@@ -218,6 +262,7 @@ export const buildTenantIntegrationManifest = ({ baseUrl, tenantId, tokenRecord 
         ping_url: `${baseUrl}/api/v1/integrations/gestion/ping`,
         product_url: `${baseUrl}/api/v1/integrations/gestion/producto`,
         products_url: `${baseUrl}/api/v1/integrations/gestion/productos`,
+        ftp_images_url: `${baseUrl}/api/v1/integrations/gestion/imagenes/ftp`,
       },
       notes: [
         'Pensado para sistemas de gestion que solo permiten configurar Dominio, Consumer Key y Consumer Secret.',

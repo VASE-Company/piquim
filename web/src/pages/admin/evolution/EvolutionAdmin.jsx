@@ -481,6 +481,7 @@ const EvolutionAdmin = () => {
         }
 
         const homeEditorPageKey = isPiquimBranding(editor.settings) ? 'piquim-home' : 'home';
+        const aboutEditorPageKey = isPiquimBranding(editor.settings) ? 'piquim-about' : 'about';
 
         switch (activeModule) {
             case 'home':
@@ -497,7 +498,7 @@ const EvolutionAdmin = () => {
             case 'about':
                 return (
                     <PageSectionsEditor
-                        pageKey="about"
+                        pageKey={aboutEditorPageKey}
                         sections={editor.pageSections?.about || []}
                         products={editor.products}
                         onChangeSections={(nextSections) => handlePageSectionsChange('about', nextSections)}

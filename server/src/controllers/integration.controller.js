@@ -1,4 +1,11 @@
+import { syncProductImagesFromFtp } from '../services/integrationFtpImages.service.js';
+import { buildProductSyncSchemaForRequest, resolveServerBaseUrl } from '../services/integrationManifest.js';
 import { syncIntegrationProducts } from '../services/integration.service.js';
+import { resolveUploadsPublicBaseUrl } from '../services/uploadPublicUrl.js';
+import {
+  buildProductUploadsUsername,
+  uploadBufferToUploadsService,
+} from '../services/uploadsService.js';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -61,7 +68,21 @@ const normalizeIncomingBody = (body) => {
   }
 
   const next = { ...parsedBody };
-  ['payload', 'json', 'data', 'producto', 'product', 'products', 'items', 'articulo', 'article'].forEach((key) => {
+  [
+    'payload',
+    'json',
+    'data',
+    'producto',
+    'product',
+    'products',
+    'items',
+    'articulo',
+    'article',
+    'ftp',
+    'options',
+    'config',
+    'configuration',
+  ].forEach((key) => {
     if (next[key] !== undefined) {
       next[key] = tryParseJsonValue(next[key]);
     }
@@ -149,6 +170,46 @@ async function handleSyncProductsRequest(req, res, next, { defaultSourceSystem =
   }
 }
 
+const resolveFtpSyncPayload = (body) => {
+  if (!isPlainObject(body)) return {};
+
+  if (isPlainObject(body.payload)) return body.payload;
+  if (isPlainObject(body.data)) return body.data;
+  if (isPlainObject(body.ftp_sync)) return body.ftp_sync;
+  if (isPlainObject(body.ftpSync)) return body.ftpSync;
+  return body;
+};
+
+async function handleSyncFtpImagesRequest(req, res, next) {
+  try {
+    const tenantResolution = resolveIntegrationTenantId(req);
+    if (tenantResolution.error) {
+      const status = tenantResolution.error === 'tenant_mismatch' ? 403 : 400;
+      return res.status(status).json({ error: tenantResolution.error });
+    }
+
+    const normalizedBody = normalizeIncomingBody(req.body);
+    const payload = resolveFtpSyncPayload(normalizedBody);
+
+    const result = await syncProductImagesFromFtp({
+      tenantId: tenantResolution.tenantId,
+      baseUrl: resolveServerBaseUrl(req),
+      uploadsBaseUrl: resolveUploadsPublicBaseUrl(req),
+      payload,
+    });
+
+    return res.json(result);
+  } catch (err) {
+    if (err?.status && err?.code) {
+      return res.status(err.status).json({
+        error: err.code,
+        detail: err.detail || null,
+      });
+    }
+    return next(err);
+  }
+}
+
 export async function syncProductsController(req, res, next) {
   return handleSyncProductsRequest(req, res, next, {
     defaultSourceSystem: 'erp',
@@ -159,4 +220,62 @@ export async function syncCompatibilityProductsController(req, res, next) {
   return handleSyncProductsRequest(req, res, next, {
     defaultSourceSystem: 'gestion-compat',
   });
+}
+
+export async function syncFtpImagesController(req, res, next) {
+  return handleSyncFtpImagesRequest(req, res, next);
+}
+
+export async function syncCompatibilityFtpImagesController(req, res, next) {
+  return handleSyncFtpImagesRequest(req, res, next);
+}
+
+export async function uploadIntegrationImageController(req, res, next) {
+  try {
+    const tenantResolution = resolveIntegrationTenantId(req);
+    if (tenantResolution.error) {
+      const status = tenantResolution.error === 'tenant_mismatch' ? 403 : 400;
+      return res.status(status).json({ error: tenantResolution.error });
+    }
+
+    const uploadedFile = req.file || req.files?.file?.[0] || req.files?.image?.[0] || null;
+    if (!uploadedFile?.buffer) {
+      return res.status(400).json({ error: 'file_required' });
+    }
+
+    const uploadUsername = buildProductUploadsUsername(tenantResolution.tenantId);
+    const uploaded = await uploadBufferToUploadsService({
+      buffer: uploadedFile.buffer,
+      originalName: uploadedFile.originalname,
+      mimeType: uploadedFile.mimetype,
+      username: uploadUsername,
+      tenantId: tenantResolution.tenantId,
+    });
+
+    return res.status(201).json({
+      ok: true,
+      tenant_id: tenantResolution.tenantId,
+      folder: uploadUsername,
+      filename: uploaded.filename,
+      original_name: uploadedFile.originalname,
+      size: uploadedFile.size,
+      mime_type: uploadedFile.mimetype,
+      url: uploaded.public_url,
+      public_url: uploaded.public_url,
+      storage: 'uploads-service',
+      usage: 'Enviar esta URL en el campo images del producto.',
+    });
+  } catch (err) {
+    if (err?.status && err?.code) {
+      return res.status(err.status).json({
+        error: err.code,
+        detail: err.detail || null,
+      });
+    }
+    return next(err);
+  }
+}
+
+export function getProductSyncSchemaController(req, res) {
+  return res.json(buildProductSyncSchemaForRequest(req));
 }

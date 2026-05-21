@@ -1,7 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import PageBuilder from '../../PageBuilder';
 import useEvolutionStore from '../../../store/useEvolutionStore';
-import { DEFAULT_ABOUT_SECTIONS, DEFAULT_HOME_SECTIONS, PIQUIM_HOME_SECTIONS } from '../../../data/defaultSections';
+import {
+    DEFAULT_ABOUT_SECTIONS,
+    DEFAULT_HOME_SECTIONS,
+    PIQUIM_ABOUT_SECTIONS,
+    PIQUIM_HOME_SECTIONS,
+} from '../../../data/defaultSections';
 import { cn } from '../../../utils/cn';
 import { PRODUCT_PLACEHOLDER_IMAGE } from '../../../utils/productImage';
 import {
@@ -30,6 +35,14 @@ const PIQUIM_HOME_SECTION_TYPES = [
     { type: 'PiquimCTABanner', label: 'CTA Piquim' },
 ];
 
+const PIQUIM_ABOUT_SECTION_TYPES = [
+    { type: 'PiquimHero', label: 'Portada Piquim' },
+    { type: 'PiquimAnnounceBar', label: 'Barra Anuncio' },
+    { type: 'PiquimTresMundos', label: 'Nosotros Piquim' },
+    { type: 'PiquimCatalog3Panel', label: 'Lineas Piquim' },
+    { type: 'PiquimCTABanner', label: 'CTA Piquim' },
+];
+
 const ABOUT_SECTION_TYPES = [
     { type: 'AboutHero', label: 'Portada Sobre Nosotros' },
     { type: 'AboutMission', label: 'Mision' },
@@ -55,6 +68,8 @@ const deepClone = (value) => {
 const getSectionTemplate = (pageKey, type) => {
     const pool = pageKey === 'about'
         ? DEFAULT_ABOUT_SECTIONS
+        : pageKey === 'piquim-about'
+            ? PIQUIM_ABOUT_SECTIONS
         : pageKey === 'piquim-home'
             ? PIQUIM_HOME_SECTIONS
             : DEFAULT_HOME_SECTIONS;
@@ -65,6 +80,8 @@ const getSectionTemplate = (pageKey, type) => {
 const getSectionTypeOptions = (pageKey) => (
     pageKey === 'about'
         ? ABOUT_SECTION_TYPES
+        : pageKey === 'piquim-about'
+            ? PIQUIM_ABOUT_SECTION_TYPES
         : pageKey === 'piquim-home'
             ? PIQUIM_HOME_SECTION_TYPES
             : HOME_SECTION_TYPES
@@ -240,6 +257,8 @@ const PageSectionsEditor = ({
                         <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
                             {pageKey === 'about'
                                 ? 'Sobre Nosotros'
+                                : pageKey === 'piquim-about'
+                                    ? 'Nosotros Piquim'
                                 : pageKey === 'piquim-home'
                                     ? 'Inicio Piquim'
                                     : 'Inicio'}

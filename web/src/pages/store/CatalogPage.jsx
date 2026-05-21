@@ -266,7 +266,7 @@ export default function CatalogPage() {
     const [loading, setLoading] = useState(false);
     const [totalItems, setTotalItems] = useState(0);
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-    const limit = 9;
+    const limit = 12;
 
     useEffect(() => {
         setPage(1);
@@ -799,7 +799,7 @@ export default function CatalogPage() {
                                 <p className="mt-2 text-sm">Prueba con otra categoria, otra marca o limpia los filtros activos.</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 xl:grid-cols-4">
                                 {catalogProducts.map((product) => (
                                     <CatalogProductCard
                                         key={product.id}
@@ -818,7 +818,7 @@ export default function CatalogPage() {
                         )}
 
                         {totalPages > 1 ? (
-                            <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+                            <div className="mt-8 flex flex-wrap items-center justify-center gap-2 rounded-2xl border bg-white/70 p-2 shadow-sm dark:bg-white/5" style={CATALOG_STYLES.border}>
                                 <PaginationButton
                                     label="Anterior"
                                     onClick={() => setPage((current) => Math.max(1, current - 1))}
@@ -844,10 +844,12 @@ export default function CatalogPage() {
                                             key={`page-${pageNumber}`}
                                             type="button"
                                             onClick={() => setPage(pageNumber)}
-                                            className={`min-w-[42px] rounded-xl px-4 py-2 text-sm font-bold transition-colors ${pageNumber === page
+                                            className={`min-w-[42px] rounded-xl px-4 py-2 text-sm font-bold transition-all ${pageNumber === page
                                                     ? "bg-primary text-white"
-                                                    : "border border-[#e5e1de] text-[#181411] hover:border-primary hover:text-primary dark:border-[#3d2f21] dark:text-white"
+                                                    : "border border-transparent text-[#181411] hover:border-primary/30 hover:bg-primary/10 hover:text-primary dark:text-white"
                                                 }`}
+                                            aria-label={`Pagina ${pageNumber}`}
+                                            aria-current={pageNumber === page ? "page" : undefined}
                                         >
                                             {pageNumber}
                                         </button>
@@ -2092,14 +2094,29 @@ function CatalogProductCard({
     const hasPriceRange = Number.isFinite(minPrice) && Number.isFinite(maxPrice) && minPrice !== maxPrice;
 
     const openProduct = () => navigate(`/product/${product.id}`);
+    const handleCardKeyDown = (event) => {
+        if (event.currentTarget !== event.target) return;
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openProduct();
+        }
+    };
 
     return (
-        <article className="group overflow-hidden rounded-[16px] md:rounded-[24px] border shadow-sm transition-transform duration-200 hover:-translate-y-1 hover:shadow-xl" style={CATALOG_STYLES.card}>
-            <div className="relative aspect-square cursor-pointer overflow-hidden" style={CATALOG_STYLES.media} onClick={openProduct}>
+        <article
+            role="link"
+            tabIndex={0}
+            onClick={openProduct}
+            onKeyDown={handleCardKeyDown}
+            className="group cursor-pointer overflow-hidden rounded-[14px] border shadow-sm outline-none transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 focus-visible:ring-2 focus-visible:ring-primary/40"
+            style={CATALOG_STYLES.card}
+            aria-label={`Ver detalle de ${name}`}
+        >
+            <div className="relative aspect-square overflow-hidden" style={CATALOG_STYLES.media}>
                 <img
                     alt={name}
                     title={alt}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                     src={image}
                     loading="lazy"
                 />
@@ -2135,20 +2152,27 @@ function CatalogProductCard({
                 </div>
 
                 {tag ? (
-                    <span className="absolute left-3 top-3 rounded-full bg-primary px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-white">
+                    <span className="absolute left-2.5 top-2.5 rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
                         {String(tag).toLowerCase() === "nuevo" || String(tag).toLowerCase() === "new" ? "Nuevo" : tag}
                     </span>
                 ) : null}
             </div>
 
-            <div className="flex flex-col gap-3 md:gap-4 p-3 md:p-5">
+            <div className="flex flex-col gap-2.5 p-2.5 md:p-3.5">
                 <div className="space-y-2">
-                    <button type="button" onClick={openProduct} className="text-left">
-                        <h3 className="text-sm md:text-lg font-black leading-tight text-[#181411] transition-colors group-hover:text-primary dark:text-white">
+                    <button
+                        type="button"
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            openProduct();
+                        }}
+                        className="text-left"
+                    >
+                        <h3 className="text-sm md:text-base font-black leading-tight text-[#181411] transition-colors group-hover:text-primary dark:text-white">
                             {name}
                         </h3>
                     </button>
-                    <p className="hidden md:block line-clamp-2 text-sm leading-6" style={CATALOG_STYLES.muted}>{desc || "Producto profesional listo para tu obra."}</p>
+                    <p className="hidden md:block line-clamp-2 text-xs leading-5" style={CATALOG_STYLES.muted}>{desc || "Producto profesional listo para tu obra."}</p>
                     {stockStatus ? (
                         <span
                             className={`inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${stockStatus.bg} ${stockStatus.tone}`}
@@ -2168,16 +2192,16 @@ function CatalogProductCard({
                     ) : null}
                 </div>
 
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mt-auto">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mt-auto">
                     <div className="min-w-0 flex flex-col">
                         {showPricesEnabled ? (
                             canViewPrices ? (
                                 <>
                                     {oldPrice ? (
-                                        <span className="text-sm font-semibold text-slate-400 line-through mb-1">{formatCurrency(oldPrice, currency, locale)}</span>
+                                        <span className="text-xs font-semibold text-slate-400 line-through mb-1">{formatCurrency(oldPrice, currency, locale)}</span>
                                     ) : null}
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <span className="text-lg md:text-2xl font-black text-primary">
+                                        <span className="text-base md:text-lg font-black text-primary">
                                             {hasPriceRange
                                                 ? `Desde ${formatCurrency(minPrice, currency, locale)}`
                                                 : formatCurrency(price, currency, locale)}
@@ -2210,8 +2234,11 @@ function CatalogProductCard({
                     {hasVariations ? (
                         <button
                             type="button"
-                            onClick={() => setExpanded((current) => !current)}
-                            className="inline-flex h-10 md:h-9 w-full md:w-auto items-center justify-center rounded-xl px-4 text-sm md:text-xs font-bold text-white transition-all hover:bg-primary"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                setExpanded((current) => !current);
+                            }}
+                            className="inline-flex h-9 w-full md:w-auto items-center justify-center rounded-xl px-3 text-xs font-bold text-white transition-all hover:bg-primary"
                             style={{ backgroundColor: "var(--color-accent, #181411)" }}
                         >
                             {expanded ? "Ocultar" : "Ver variantes"}
@@ -2219,11 +2246,14 @@ function CatalogProductCard({
                     ) : (
                         <button
                             type="button"
-                            onClick={() => addToCart(product, 1)}
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                addToCart(product, 1);
+                            }}
                             disabled={!inStock}
-                            className="inline-flex h-10 md:h-10 w-full md:w-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 md:px-0 text-sm md:text-xs font-bold text-white transition-all hover:shadow-lg hover:shadow-primary/30 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex h-9 w-full md:w-9 items-center justify-center gap-2 rounded-xl bg-primary px-3 md:px-0 text-xs font-bold text-white transition-all hover:shadow-lg hover:shadow-primary/30 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            <CartPlusIcon className="size-5 md:size-4" />
+                            <CartPlusIcon className="size-4" />
                             <span className="md:hidden">Agregar al carrito</span>
                         </button>
                     )}
@@ -2293,7 +2323,10 @@ function CatalogProductCard({
                                                 <div className="flex flex-wrap gap-2">
                                                     <button
                                                         type="button"
-                                                        onClick={() => navigate(`/product/${variation.id}`)}
+                                                        onClick={(event) => {
+                                                            event.stopPropagation();
+                                                            navigate(`/product/${variation.id}`);
+                                                        }}
                                                         className="rounded-xl border px-3 py-2 text-xs font-bold text-[#181411] transition-colors hover:border-primary hover:text-primary dark:text-white"
                                                         style={CATALOG_STYLES.border}
                                                     >
@@ -2301,7 +2334,10 @@ function CatalogProductCard({
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        onClick={() => addToCart(variation, 1)}
+                                                        onClick={(event) => {
+                                                            event.stopPropagation();
+                                                            addToCart(variation, 1);
+                                                        }}
                                                         disabled={!variationInStock}
                                                         className="rounded-xl bg-primary px-3 py-2 text-xs font-bold text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                                                     >

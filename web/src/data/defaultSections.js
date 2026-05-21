@@ -413,10 +413,87 @@ export const PIQUIM_HOME_SECTIONS = [
     },
 ];
 
+export const PIQUIM_ABOUT_SECTIONS = [
+    {
+        id: 'piquim-about-hero',
+        type: 'PiquimHero',
+        enabled: true,
+        props: {
+            badgeText: 'Nosotros',
+            preTitle: 'Materia prima',
+            titleHighlight: 'con criterio',
+            postTitle: 'profesional.',
+            primaryLabel: 'Ver catalogo',
+            primaryHref: '/catalog',
+            secondaryLabel: 'Contactar ventas',
+            secondaryHref: '/about',
+            statProducts: '+200',
+            statCategories: '3',
+            statYears: '+30',
+            mediaType: 'video',
+            image: '',
+            videoUrl: '',
+            videoUrlDesktop: '',
+            videoUrlMobile: '',
+            videoPoster: '',
+            videoAutoplay: true,
+            videoLoop: true,
+            videoMuted: true,
+            videoControls: false,
+        },
+    },
+    {
+        id: 'piquim-about-announce',
+        type: 'PiquimAnnounceBar',
+        enabled: true,
+        props: {
+            text: 'HECHO EN MAR DEL PLATA | HELADERIA | PANADERIA | CONFITERIA | SOPORTE COMERCIAL',
+        },
+    },
+    {
+        id: 'piquim-about-mundos',
+        type: 'PiquimTresMundos',
+        enabled: true,
+        props: {
+            eyebrow: 'COMO TRABAJAMOS',
+            titleStart: 'Acompanamos',
+            titleHighlight: 'tres mundos',
+            titleEnd: 'de produccion.',
+            subtitle: 'Organizamos insumos, catalogos y reposicion para que cada obrador compre con claridad.',
+            leftImage: '/piquim/product-bucket.png',
+            rightImage: '/piquim/product-bucket.png',
+        },
+    },
+    {
+        id: 'piquim-about-catalog',
+        type: 'PiquimCatalog3Panel',
+        enabled: true,
+        props: {
+            title: 'Lineas pensadas para trabajo diario',
+            subtitle: 'Heladeria, panaderia y confiteria con lectura simple y productos listos para operar.',
+            cards: PIQUIM_CATALOG_CARDS,
+        },
+    },
+    {
+        id: 'piquim-about-cta',
+        type: 'PiquimCTABanner',
+        enabled: true,
+        props: {
+            title: 'Necesitas armar un pedido para tu produccion?',
+            subtitle: 'El equipo comercial de PIQUIM te acompana para elegir insumos segun receta, volumen y reposicion.',
+            primaryLabel: 'Ver productos',
+            primaryHref: '/catalog',
+            secondaryLabel: 'Hablar con ventas',
+            secondaryHref: '/about',
+        },
+    },
+];
+
 const DEFAULT_SECTIONS_BY_PAGE = {
     home: DEFAULT_HOME_SECTIONS,
     about: DEFAULT_ABOUT_SECTIONS,
     'piquim-home': PIQUIM_HOME_SECTIONS,
+    'piquim-about': PIQUIM_ABOUT_SECTIONS,
 };
 
 export const getDefaultSectionsForPage = (pageKey = 'home') =>
