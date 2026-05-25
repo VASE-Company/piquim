@@ -3,7 +3,7 @@ import { navigate } from '../../utils/navigation';
 import { ArrowRight } from 'lucide-react';
 
 const DEFAULT_PROPS = {
-    badgeText: 'Heladeria | Panaderia | Confiteria',
+    badgeText: 'Heladeria | Panaderia/Confiteria',
     preTitle: 'Materia prima',
     titleHighlight: 'que inspira',
     postTitle: 'cada receta.',
@@ -12,7 +12,7 @@ const DEFAULT_PROPS = {
     secondaryLabel: 'Ver catalogo',
     secondaryHref: '/catalog',
     statProducts: '+200',
-    statCategories: '3',
+    statCategories: '2',
     statYears: '+30',
     mediaType: 'video',
     image: '',

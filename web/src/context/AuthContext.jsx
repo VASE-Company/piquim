@@ -267,6 +267,9 @@ export const AuthProvider = ({ children }) => {
             province: input.province,
             city: input.city,
             postal_code: input.postal_code,
+            business_name: input.business_name,
+            business_activity: input.business_activity,
+            cuil: input.cuil,
             ...(tenantId ? { tenant_id: tenantId } : {}),
         };
 

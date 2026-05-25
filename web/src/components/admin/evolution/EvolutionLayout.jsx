@@ -93,7 +93,7 @@ const EvolutionLayout = ({
                 />
 
                 {/* Global Overlay: Command Palette */}
-                <CommandPalette branding={adminBranding} onAddItem={onAddItem} />
+                <CommandPalette branding={adminBranding} onAddItem={onAddItem} searchItems={searchItems} />
             </div>
         </>
     );

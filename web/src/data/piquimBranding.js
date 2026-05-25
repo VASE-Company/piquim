@@ -12,25 +12,14 @@ export const PIQUIM_CATALOG_CARDS = [
     },
     {
         id: 'panaderia',
-        title: 'Panaderia',
-        prefix: '02 - Hornear es un arte',
-        description: 'Premezclas, mejoradores y soluciones pensadas para produccion diaria con textura, volumen y regularidad.',
-        tags: ['Premezclas', 'Mejoradores', 'Aditivos', 'Chipa'],
+        title: 'Panaderia/Confiteria',
+        prefix: '02 - Hornear y decorar',
+        description: 'Premezclas, mejoradores, cremas y bases para panaderia, reposteria y confiteria profesional.',
+        tags: ['Premezclas', 'Mejoradores', 'Cremas', 'DDL'],
         image: '/piquim/catalogo/card-panaderia.png',
         category: 'panaderia',
         categorySlug: 'panaderia',
         overlay: 'linear-gradient(180deg, rgba(255, 150, 64, 0.12) 0%, rgba(39, 22, 12, 0.86) 100%)',
-    },
-    {
-        id: 'confiteria',
-        title: 'Confiteria',
-        prefix: '03 - Dulce inspiracion',
-        description: 'Cremas, mousses, dulces y bases para piezas de pasteleria con terminacion profesional.',
-        tags: ['Cremas', 'Mousses', 'DDL', 'Brownie'],
-        image: '/piquim/catalogo/card-confiteria.png',
-        category: 'confiteria',
-        categorySlug: 'confiteria',
-        overlay: 'linear-gradient(180deg, rgba(222, 97, 132, 0.14) 0%, rgba(38, 17, 26, 0.86) 100%)',
     },
 ];
 
@@ -46,8 +35,7 @@ export const PIQUIM_FOOTER_DEFAULTS = {
     },
     shopLinks: [
         { label: 'Heladeria', href: '/catalog?category=heladeria' },
-        { label: 'Panaderia', href: '/catalog?category=panaderia' },
-        { label: 'Confiteria', href: '/catalog?category=confiteria' },
+        { label: 'Panaderia/Confiteria', href: '/catalog?category=panaderia' },
         { label: 'Promociones', href: '/catalog' },
     ],
     helpLinks: [

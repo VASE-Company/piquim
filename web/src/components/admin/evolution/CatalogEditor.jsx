@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import useEvolutionStore from '../../../store/useEvolutionStore';
 import { cn } from '../../../utils/cn';
 import {
@@ -9,6 +10,7 @@ import {
     DotsThree,
     ArrowUpRight,
     Image as ImageIcon,
+    Trash,
 } from '@phosphor-icons/react';
 
 const getProductImage = (product) => {
@@ -32,10 +34,12 @@ const SYNC_STATUS_LABELS = {
 
 const PRODUCTS_PER_PAGE = 10;
 
-const CatalogEditor = ({ products, onAddItem, onEditProduct }) => {
+const CatalogEditor = ({ products, onAddItem, onEditProduct, onDeleteProduct }) => {
     const { selectItem, selectedId } = useEvolutionStore();
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const [openActionsId, setOpenActionsId] = useState(null);
+    const [deleteTarget, setDeleteTarget] = useState(null);
 
     const normalizedProducts = useMemo(() => {
         return (Array.isArray(products) ? products : [])
@@ -71,10 +75,116 @@ const CatalogEditor = ({ products, onAddItem, onEditProduct }) => {
         setCurrentPage((prev) => Math.min(prev, totalPages));
     }, [totalPages]);
 
+    useEffect(() => {
+        setOpenActionsId(null);
+    }, [currentPage, searchQuery]);
+
     const handleAdd = () => {
         if (typeof onAddItem !== 'function') return;
         onAddItem('product');
     };
+
+    const toggleActions = (event, itemId) => {
+        event.stopPropagation();
+        setOpenActionsId((current) => (current === itemId ? null : itemId));
+    };
+
+    const handleDelete = (event, item) => {
+        event.stopPropagation();
+        setOpenActionsId(null);
+        if (typeof onDeleteProduct !== 'function') return;
+        setDeleteTarget(item);
+    };
+
+    const closeDeleteModal = () => {
+        setDeleteTarget(null);
+    };
+
+    const confirmDelete = () => {
+        if (!deleteTarget || typeof onDeleteProduct !== 'function') return;
+        onDeleteProduct(deleteTarget.id, deleteTarget.name, { skipConfirm: true });
+        setDeleteTarget(null);
+    };
+
+    useEffect(() => {
+        if (!deleteTarget) return undefined;
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') {
+                closeDeleteModal();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [deleteTarget]);
+
+    const deleteModal = deleteTarget && typeof document !== 'undefined'
+        ? createPortal(
+            <div
+                className="fixed inset-0 z-[10000] flex items-center justify-center px-6 py-10"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="delete-product-title"
+                onClick={closeDeleteModal}
+            >
+                <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-[4px]" />
+                <div
+                    className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-white/70 bg-white text-slate-950 shadow-[0_28px_90px_rgba(2,6,23,0.45)]"
+                    onClick={(event) => event.stopPropagation()}
+                >
+                    <div className="border-b border-slate-200 bg-slate-50 px-6 py-5">
+                        <div className="flex items-start gap-4">
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 ring-1 ring-rose-100">
+                                <Trash size={22} weight="bold" />
+                            </div>
+                            <div className="min-w-0 space-y-1">
+                                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-rose-600">Eliminar producto</p>
+                                <h3 id="delete-product-title" className="text-xl font-black tracking-tight text-slate-950">
+                                    Confirmar eliminacion
+                                </h3>
+                                <p className="text-sm leading-6 text-slate-600">
+                                    Esta accion quita el producto del catalogo y de la tienda publica.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4 px-6 py-6">
+                        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Producto seleccionado</p>
+                            <p className="mt-1 break-words text-base font-bold text-slate-950">
+                                {deleteTarget.name || 'Producto sin nombre'}
+                            </p>
+                            {deleteTarget.sku ? (
+                                <p className="mt-1 font-mono text-xs text-slate-500">SKU: {deleteTarget.sku}</p>
+                            ) : null}
+                        </div>
+
+                        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold leading-6 text-rose-800">
+                            Se eliminara de forma permanente. Esta accion no se puede deshacer desde el panel.
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col-reverse gap-3 border-t border-slate-200 bg-white px-6 py-5 sm:flex-row sm:justify-end">
+                        <button
+                            type="button"
+                            onClick={closeDeleteModal}
+                            className="h-11 rounded-xl border border-slate-300 bg-white px-5 text-xs font-black uppercase tracking-[0.16em] text-slate-700 transition-colors hover:bg-slate-50"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            onClick={confirmDelete}
+                            className="h-11 rounded-xl bg-rose-600 px-5 text-xs font-black uppercase tracking-[0.16em] text-white shadow-lg shadow-rose-950/20 transition-colors hover:bg-rose-500"
+                        >
+                            Eliminar producto
+                        </button>
+                    </div>
+                </div>
+            </div>,
+            document.body
+        )
+        : null;
 
     return (
         <div className="h-full flex flex-col space-y-6 animate-in fade-in duration-500">
@@ -90,7 +200,7 @@ const CatalogEditor = ({ products, onAddItem, onEditProduct }) => {
                         </div>
                     </div>
                     <p className="text-[11px] text-zinc-500">
-                        Los productos se publican dentro de Heladeria, Panaderia o Confiteria desde el inspector.
+                        Los productos se publican dentro de Heladeria o Panaderia/Confiteria desde el inspector.
                     </p>
                 </div>
 
@@ -193,13 +303,39 @@ const CatalogEditor = ({ products, onAddItem, onEditProduct }) => {
                                 </div>
                             </div>
 
-                            <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                                <button className="rounded-lg border border-white/10 bg-white/10 p-1.5 text-white backdrop-blur-md hover:bg-white/20">
+                            <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                                <button
+                                    type="button"
+                                    onClick={(event) => toggleActions(event, item.id)}
+                                    className="rounded-lg border border-white/10 bg-white/10 p-1.5 text-white backdrop-blur-md hover:bg-white/20"
+                                    title="Acciones"
+                                >
                                     <DotsThree size={14} weight="bold" />
                                 </button>
-                                <button className="rounded-lg bg-white p-1.5 text-zinc-900 shadow-xl transition-transform hover:scale-100 scale-90">
+                                <button
+                                    type="button"
+                                    onClick={(event) => event.stopPropagation()}
+                                    className="rounded-lg bg-white p-1.5 text-zinc-900 shadow-xl transition-transform hover:scale-100 scale-90"
+                                    title="Abrir producto"
+                                >
                                     <ArrowUpRight size={14} weight="bold" />
                                 </button>
+
+                                {openActionsId === item.id ? (
+                                    <div
+                                        className="absolute right-0 top-9 z-20 w-44 overflow-hidden rounded-xl border border-white/10 bg-zinc-950/95 p-1 shadow-2xl backdrop-blur-md"
+                                        onClick={(event) => event.stopPropagation()}
+                                    >
+                                        <button
+                                            type="button"
+                                            onClick={(event) => handleDelete(event, item)}
+                                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[11px] font-bold uppercase tracking-[0.12em] text-rose-300 transition-colors hover:bg-rose-500/15 hover:text-rose-100"
+                                        >
+                                            <Trash size={14} weight="bold" />
+                                            Eliminar
+                                        </button>
+                                    </div>
+                                ) : null}
                             </div>
                         </div>
                     ))}
@@ -251,6 +387,8 @@ const CatalogEditor = ({ products, onAddItem, onEditProduct }) => {
                     </button>
                 </div>
             </div>
+
+            {deleteModal}
         </div>
     );
 };

@@ -521,6 +521,7 @@ const EvolutionAdmin = () => {
                         products={editor.products}
                         onAddItem={handleAddItem}
                         onEditProduct={catalog.handleEditProduct}
+                        onDeleteProduct={catalog.handleDeleteProduct}
                     />
                 );
             case 'categories':
@@ -596,6 +597,7 @@ const EvolutionAdmin = () => {
                         brands={editor.brands}
                         onAddItem={handleAddItem}
                         onEditProduct={catalog.handleEditProduct}
+                        onDeleteProduct={catalog.handleDeleteProduct}
                     />
                 );
             case 'media':

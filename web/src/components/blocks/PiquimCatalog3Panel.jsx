@@ -27,8 +27,8 @@ export default function PiquimCatalog3Panel({
                 <p className="hidden text-[16px] tracking-[3.2px] text-[#ff4d00] md:block">{eyebrow}</p>
             </div>
 
-            <div className="grid grid-cols-1 gap-[2px] md:grid-cols-3">
-                {list.slice(0, 3).map((card, idx) => (
+            <div className="grid grid-cols-1 gap-[2px] md:grid-cols-2">
+                {list.slice(0, 2).map((card, idx) => (
                     <article key={card.id || idx} className="relative h-[620px] overflow-hidden md:h-[700px]">
                         <img src={card.image} alt={card.title} className="absolute inset-0 h-full w-full object-cover" />
                         <div className="absolute inset-0" style={{ background: card.overlay || 'linear-gradient(180deg, rgba(0,0,0,0.24) 0%, rgba(26,22,20,0.8) 100%)' }} />
@@ -52,7 +52,7 @@ export default function PiquimCatalog3Panel({
                                 onClick={() => navigate(`/catalog?category=${encodeURIComponent(card.category || card.title || '')}`)}
                                 className="border-b-2 border-[#ff4d00] pb-1 text-[11px] font-bold tracking-[0.88px] text-[#fffaf6]"
                             >
-                                VER CATALOGO ?
+                                VER CATALOGO
                             </button>
                         </div>
                     </article>

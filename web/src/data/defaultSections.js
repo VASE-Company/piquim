@@ -90,8 +90,7 @@ export const DEFAULT_HOME_SECTIONS = [
             subtitle: 'Productos y soporte para heladerias, panaderias y confiterias que necesitan regularidad y compra simple.',
             items: [
                 { id: 'brand-piquim-heladeria', name: 'Heladeria' },
-                { id: 'brand-piquim-panaderia', name: 'Panaderia' },
-                { id: 'brand-piquim-confiteria', name: 'Confiteria' },
+                { id: 'brand-piquim-panaderia', name: 'Panaderia/Confiteria' },
                 { id: 'brand-piquim-pulpas', name: 'Pulpas' },
                 { id: 'brand-piquim-bases', name: 'Bases' },
                 { id: 'brand-piquim-cremas', name: 'Cremas' },
@@ -313,7 +312,7 @@ export const PIQUIM_HOME_SECTIONS = [
         type: 'PiquimHero',
         enabled: true,
         props: {
-            badgeText: 'Heladeria | Panaderia | Confiteria',
+            badgeText: 'Heladeria | Panaderia/Confiteria',
             preTitle: 'Materia prima',
             titleHighlight: 'que inspira',
             postTitle: 'cada receta.',
@@ -322,7 +321,7 @@ export const PIQUIM_HOME_SECTIONS = [
             secondaryLabel: 'Ver catalogo',
             secondaryHref: '/catalog',
             statProducts: '+200',
-            statCategories: '3',
+            statCategories: '2',
             statYears: '+30',
             mediaType: 'video',
             image: '',
@@ -349,7 +348,7 @@ export const PIQUIM_HOME_SECTIONS = [
         type: 'PiquimTresMundos',
         enabled: true,
         props: {
-            title: 'Tres mundos, una misma calidad',
+            title: 'Dos mundos, una misma calidad',
             subtitle: 'Elegi tu rubro y encontra productos pensados para tu operacion.',
             items: [
                 {
@@ -361,17 +360,10 @@ export const PIQUIM_HOME_SECTIONS = [
                 },
                 {
                     id: 'panaderia',
-                    title: 'Panaderia',
-                    description: 'Mejoradores, rellenos y materias primas para produccion diaria.',
+                    title: 'Panaderia/Confiteria',
+                    description: 'Mejoradores, rellenos, cremas y materias primas para produccion diaria.',
                     image: '/piquim/catalog-panaderia.jpg',
                     href: '/catalog?category=panaderia',
-                },
-                {
-                    id: 'confiteria',
-                    title: 'Confiteria',
-                    description: 'Cremas, decoraciones y soluciones para piezas premium.',
-                    image: '/piquim/catalog-confiteria.jpg',
-                    href: '/catalog?category=confiteria',
                 },
             ],
         },
@@ -428,7 +420,7 @@ export const PIQUIM_ABOUT_SECTIONS = [
             secondaryLabel: 'Contactar ventas',
             secondaryHref: '/about',
             statProducts: '+200',
-            statCategories: '3',
+            statCategories: '2',
             statYears: '+30',
             mediaType: 'video',
             image: '',

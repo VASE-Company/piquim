@@ -63,6 +63,11 @@ const normalizeCatalogLabel = (value) =>
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
 
+const normalizePiquimCatalogSlug = (value) => {
+    const normalized = normalizeCatalogLabel(value);
+    return normalized === "confiteria" ? "panaderia" : normalized;
+};
+
 const formatSearchTerm = (value) =>
     String(value || "")
         .trim()
@@ -158,6 +163,18 @@ const getProductImage = (product) => {
         data.image_url ||
         (rawFirst && (rawFirst.url || rawFirst.src || rawFirst)) ||
         FALLBACK_IMAGE
+    );
+};
+
+const getRealProductImage = (product) => {
+    const data = product?.data || {};
+    const rawImages = Array.isArray(data.images) ? data.images : [];
+    const rawFirst = rawImages[0];
+    return (
+        data.image ||
+        data.image_url ||
+        (rawFirst && (rawFirst.url || rawFirst.src || rawFirst)) ||
+        ""
     );
 };
 
@@ -584,11 +601,24 @@ export default function CatalogPage() {
     const quickBrands = useMemo(() => brands.slice(0, 4), [brands]);
     const catalogCards = useMemo(() => {
         const configured = settings?.branding?.catalog_cards;
-        return Array.isArray(configured) && configured.length ? configured : PIQUIM_CATALOG_CARDS;
+        const source = Array.isArray(configured) && configured.length ? configured : PIQUIM_CATALOG_CARDS;
+        const combinedPanaderia = PIQUIM_CATALOG_CARDS.find((card) => card.id === "panaderia") || {};
+        return source
+            .filter((card) => normalizeCatalogLabel(card?.categorySlug || card?.slug || card?.category || card?.id || card?.title) !== "confiteria")
+            .map((card) => {
+                const slug = normalizePiquimCatalogSlug(card?.categorySlug || card?.slug || card?.category || card?.id || card?.title);
+                if (slug !== "panaderia") return card;
+                return {
+                    ...card,
+                    ...combinedPanaderia,
+                    category: "panaderia",
+                    categorySlug: "panaderia",
+                };
+            });
     }, [settings?.branding?.catalog_cards]);
 
     const handleCatalogCardClick = useCallback((card) => {
-        const directSlug = normalizeCatalogLabel(card?.categorySlug || card?.slug || card?.category || card?.id);
+        const directSlug = normalizePiquimCatalogSlug(card?.categorySlug || card?.slug || card?.category || card?.id);
         if (PIQUIM_SUBCATALOGS[directSlug]) {
             applyFilters({ category: directSlug });
             return;
@@ -639,7 +669,7 @@ export default function CatalogPage() {
         );
     }
 
-    const selectedSubcatalogKey = normalizeCatalogLabel(selectedCategoryEntry?.slug || selectedCategoryEntry?.name || selectedCategory);
+    const selectedSubcatalogKey = normalizePiquimCatalogSlug(selectedCategoryEntry?.slug || selectedCategoryEntry?.name || selectedCategory);
     const selectedSubcatalog = PIQUIM_SUBCATALOGS[selectedSubcatalogKey];
 
     if (selectedSubcatalog) {
@@ -651,7 +681,15 @@ export default function CatalogPage() {
                     products={products}
                     currency={currency}
                     locale={locale}
-                    onProductClick={(productId) => navigate(`/product/${productId}`)}
+                    onProductClick={(productId, context = {}) => {
+                        const params = new URLSearchParams();
+                        params.set("catalog", selectedSubcatalog.slug);
+                        const groupLabel = String(context.group || "").trim();
+                        if (groupLabel) params.set("group", groupLabel);
+                        const filterLabel = String(context.filter || "").trim();
+                        if (filterLabel) params.set("filter", filterLabel);
+                        navigate(`/product/${productId}?${params.toString()}`);
+                    }}
                     labels={subcatalogLabels}
                 />
             </StoreLayout>
@@ -876,7 +914,7 @@ const PIQUIM_EXACT_CARDS = [
         slug: 'heladeria',
         prefix: '01 — Frío que enamora',
         title: 'Heladería',
-        tags: ['Pulpas', 'Variegattos', 'Bases', 'Neutros'],
+        tags: ['Estabilizantes', 'Aditivos'],
         description: 'Materia prima para la elaboración de productos de heladería artesanal de altísima calidad.',
         image: '/piquim/catalogo/card-heladeria.png',
         imageStyle: { width: 566, height: 700, left: -64, top: 0 },
@@ -886,26 +924,14 @@ const PIQUIM_EXACT_CARDS = [
     {
         id: 'panaderia',
         slug: 'panaderia',
-        prefix: '02 — Hornear es un arte',
-        title: 'Panadería',
-        tags: ['Premezclas', 'Mejoradores', 'Aditivos', 'Chipá'],
-        description: 'Premezclas y mejoradores profesionales para panes y bollería con identidad propia.',
+        prefix: '02 — Hornear y decorar',
+        title: 'Panadería/Confitería',
+        tags: ['Premezclas', 'Mejoradores', 'Cremas', 'DDL'],
+        description: 'Premezclas, mejoradores, cremas y bases para panaderia, reposteria y confiteria profesional.',
         image: '/piquim/catalogo/card-panaderia.png',
         imageStyle: { width: 770, height: 752, left: -210, top: -26 },
         overlay: 'linear-gradient(180deg, rgba(212, 162, 74, 0.56) 0%, rgba(26, 22, 20, 0.80) 100%)',
         width: 478,
-    },
-    {
-        id: 'confiteria',
-        slug: 'confiteria',
-        prefix: '03 — Dulce inspiración',
-        title: 'Confitería',
-        tags: ['Cremas', 'Mousses', 'DDL', 'Brownie'],
-        description: 'Cremas, mousses, glaseados y coberturas para reposteros que buscan firma propia.',
-        image: '/piquim/catalogo/card-confiteria.png',
-        imageStyle: { width: 644, height: 763, left: -54, top: -32 },
-        overlay: 'linear-gradient(180deg, rgba(224, 81, 138, 0.56) 0%, rgba(26, 22, 20, 0.80) 100%)',
-        width: 480,
     },
 ];
 
@@ -914,7 +940,7 @@ function PiquimCatalogLanding({ onSelectCard }) {
         <div className="min-h-screen bg-[#FFFAF6] font-[Inter] text-[#1A1614]">
             <div className="w-full overflow-hidden bg-[#FFFAF6]">
                 <section className="w-full overflow-hidden pt-[86px] max-md:pt-[74px]">
-                    <div className="grid w-full grid-cols-1 items-stretch gap-0.5 overflow-hidden rounded-t-[45px] bg-[#FF4D00] lg:grid-cols-3">
+                    <div className="grid w-full grid-cols-1 items-stretch gap-0.5 overflow-hidden rounded-t-[45px] bg-[#FF4D00] lg:grid-cols-2">
                         {PIQUIM_EXACT_CARDS.map((card) => (
                             <PiquimExactCatalogCard
                                 key={card.id}
@@ -1023,8 +1049,7 @@ function PiquimExactCatalogCard({ card, onClick }) {
 function PiquimCatalogFooter() {
     const shopLinks = [
         { label: 'Heladería', href: '/catalog?category=heladeria' },
-        { label: 'Panadería', href: '/catalog?category=panaderia' },
-        { label: 'Confitería', href: '/catalog?category=confiteria' },
+        { label: 'Panadería/Confitería', href: '/catalog?category=panaderia' },
         { label: 'Promociones', href: '/catalog' },
     ];
     const helpLinks = ['Envíos y entregas', 'Pagos y facturación', 'Cambios y devoluciones', 'Preguntas frecuentes'];
@@ -1085,6 +1110,116 @@ function PiquimCatalogFooter() {
     );
 }
 
+const getConfiguredGroupTitles = (catalog) =>
+    Array.isArray(catalog?.productGroups)
+        ? catalog.productGroups.map((group) => group.title).filter(Boolean)
+        : [];
+
+const getConfiguredCategoryTitles = (catalog) =>
+    Array.isArray(catalog?.productGroups)
+        ? catalog.productGroups.flatMap((group) =>
+            (Array.isArray(group.categories) ? group.categories : []).map((category) => category.title).filter(Boolean)
+        )
+        : [];
+
+const getPiquimCatalogDisplayLabel = (catalog) => {
+    const fixedLabels = {
+        heladeria: 'Heladería',
+        panaderia: 'Panadería/Confitería',
+        confiteria: 'Panadería/Confitería',
+    };
+    return fixedLabels[catalog?.slug] || String(catalog?.headingAccent || catalog?.slug || 'Catalogo').replace(/^de\s+/i, '');
+};
+
+const matchesCatalogKeyword = (haystack, value) => {
+    const normalized = normalizeCatalogLabel(value);
+    return Boolean(normalized) && haystack.includes(normalized);
+};
+
+const getFlavorSearchTerms = (flavor) => [
+    flavor?.name,
+    ...(Array.isArray(flavor?.keywords) ? flavor.keywords : []),
+    ...String(flavor?.name || "").split("/"),
+].map((item) => String(item || "").trim()).filter(Boolean);
+
+const resolveConfiguredProductGroup = (catalog, product, labels = {}) => {
+    if (!Array.isArray(catalog?.productGroups) || !catalog.productGroups.length) return null;
+
+    const data = product?.data || {};
+    const sourcePath = [
+        ...(Array.isArray(product?.source_category_path) ? product.source_category_path : []),
+        ...(Array.isArray(data?.source_category_path) ? data.source_category_path : []),
+    ];
+    const haystack = normalizeCatalogLabel([
+        product?.name,
+        product?.sku,
+        product?.erp_id,
+        product?.category?.name,
+        data?.category,
+        data?.source_category,
+        labels.category,
+        labels.type,
+        labels.format,
+        ...sourcePath,
+    ].filter(Boolean).join(" "));
+
+    for (const group of catalog.productGroups) {
+        const groupKeywords = [
+            group.title,
+            ...(Array.isArray(group.keywords) ? group.keywords : []),
+            ...(Array.isArray(group.flavors) ? group.flavors.flatMap(getFlavorSearchTerms) : []),
+        ];
+        const groupMatches = groupKeywords.some((keyword) => matchesCatalogKeyword(haystack, keyword));
+        const categories = Array.isArray(group.categories) ? group.categories : [];
+
+        for (const category of categories) {
+            const categoryKeywords = [category.title, ...(Array.isArray(category.keywords) ? category.keywords : [])];
+            if (categoryKeywords.some((keyword) => matchesCatalogKeyword(haystack, keyword))) {
+                return {
+                    groupTitle: group.title,
+                    categoryTitle: category.title,
+                };
+            }
+        }
+
+        if (groupMatches) {
+            return {
+                groupTitle: group.title,
+                categoryTitle: categories[0]?.title || group.title,
+            };
+        }
+    }
+
+    return null;
+};
+
+const resolveConfiguredProductFlavor = (catalog, groupTitle, product, labels = {}) => {
+    if (!Array.isArray(catalog?.productGroups) || !groupTitle) return null;
+    const group = catalog.productGroups.find((item) => item.title === groupTitle);
+    const flavors = Array.isArray(group?.flavors) ? group.flavors : [];
+    if (!flavors.length) return null;
+
+    const data = product?.data || {};
+    const sourcePath = [
+        ...(Array.isArray(product?.source_category_path) ? product.source_category_path : []),
+        ...(Array.isArray(data?.source_category_path) ? data.source_category_path : []),
+    ];
+    const haystack = normalizeCatalogLabel([
+        product?.name,
+        product?.sku,
+        product?.erp_id,
+        product?.category?.name,
+        data?.category,
+        data?.source_category,
+        labels.category,
+        labels.type,
+        labels.format,
+        ...sourcePath,
+    ].filter(Boolean).join(" "));
+
+    return flavors.find((flavor) => getFlavorSearchTerms(flavor).some((term) => matchesCatalogKeyword(haystack, term))) || null;
+};
+
 function PiquimFooterColumn({ title, links }) {
     return (
         <div className="inline-flex flex-col items-start justify-start gap-4 overflow-hidden">
@@ -1107,8 +1242,11 @@ function PiquimSubcatalogPage({ catalog, products, currency, locale, onProductCl
     const [query, setQuery] = useState("");
     const [typeFilters, setTypeFilters] = useState([]);
     const [formatFilters, setFormatFilters] = useState([]);
+    const [flavorFilters, setFlavorFilters] = useState([]);
     const [stockOnly, setStockOnly] = useState(false);
     const [recentTerms, setRecentTerms] = useState([]);
+    const [expandedSections, setExpandedSections] = useState({});
+    const usesConfiguredGroups = Array.isArray(catalog?.productGroups) && catalog.productGroups.length > 0;
 
     useEffect(() => {
         setRecentTerms(readSearchHistory());
@@ -1134,6 +1272,11 @@ function PiquimSubcatalogPage({ catalog, products, currency, locale, onProductCl
                 data?.presentation ||
                 ""
             ).trim();
+            const configuredGroup = resolveConfiguredProductGroup(catalog, product, { category, type, format });
+
+            if (usesConfiguredGroups && !configuredGroup) {
+                return null;
+            }
 
             const variations = Array.isArray(product?.variations) ? product.variations : [];
             const variationPrices = variations
@@ -1142,27 +1285,53 @@ function PiquimSubcatalogPage({ catalog, products, currency, locale, onProductCl
             const unitPrice = Number(product?.price || 0);
             const effectivePrice = variationPrices.length ? Math.min(...variationPrices) : unitPrice;
 
+            const image = getRealProductImage(product);
+            const configuredFlavor = resolveConfiguredProductFlavor(catalog, configuredGroup?.groupTitle, product, { category, type, format });
+
             return {
                 id: product?.id,
+                sku: String(product?.sku || product?.erp_id || product?.id || "").trim(),
                 name: String(product?.name || "").trim(),
-                category: category || "Sin categoria",
-                subtype: type || "General",
+                category: configuredGroup?.groupTitle || category || "Sin categoria",
+                subtype: configuredGroup?.categoryTitle || type || "General",
+                sectionTitle: configuredGroup?.groupTitle || type || "General",
+                familyTitle: configuredGroup?.categoryTitle || format || "Sin especificar",
+                breadcrumbLabel: [
+                    getPiquimCatalogDisplayLabel(catalog),
+                    configuredGroup?.groupTitle || category || "",
+                    configuredGroup?.categoryTitle || type || "",
+                ].filter(Boolean).join(" › "),
+                flavorTitle: configuredFlavor?.name || "",
+                flavorColor: configuredFlavor?.color || "",
                 format: format || "Sin especificar",
                 priceValue: Number.isFinite(effectivePrice) ? effectivePrice : 0,
                 stock: Number(product?.stock || 0),
+                image: image || getProductImage(product),
+                hasImage: Boolean(image),
+                alt: product?.alt || product?.name || "Producto",
                 temperature: `${category} ${type}`.toLowerCase(),
             };
-        }).filter((item) => item.id && item.name);
+        }).filter((item) => item && item.id && item.name);
         return mapped;
-    }, [products]);
+    }, [catalog, products, usesConfiguredGroups]);
 
     const availableTypes = useMemo(
-        () => [...new Set(normalizedProducts.map((item) => item.subtype).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" })),
-        [normalizedProducts]
+        () => {
+            if (usesConfiguredGroups) {
+                return getConfiguredGroupTitles(catalog);
+            }
+            return [...new Set(normalizedProducts.map((item) => item.subtype).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+        },
+        [catalog, normalizedProducts, usesConfiguredGroups]
     );
     const availableFormats = useMemo(
-        () => [...new Set(normalizedProducts.map((item) => item.format).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" })),
-        [normalizedProducts]
+        () => {
+            if (usesConfiguredGroups) {
+                return getConfiguredCategoryTitles(catalog);
+            }
+            return [...new Set(normalizedProducts.map((item) => item.format).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+        },
+        [catalog, normalizedProducts, usesConfiguredGroups]
     );
 
     const queryNormalized = normalizeCatalogLabel(query);
@@ -1186,21 +1355,58 @@ function PiquimSubcatalogPage({ catalog, products, currency, locale, onProductCl
     const filteredProducts = useMemo(() => {
         return normalizedProducts.filter((item) => {
             const matchText = !queryNormalized || normalizeCatalogLabel(`${item.name} ${item.category} ${item.subtype} ${item.format}`).includes(queryNormalized);
-            const matchType = !typeFilters.length || typeFilters.includes(item.subtype);
-            const matchFormat = !formatFilters.length || formatFilters.includes(item.format);
+            const matchType = !typeFilters.length || typeFilters.includes(usesConfiguredGroups ? item.sectionTitle : item.subtype);
+            const matchFormat = !formatFilters.length || formatFilters.includes(usesConfiguredGroups ? item.familyTitle : item.format);
+            const matchFlavor = !flavorFilters.length || flavorFilters.some((flavor) =>
+                item.flavorTitle === flavor ||
+                normalizeCatalogLabel(`${item.name} ${item.category} ${item.subtype} ${item.format}`).includes(normalizeCatalogLabel(flavor))
+            );
             const matchStock = !stockOnly || Number(item.stock || 0) > 0;
-            return matchText && matchType && matchFormat && matchStock;
+            return matchText && matchType && matchFormat && matchFlavor && matchStock;
         });
-    }, [formatFilters, normalizedProducts, queryNormalized, stockOnly, typeFilters]);
+    }, [flavorFilters, formatFilters, normalizedProducts, queryNormalized, stockOnly, typeFilters, usesConfiguredGroups]);
 
     const sections = useMemo(() => {
+        if (usesConfiguredGroups) {
+            return getConfiguredGroupTitles(catalog)
+                .map((title) => {
+                    const sectionProducts = filteredProducts.filter((item) => item.sectionTitle === title);
+                    const categories = getConfiguredCategoryTitles({
+                        productGroups: catalog.productGroups.filter((group) => group.title === title),
+                    })
+                        .map((categoryTitle) => ({
+                            title: categoryTitle,
+                            products: sectionProducts.filter((item) => item.familyTitle === categoryTitle),
+                        }))
+                        .filter((categorySection) => categorySection.products.length > 0);
+
+                    return { title, products: sectionProducts, categories };
+                })
+                .filter((section) => section.products.length > 0);
+        }
+
         const byType = new Map();
         filteredProducts.forEach((item) => {
             if (!byType.has(item.subtype)) byType.set(item.subtype, []);
             byType.get(item.subtype).push(item);
         });
-        return [...byType.entries()].map(([title, items]) => ({ title, products: items }));
-    }, [filteredProducts]);
+        return [...byType.entries()].map(([title, items]) => ({ title, products: items, categories: [] }));
+    }, [catalog, filteredProducts, usesConfiguredGroups]);
+
+    useEffect(() => {
+        if (!usesConfiguredGroups || !sections.length) return;
+        setExpandedSections((prev) => {
+            const next = { ...prev };
+            let changed = false;
+            sections.forEach((section) => {
+                if (!Object.prototype.hasOwnProperty.call(next, section.title)) {
+                    next[section.title] = true;
+                    changed = true;
+                }
+            });
+            return changed ? next : prev;
+        });
+    }, [sections, usesConfiguredGroups]);
 
     const handleSuggestionPick = (value) => setQuery(value);
 
@@ -1237,6 +1443,8 @@ function PiquimSubcatalogPage({ catalog, products, currency, locale, onProductCl
                     availableFormats={availableFormats}
                     selectedFormats={formatFilters}
                     onToggleFormat={(value) => setFormatFilters((prev) => prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value])}
+                    selectedFlavors={flavorFilters}
+                    onToggleFlavor={(value) => setFlavorFilters((prev) => prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value])}
                     stockOnly={stockOnly}
                     setStockOnly={setStockOnly}
                 />
@@ -1256,27 +1464,81 @@ function PiquimSubcatalogPage({ catalog, products, currency, locale, onProductCl
                         </div>
                     ) : null}
 
-                    {sections.map((section) => (
-                        <section key={section.title} className="flex w-full flex-col items-start justify-start gap-[25px]">
-                            <h2 className="text-4xl font-bold leading-9 text-[#1A1614]" style={{ fontFamily: 'Gilroy, sans-serif' }}>
-                                {section.title}
-                            </h2>
-                            <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(282px,1fr))] gap-6">
-                                {section.products.map((product) => (
-                                    <PiquimSubcatalogProductCard
-                                        key={product.id}
-                                        product={product}
-                                        accent={catalog.accent}
-                                        mediaGradient={catalog.mediaGradient}
-                                        icon={catalog.icon}
-                                        currency={currency}
-                                        locale={locale}
-                                        onOpen={() => onProductClick(product.id)}
-                                    />
-                                ))}
-                            </div>
-                        </section>
-                    ))}
+                    {sections.map((section) => {
+                        const expanded = !usesConfiguredGroups || expandedSections[section.title] !== false;
+
+                        return (
+                            <section key={section.title} className="flex w-full flex-col items-start justify-start gap-[25px]">
+                                {usesConfiguredGroups ? (
+                                    <button
+                                        type="button"
+                                        onClick={() => setExpandedSections((prev) => ({ ...prev, [section.title]: prev[section.title] === false }))}
+                                        className="flex w-full items-center justify-between gap-4 border-b border-[#E8DFD8] pb-4 text-left"
+                                        aria-expanded={expanded}
+                                    >
+                                        <span className="flex min-w-0 flex-col gap-1">
+                                            <span className="text-4xl font-bold leading-9 text-[#1A1614]" style={{ fontFamily: 'Gilroy, sans-serif' }}>
+                                                {section.title}
+                                            </span>
+                                            <span className="text-xs font-bold uppercase tracking-[0.18em] text-[#8A7560]">
+                                                {section.products.length} {section.products.length === 1 ? 'producto' : 'productos'}
+                                            </span>
+                                        </span>
+                                        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#FF4D00] text-white transition-transform duration-300" style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                                            <ChevronDownSmallIcon className="size-5" />
+                                        </span>
+                                    </button>
+                                ) : (
+                                    <h2 className="text-4xl font-bold leading-9 text-[#1A1614]" style={{ fontFamily: 'Gilroy, sans-serif' }}>
+                                        {section.title}
+                                    </h2>
+                                )}
+
+                                {expanded && section.categories?.length ? (
+                                    <div className="flex w-full flex-col gap-8">
+                                        {section.categories.map((categorySection) => (
+                                            <div key={`${section.title}-${categorySection.title}`} className="flex w-full flex-col gap-4">
+                                                <h3 className="text-2xl font-bold leading-8" style={{ color: catalog.accent, fontFamily: 'Gilroy, sans-serif' }}>
+                                                    {categorySection.title}
+                                                </h3>
+                                                <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(282px,1fr))] gap-6">
+                                                    {categorySection.products.map((product) => (
+                                                        <PiquimSubcatalogProductCard
+                                                            key={product.id}
+                                                            product={product}
+                                                            accent={catalog.accent}
+                                                            mediaGradient={catalog.mediaGradient}
+                                                            icon={catalog.icon}
+                                                            currency={currency}
+                                                            locale={locale}
+                                                        onOpen={() => onProductClick(product.id, { group: section.title, filter: categorySection.title })}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : null}
+
+                                {expanded && !section.categories?.length ? (
+                                    <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(282px,1fr))] gap-6">
+                                        {section.products.map((product) => (
+                                            <PiquimSubcatalogProductCard
+                                                key={product.id}
+                                                product={product}
+                                                accent={catalog.accent}
+                                                mediaGradient={catalog.mediaGradient}
+                                                icon={catalog.icon}
+                                                currency={currency}
+                                                locale={locale}
+                                                onOpen={() => onProductClick(product.id, { filter: section.title })}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : null}
+                            </section>
+                        );
+                    })}
                 </section>
             </main>
             <PiquimCatalogFooter />
@@ -1299,6 +1561,8 @@ function PiquimSubcatalogSidebar({
     availableFormats,
     selectedFormats,
     onToggleFormat,
+    selectedFlavors,
+    onToggleFlavor,
     stockOnly,
     setStockOnly,
 }) {
@@ -1310,6 +1574,7 @@ function PiquimSubcatalogSidebar({
     const typeLabel = labels?.type_label || catalog?.filters?.groups?.[0]?.title || "Tipo de producto";
     const formatLabel = labels?.format_label || catalog?.filters?.groups?.[1]?.title || "Presentacion";
     const stockLabel = labels?.stock_label || "Solo con stock";
+    const usesGroupedFilters = Array.isArray(catalog?.productGroups) && catalog.productGroups.length > 0;
 
     return (
         <aside className="flex min-h-[1850px] w-64 shrink-0 flex-col items-start justify-start gap-2 overflow-hidden rounded-xl border-r border-[#FFDCC1] bg-[#FFD7B6] p-6 shadow-sm max-lg:min-h-0 max-lg:w-full">
@@ -1339,8 +1604,23 @@ function PiquimSubcatalogSidebar({
                 <SuggestionGroup title={topSearchesLabel} items={trendingSuggestions} onPick={onSuggestionPick} />
                 <SuggestionGroup title={productMatchesLabel} items={productSuggestions} onPick={onSuggestionPick} />
 
-                <FilterGroup title={typeLabel} options={availableTypes} selected={selectedTypes} onToggle={onToggleType} />
-                <FilterGroup title={formatLabel} options={availableFormats} selected={selectedFormats} onToggle={onToggleFormat} />
+                {usesGroupedFilters ? (
+                    <GroupedFilterTree
+                        title={typeLabel}
+                        groups={catalog.productGroups}
+                        selectedGroups={selectedTypes}
+                        onToggleGroup={onToggleType}
+                        selectedCategories={selectedFormats}
+                        onToggleCategory={onToggleFormat}
+                        selectedFlavors={selectedFlavors}
+                        onToggleFlavor={onToggleFlavor}
+                    />
+                ) : (
+                    <>
+                        <FilterGroup title={typeLabel} options={availableTypes} selected={selectedTypes} onToggle={onToggleType} />
+                        <FilterGroup title={formatLabel} options={availableFormats} selected={selectedFormats} onToggle={onToggleFormat} />
+                    </>
+                )}
 
                 <label className="inline-flex w-full items-center justify-start gap-2 pb-4">
                     <input type="checkbox" checked={stockOnly} onChange={(event) => setStockOnly(event.target.checked)} />
@@ -1348,6 +1628,155 @@ function PiquimSubcatalogSidebar({
                 </label>
             </div>
         </aside>
+    );
+}
+
+function GroupedFilterTree({ title, groups, selectedGroups, onToggleGroup, selectedCategories, onToggleCategory, selectedFlavors, onToggleFlavor }) {
+    const [expanded, setExpanded] = useState(() => {
+        const initial = {};
+        (Array.isArray(groups) ? groups : []).forEach((group) => {
+            if (group?.title) initial[group.title] = true;
+        });
+        return initial;
+    });
+    const [activeFlavorGroup, setActiveFlavorGroup] = useState(null);
+
+    if (!Array.isArray(groups) || !groups.length) return null;
+
+    return (
+        <div className="w-full pb-6">
+            <div className="mb-3 inline-flex w-full items-center justify-start gap-2">
+                <FilterDotIcon className="size-4 text-[#A04100]" />
+                <h3 className="text-sm font-semibold leading-[16.8px] text-[#A04100]">{title}</h3>
+            </div>
+            <div className="flex w-full flex-col gap-2">
+                {groups.map((group) => {
+                    const groupTitle = group.title;
+                    const isExpanded = expanded[groupTitle] !== false;
+                    const categories = Array.isArray(group.categories) ? group.categories : [];
+                    const flavors = Array.isArray(group.flavors) ? group.flavors : [];
+                    const selectedFlavorCount = flavors.filter((flavor) => selectedFlavors.includes(flavor.name)).length;
+
+                    return (
+                        <div key={`filter-group-${groupTitle}`} className="rounded-xl bg-[#FFEDDE]/70 p-2">
+                            <div className="flex items-center justify-between gap-2">
+                                <label className="inline-flex min-w-0 flex-1 items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedGroups.includes(groupTitle)}
+                                        onChange={() => onToggleGroup(groupTitle)}
+                                    />
+                                    <span className="truncate text-sm font-semibold leading-5 text-[#5A4136]">{groupTitle}</span>
+                                </label>
+                                <button
+                                    type="button"
+                                    onClick={() => setExpanded((prev) => ({ ...prev, [groupTitle]: prev[groupTitle] === false }))}
+                                    className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white/70 text-[#A04100] transition-transform"
+                                    aria-label={`${isExpanded ? 'Cerrar' : 'Abrir'} ${groupTitle}`}
+                                    aria-expanded={isExpanded}
+                                >
+                                    <ChevronDownSmallIcon className={`size-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                                </button>
+                            </div>
+                            {isExpanded && categories.length ? (
+                                <div className="mt-2 flex flex-col gap-2 border-l border-[#FFC89E] pl-5">
+                                    {categories.map((category) => (
+                                        <label key={`filter-category-${groupTitle}-${category.title}`} className="inline-flex w-full items-center justify-start gap-2">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedCategories.includes(category.title)}
+                                                onChange={() => onToggleCategory(category.title)}
+                                            />
+                                            <span className="text-sm font-normal leading-5 text-[#5A4136]">{category.title}</span>
+                                        </label>
+                                    ))}
+                                    {flavors.length ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => setActiveFlavorGroup(group)}
+                                            className="mt-1 inline-flex w-fit items-center gap-2 rounded-full bg-[#FF4D00] px-3 py-1.5 text-xs font-bold text-white transition hover:bg-[#E04400]"
+                                        >
+                                            Ver sabores
+                                            {selectedFlavorCount > 0 ? <span className="rounded-full bg-white px-1.5 py-0.5 text-[10px] text-[#FF4D00]">{selectedFlavorCount}</span> : null}
+                                        </button>
+                                    ) : null}
+                                </div>
+                            ) : null}
+                        </div>
+                    );
+                })}
+            </div>
+            {activeFlavorGroup ? (
+                <FlavorSelectionModal
+                    group={activeFlavorGroup}
+                    selectedFlavors={selectedFlavors}
+                    onToggleFlavor={onToggleFlavor}
+                    onClose={() => setActiveFlavorGroup(null)}
+                />
+            ) : null}
+        </div>
+    );
+}
+
+function FlavorSelectionModal({ group, selectedFlavors, onToggleFlavor, onClose }) {
+    const flavors = Array.isArray(group?.flavors) ? group.flavors : [];
+    if (typeof document === "undefined") return null;
+
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/45 px-4 py-6" role="dialog" aria-modal="true" aria-label={`Seleccionar sabores de ${group?.title || ''}`}>
+            <div className="flex max-h-[88vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-[#FFFAF6] shadow-2xl">
+                <div className="flex items-start justify-between gap-4 border-b border-[#E8DFD8] px-6 py-5">
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#FF4D00]">Selector profesional</p>
+                        <h3 className="mt-1 text-3xl font-black text-[#1A1614]" style={{ fontFamily: 'Gilroy, sans-serif' }}>
+                            {group?.title}
+                        </h3>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="flex size-10 items-center justify-center rounded-full bg-[#FFEDDE] text-[#A04100] hover:bg-[#FFD7B6]"
+                        aria-label="Cerrar selector"
+                    >
+                        <CloseIcon className="size-5" />
+                    </button>
+                </div>
+                <div className="custom-scrollbar grid gap-3 overflow-y-auto p-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {flavors.map((flavor) => {
+                        const selected = selectedFlavors.includes(flavor.name);
+                        return (
+                            <button
+                                key={`${group.title}-${flavor.name}`}
+                                type="button"
+                                onClick={() => onToggleFlavor(flavor.name)}
+                                className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-all ${
+                                    selected
+                                        ? 'border-[#FF4D00] bg-[#FFEDDE] shadow-[0_10px_26px_rgba(255,77,0,0.14)]'
+                                        : 'border-[#E8DFD8] bg-white hover:border-[#FFB27D]'
+                                }`}
+                            >
+                                <span className="size-5 shrink-0 rounded-full border border-black/10" style={{ backgroundColor: flavor.color || '#E8DFD8' }} />
+                                <span className="min-w-0 flex-1 text-sm font-bold text-[#1A1614]">{flavor.name}</span>
+                                {selected ? <CheckIcon className="size-4 shrink-0 text-[#FF4D00]" /> : null}
+                            </button>
+                        );
+                    })}
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#E8DFD8] px-6 py-4">
+                    <p className="text-xs font-semibold text-[#8A7560]">
+                        {selectedFlavors.length} {selectedFlavors.length === 1 ? 'sabor seleccionado' : 'sabores seleccionados'}
+                    </p>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="rounded-full bg-[#FF4D00] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#E04400]"
+                    >
+                        Aplicar
+                    </button>
+                </div>
+            </div>
+        </div>,
+        document.body
     );
 }
 
@@ -1396,14 +1825,55 @@ function FilterGroup({ title, options, selected, onToggle }) {
 }
 
 function PiquimSubcatalogProductCard({ product, accent, mediaGradient, icon, currency, locale, onOpen }) {
+    const { addToCart, toggleFavorite, isFavorite } = useStore();
     const temperatureType = String(product?.temperature || icon || "").toLowerCase();
     const isCold = temperatureType.includes("ice") || temperatureType.includes("cold") || temperatureType.includes("frio") || temperatureType.includes("frío");
     const isHot = temperatureType.includes("fire") || temperatureType.includes("hot") || temperatureType.includes("calor");
     const showCold = isCold || (!isCold && !isHot);
     const showHot = isHot;
+    const inStock = Number(product?.stock || 0) > 0;
+    const favorite = isFavorite(product.id);
+    const cartPayload = {
+        id: product.id,
+        sku: product.sku || product.id,
+        name: product.name,
+        price: product.priceValue || 0,
+        image: product.image || "",
+        alt: product.alt || product.name,
+        stock: product.stock,
+    };
+
+    const openProduct = () => {
+        if (typeof onOpen === "function") onOpen();
+    };
+
+    const handleCardKeyDown = (event) => {
+        if (event.target !== event.currentTarget) return;
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        openProduct();
+    };
+
+    const handleFavoriteClick = (event) => {
+        event.stopPropagation();
+        toggleFavorite(cartPayload);
+    };
+
+    const handleAddToCart = (event) => {
+        event.stopPropagation();
+        if (!inStock) return;
+        addToCart(cartPayload, 1);
+    };
 
     return (
-        <article className="flex h-[380px] min-w-[282px] flex-col items-start justify-start overflow-hidden rounded-[18px] bg-white outline outline-1 -outline-offset-1 outline-[#E8DFD8]">
+        <article
+            role="link"
+            tabIndex={0}
+            aria-label={`Ver detalle de ${product.name}`}
+            onClick={openProduct}
+            onKeyDown={handleCardKeyDown}
+            className="group flex h-[400px] min-w-[282px] cursor-pointer flex-col items-start justify-start overflow-hidden rounded-[18px] bg-white outline outline-1 -outline-offset-1 outline-[#E8DFD8] transition-all duration-300 hover:-translate-y-1.5 hover:outline-[#FF4D00] hover:shadow-[0_18px_46px_rgba(255,77,0,0.16)] focus-visible:outline-2 focus-visible:outline-[#FF4D00]"
+        >
             <div className="relative h-[220px] w-full overflow-hidden" style={{ background: mediaGradient }}>
                 {product.badge ? (
                     <div
@@ -1415,29 +1885,57 @@ function PiquimSubcatalogProductCard({ product, accent, mediaGradient, icon, cur
                         </span>
                     </div>
                 ) : null}
-                <button type="button" className="absolute right-4 top-4 flex size-10 items-center justify-center rounded-full bg-white/85 text-[#1A1614]">
+                <button
+                    type="button"
+                    onClick={handleFavoriteClick}
+                    aria-label={favorite ? "Quitar de favoritos" : "Agregar a favoritos"}
+                    aria-pressed={favorite}
+                    className={`absolute right-4 top-4 flex size-10 items-center justify-center rounded-full text-[#1A1614] transition-all hover:scale-105 ${
+                        favorite ? "bg-[#FF4D00] text-white" : "bg-white/85 hover:bg-white"
+                    }`}
+                >
                     <HeartIcon className="size-5" />
                 </button>
-                <ProductDisplayIcon type={icon} className="absolute left-1/2 top-12 h-[138px] w-[86px] -translate-x-1/2" accent={accent} />
+                {product.hasImage ? (
+                    <img
+                        src={product.image}
+                        alt={product.alt || product.name}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                    />
+                ) : (
+                    <ProductDisplayIcon type={icon} className="absolute left-1/2 top-12 h-[138px] w-[86px] -translate-x-1/2 transition-transform duration-500 group-hover:scale-105" accent={accent} />
+                )}
                 <div className="absolute bottom-[17px] right-6 inline-flex h-[35px] min-w-[44px] items-center justify-center gap-[10px] rounded-[15px] bg-white px-3 py-2.5">
                     {showCold ? <Snowflake className="size-4" style={{ color: accent }} /> : null}
                     {showHot ? <Flame className="size-4 text-[#FF4D00]" /> : null}
                 </div>
             </div>
             <div className="flex w-full flex-col items-start justify-start gap-1.5 overflow-hidden p-[18px]">
-                <p className="text-[10px] font-bold text-[#FF4D00]" style={{ fontFamily: 'Gilroy, sans-serif', letterSpacing: 1.8 }}>
-                    {product.category}
+                <p className="line-clamp-1 text-[10px] font-bold uppercase text-[#8A7560]" style={{ fontFamily: 'Gilroy, sans-serif', letterSpacing: 1.2 }}>
+                    {product.breadcrumbLabel || `${product.category} › ${product.subtype}`}
                 </p>
                 <h3 className="text-base font-bold leading-[20.8px] text-[#1A1614]" style={{ fontFamily: 'Gilroy, sans-serif' }}>
                     {product.name}
                 </h3>
-                <p className="text-xs font-normal text-[#B5ADA8]" style={{ fontFamily: 'Gilroy, sans-serif' }}>
-                    {product.subtype}
-                </p>
+                <div className="flex min-h-5 items-center gap-2">
+                    {product.flavorColor ? (
+                        <span className="size-3 rounded-full border border-black/10" style={{ backgroundColor: product.flavorColor }} />
+                    ) : null}
+                    <p className="line-clamp-1 text-xs font-normal text-[#B5ADA8]" style={{ fontFamily: 'Gilroy, sans-serif' }}>
+                        {product.flavorTitle || product.subtype}
+                    </p>
+                </div>
                 <div className="h-2 w-px" />
                 <div className="inline-flex w-full items-center justify-between overflow-hidden">
                     <p className="text-xl font-black text-[#1A1614]">{formatCurrency(product.priceValue || 0, currency || "ARS", locale || "es-AR")}</p>
-                    <button type="button" onClick={onOpen} className="flex size-9 items-center justify-center rounded-full bg-[#FF4D00] text-white">
+                    <button
+                        type="button"
+                        onClick={handleAddToCart}
+                        disabled={!inStock}
+                        aria-label={inStock ? "Agregar al carrito" : "Sin stock"}
+                        className="flex size-9 items-center justify-center rounded-full bg-[#FF4D00] text-white transition-all hover:scale-105 hover:shadow-[0_10px_22px_rgba(255,77,0,0.28)] disabled:cursor-not-allowed disabled:bg-[#D8CCC5] disabled:text-[#8A7560]"
+                    >
                         <CartPlusIcon className="size-5" />
                     </button>
                 </div>
@@ -2401,6 +2899,14 @@ function CloseIcon({ className = "size-4" }) {
         <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+    );
+}
+
+function CheckIcon({ className = "size-4" }) {
+    return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
         </svg>
     );
 }

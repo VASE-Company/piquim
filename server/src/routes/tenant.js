@@ -2026,7 +2026,7 @@ tenantRouter.put('/products/:id', async (req, res, next) => {
       imageData = rawImages
         .map((img, index) => {
           if (typeof img === 'string') {
-            return { url: img, alt: name, primary: index === 0 };
+            return { url: img, alt: name, sku: sku || existing.sku || null, primary: index === 0 };
           }
           if (!img || typeof img !== 'object') return null;
           const url = img.url || img.src || '';
@@ -2034,12 +2034,13 @@ tenantRouter.put('/products/:id', async (req, res, next) => {
           return {
             url,
             alt: img.alt || name,
+            sku: img.sku || sku || existing.sku || null,
             primary: img.primary === true || index === 0,
           };
         })
         .filter(Boolean);
     } else if (typeof rawImages === 'string' && rawImages.trim()) {
-      imageData = [{ url: rawImages.trim(), alt: name, primary: true }];
+      imageData = [{ url: rawImages.trim(), alt: name, sku: sku || existing.sku || null, primary: true }];
     }
 
     const features = Object.prototype.hasOwnProperty.call(req.body || {}, 'features')
@@ -2252,11 +2253,12 @@ tenantRouter.post('/products', async (req, res, next) => {
     imageData = images.map((img, index) => ({
       url: img.url || img,
       alt: img.alt || name,
+      sku: img.sku || sku || null,
       primary: img.primary === true || index === 0 // First image is primary by default
     }));
   } else if (typeof images === 'string') {
     // Backward compatibility: single URL string
-    imageData = [{ url: images, alt: name, primary: true }];
+    imageData = [{ url: images, alt: name, sku: sku || null, primary: true }];
   }
 
   const shortDescription = String(short_description || '').trim() || null;
