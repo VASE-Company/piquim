@@ -94,14 +94,20 @@ JWT_SECRET=CAMBIAR_ESTE_SECRETO
 BOOTSTRAP_TOKEN=CAMBIAR_ESTE_TOKEN
 DATABASE_URL=postgresql://USUARIO:PASSWORD@HOST:5432/DBNAME
 VITE_EDITOR_HOST=editor.vase.ar
+VITE_TENANT_ID=636736e2-e135-44cd-ac5c-5d4ccb839a73
 PLATFORM_BASE_DOMAIN=vase.ar
 PLATFORM_CNAME_TARGET=editor.vase.ar
 PLATFORM_APEX_IP=76.13.231.188
+PUBLIC_API_URL=https://editor.vase.ar
+INTEGRATIONS_PUBLIC_BASE_URL=https://editor.vase.ar
+PUBLIC_ADMIN_URL=https://editor.vase.ar/admin/evolution
+PIQUIM_TENANT_ID=636736e2-e135-44cd-ac5c-5d4ccb839a73
 ```
 
 Puntos importantes:
 
-- `VITE_API_URL` no hace falta en produccion; el frontend ya usa mismo origen por defecto.
+- `VITE_API_URL` no hace falta en produccion si frontend y API comparten `editor.vase.ar`; dejarlo vacio usa el mismo origen.
+- `VITE_TENANT_ID` fija el ecommerce personalizado de Piquim sobre el tenant correcto, mientras `editor.vase.ar` sigue siendo el panel Vase.
 - `CORS_ORIGIN` puedes dejarlo vacio mientras frontend y backend vivan en el mismo host.
 - Esta opcion requiere una base PostgreSQL funcional. Si no tienes una, crea una temporal solo para validar este servicio.
 
@@ -117,10 +123,15 @@ JWT_SECRET=CAMBIAR_ESTE_SECRETO
 BOOTSTRAP_TOKEN=CAMBIAR_ESTE_TOKEN
 DATABASE_URL=postgresql://USUARIO:PASSWORD@HOST:5432/DBNAME
 VITE_EDITOR_HOST=editor.vase.ar
+VITE_TENANT_ID=636736e2-e135-44cd-ac5c-5d4ccb839a73
 VASE_BUSINESS_SSO_SECRET=vase091218
 PLATFORM_BASE_DOMAIN=vase.ar
 PLATFORM_CNAME_TARGET=editor.vase.ar
 PLATFORM_APEX_IP=76.13.231.188
+PUBLIC_API_URL=https://editor.vase.ar
+INTEGRATIONS_PUBLIC_BASE_URL=https://editor.vase.ar
+PUBLIC_ADMIN_URL=https://editor.vase.ar/admin/evolution
+PIQUIM_TENANT_ID=636736e2-e135-44cd-ac5c-5d4ccb839a73
 VITE_EXTERNAL_AUTH=true
 VITE_VASE_APP_URL=https://vase.ar
 VITE_VASE_APP_LAUNCH_URL=https://vase.ar/app/business/launch

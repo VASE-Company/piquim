@@ -286,9 +286,7 @@ WITH seed AS (
 INSERT INTO categories (tenant_id, name, slug, data)
 SELECT tenant_id, 'Heladeria', 'heladeria', '{}'::jsonb FROM seed
 UNION ALL
-SELECT tenant_id, 'Panaderia', 'panaderia', '{}'::jsonb FROM seed
-UNION ALL
-SELECT tenant_id, 'Confiteria', 'confiteria', '{}'::jsonb
+SELECT tenant_id, 'Panaderia/Confiteria', 'panaderia', '{}'::jsonb
 FROM seed
 ON CONFLICT (tenant_id, slug) DO NOTHING;
 
