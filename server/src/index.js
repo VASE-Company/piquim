@@ -12,8 +12,10 @@ import { ensureProductSyncSchema } from './services/integration.service.js';
 const PIQUIM_TENANT_ID = String(
   process.env.PIQUIM_TENANT_ID ||
   process.env.PIQUIM_TENANT_IDS ||
-  '636736e2-e135-44cd-ac5c-5d4ccb839a73'
+  (process.env.NODE_ENV === 'production' ? '' : '636736e2-e135-44cd-ac5c-5d4ccb839a73')
 ).split(',')[0].trim();
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function runStartupMigrations() {
   await pool.query(
@@ -76,11 +78,11 @@ async function runStartupMigrations() {
 
   await ensureProductSyncSchema();
 
-  if (PIQUIM_TENANT_ID) {
+  if (PIQUIM_TENANT_ID && UUID_PATTERN.test(PIQUIM_TENANT_ID)) {
     await pool.query(
       [
         'WITH seed AS (',
-        'SELECT $1::uuid AS tenant_id',
+        'SELECT id AS tenant_id FROM tenants WHERE id = $1::uuid',
         '), panaderia AS (',
         'INSERT INTO categories (tenant_id, name, slug, data)',
         "SELECT tenant_id, 'Panaderia/Confiteria', 'panaderia', '{}'::jsonb FROM seed",
@@ -107,6 +109,10 @@ async function runStartupMigrations() {
       ].join(' '),
       [PIQUIM_TENANT_ID]
     );
+  } else if (PIQUIM_TENANT_ID) {
+    console.warn(`Skipping PIQUIM catalog startup migration: invalid PIQUIM_TENANT_ID "${PIQUIM_TENANT_ID}"`);
+  } else {
+    console.log('Skipping PIQUIM catalog startup migration: PIQUIM_TENANT_ID is not configured');
   }
 }
 
