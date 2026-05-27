@@ -31,12 +31,27 @@ function normalizeInternalRole(value) {
   return value === 'master_admin' ? 'master_admin' : 'tenant_admin';
 }
 
-function buildDefaultTenantSettings(tenantName) {
+function normalizeTenantPresetText(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+function inferDefaultDesignPreset(tenantName, tenantSlug = '') {
+  const identity = normalizeTenantPresetText(`${tenantName} ${tenantSlug}`);
+  if (identity.includes('piquim')) return 'piquim';
+  return 'sanitarios_industrial';
+}
+
+function buildDefaultTenantSettings(tenantName, tenantSlug = '') {
   const safeName = normalizeDisplayName(tenantName) || 'Vase Business';
 
   return {
     branding: {
       name: safeName,
+      design_preset: inferDefaultDesignPreset(safeName, tenantSlug),
     },
     theme: {},
     commerce: {
@@ -154,7 +169,7 @@ async function upsertTenant(client, payload) {
   return insertRes.rows[0];
 }
 
-async function ensureTenantSettings(client, tenantId, tenantName) {
+async function ensureTenantSettings(client, tenantId, tenantName, tenantSlug = '') {
   const existingSettingsRes = await client.query(
     'select tenant_id from tenant_settings where tenant_id = $1',
     [tenantId]
@@ -164,7 +179,7 @@ async function ensureTenantSettings(client, tenantId, tenantName) {
     return;
   }
 
-  const defaults = buildDefaultTenantSettings(tenantName);
+  const defaults = buildDefaultTenantSettings(tenantName, tenantSlug);
   await client.query(
     [
       'insert into tenant_settings (tenant_id, branding, theme, commerce)',
@@ -297,7 +312,7 @@ export async function exchangeVaseLaunchToken(rawToken) {
     await client.query('BEGIN');
 
     const tenant = await upsertTenant(client, payload);
-    await ensureTenantSettings(client, tenant.id, tenant.name);
+    await ensureTenantSettings(client, tenant.id, tenant.name, payload.externalTenantSlug || '');
     await ensureTenantPlatformDomain(client, tenant.id, {
       preferredSubdomain: payload.externalTenantSlug || '',
       preferredLabels: [payload.displayName || '', payload.tenantName || ''],

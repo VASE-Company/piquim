@@ -16,6 +16,24 @@ async function readJsonResponse(response, fallbackError = 'request_failed') {
     }
 }
 
+function getRequestTenantId() {
+    const tenantHeaders = getTenantHeaders();
+    return String(tenantHeaders['X-Tenant-Id'] || '').trim();
+}
+
+function buildTenantJsonHeaders() {
+    const tenantId = getRequestTenantId();
+    return {
+        'Content-Type': 'application/json',
+        ...(tenantId ? { 'X-Tenant-Id': tenantId } : {}),
+    };
+}
+
+function withTenantId(payload = {}) {
+    const tenantId = getRequestTenantId();
+    return tenantId ? { ...payload, tenant_id: tenantId } : payload;
+}
+
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -168,12 +186,11 @@ export const AuthProvider = ({ children }) => {
 
         const response = await fetch(`${getApiBase()}/auth/login`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+            headers: buildTenantJsonHeaders(),
+            body: JSON.stringify(withTenantId({
                 email: normalizedEmail,
                 password,
-                tenant_id: import.meta.env.VITE_TENANT_ID
-            }),
+            })),
         });
 
         const data = await readJsonResponse(response, 'login_failed');
@@ -203,11 +220,10 @@ export const AuthProvider = ({ children }) => {
 
         const response = await fetch(`${getApiBase()}/auth/request-login-code`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+            headers: buildTenantJsonHeaders(),
+            body: JSON.stringify(withTenantId({
                 email: normalizedEmail,
-                tenant_id: import.meta.env.VITE_TENANT_ID
-            }),
+            })),
         });
         if (!response.ok) {
             const error = await response.json().catch(() => ({}));
@@ -226,12 +242,11 @@ export const AuthProvider = ({ children }) => {
             : rawEmail.toLowerCase();
         const response = await fetch(`${getApiBase()}/auth/login-with-code`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+            headers: buildTenantJsonHeaders(),
+            body: JSON.stringify(withTenantId({
                 email: normalizedEmail,
                 code: String(code || '').trim(),
-                tenant_id: import.meta.env.VITE_TENANT_ID
-            }),
+            })),
         });
         if (!response.ok) {
             const error = await response.json().catch(() => ({}));
@@ -249,10 +264,7 @@ export const AuthProvider = ({ children }) => {
             throw new Error('external_auth_enabled');
         }
 
-        const tenantHeaders = getTenantHeaders();
-        const envTenant = String(import.meta.env.VITE_TENANT_ID || '').trim();
-        const headerTenant = String(tenantHeaders['X-Tenant-Id'] || '').trim();
-        const tenantId = headerTenant || envTenant || '';
+        const tenantId = getRequestTenantId();
 
         const payload = {
             email: input.email,
@@ -385,12 +397,11 @@ export const AuthProvider = ({ children }) => {
 
         const response = await fetch(`${getApiBase()}/auth/verify-email`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+            headers: buildTenantJsonHeaders(),
+            body: JSON.stringify(withTenantId({
                 email,
                 code,
-                tenant_id: import.meta.env.VITE_TENANT_ID
-            }),
+            })),
         });
 
         if (!response.ok) {
@@ -407,11 +418,10 @@ export const AuthProvider = ({ children }) => {
 
         const response = await fetch(`${getApiBase()}/auth/resend-verification`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+            headers: buildTenantJsonHeaders(),
+            body: JSON.stringify(withTenantId({
                 email,
-                tenant_id: import.meta.env.VITE_TENANT_ID
-            }),
+            })),
         });
 
         if (!response.ok) {
