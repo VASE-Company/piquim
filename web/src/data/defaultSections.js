@@ -1,5 +1,5 @@
-import { getDefaultBrandMarqueeProps } from './brandMarqueeDefaults';
-import { PIQUIM_CATALOG_CARDS } from './piquimBranding';
+import { getDefaultBrandMarqueeProps } from './brandMarqueeDefaults.js';
+import { PIQUIM_CATALOG_CARDS } from './piquimBranding.js';
 
 const cloneValue = (value) => {
     try {
