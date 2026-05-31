@@ -34,6 +34,8 @@ const createEmptyProduct = () => ({
     price_tiers: [],
     source_category: '',
     source_category_path: [],
+    recipe_file_url: '',
+    recipe_file_name: '',
 });
 
 const readImageAsDataUrl = (file) =>
@@ -241,6 +243,8 @@ const buildProductFormFromProduct = (product) => {
             : Array.isArray(data.source_category_path)
                 ? data.source_category_path
                 : [],
+        recipe_file_url: data.recipe_file_url || '',
+        recipe_file_name: data.recipe_file_name || '',
     };
 };
 
@@ -315,6 +319,8 @@ const mapProductPayloadToLocalItem = (payload, productId, categoryIds = []) => (
                 : {},
         source_category: payload.source_category || null,
         source_category_path: Array.isArray(payload.source_category_path) ? payload.source_category_path : [],
+        recipe_file_url: payload.recipe_file_url || null,
+        recipe_file_name: payload.recipe_file_name || null,
     },
 });
 
@@ -843,6 +849,42 @@ export const useCatalogManager = ({ setProducts, categories, setCategories, bran
         }
     }, [addToast]);
 
+    const handleRecipeFileUpload = useCallback(async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        setUploading(true);
+        try {
+            const token = localStorage.getItem('teflon_token');
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await fetch(`${getApiBase()}/tenant/products/upload-recipe-file`, {
+                method: 'POST',
+                headers: {
+                    ...getTenantHeaders(),
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+                },
+                body: formData,
+            });
+            if (!res.ok) {
+                addToast('No se pudo subir el recetario', 'error');
+                return;
+            }
+            const payload = await res.json();
+            setProductDraft((prev) => ({
+                ...prev,
+                recipe_file_url: payload.url || '',
+                recipe_file_name: payload.original_name || file.name,
+            }));
+            addToast('Recetario cargado', 'success');
+        } catch (err) {
+            console.error('Recipe file upload failed', err);
+            addToast('Error al subir el recetario', 'error');
+        } finally {
+            setUploading(false);
+            event.target.value = '';
+        }
+    }, [addToast]);
+
     const handleRemoveImage = useCallback((index) => {
         setProductDraft((prev) => {
             const current = Array.isArray(prev.images) ? [...prev.images] : [];
@@ -898,6 +940,7 @@ export const useCatalogManager = ({ setProducts, categories, setCategories, bran
         handleClearFeatured,
         handleAddStock,
         handleImageUpload,
+        handleRecipeFileUpload,
         handleRemoveImage,
         handleSetPrimaryImage,
         setStockEdits,

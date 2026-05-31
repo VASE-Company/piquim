@@ -99,10 +99,6 @@ export const StoreProvider = ({ children }) => {
     }, [cartItems]);
 
     useEffect(() => {
-        if (!user) {
-            setFavorites([]);
-            return;
-        }
         try {
             const raw = localStorage.getItem(favoritesKey);
             setFavorites(raw ? JSON.parse(raw) : []);
@@ -113,7 +109,6 @@ export const StoreProvider = ({ children }) => {
     }, [favoritesKey, user]);
 
     useEffect(() => {
-        if (!user) return;
         try {
             localStorage.setItem(favoritesKey, JSON.stringify(favorites));
         } catch (err) {
@@ -227,10 +222,8 @@ export const StoreProvider = ({ children }) => {
     );
 
     const requireAuthForFavorites = useCallback(() => {
-        if (user) return true;
-        showToast("Inicia sesión para guardar favoritos");
-        return false;
-    }, [user, showToast]);
+        return true;
+    }, []);
 
     const addFavorite = useCallback((product) => {
         if (!requireAuthForFavorites()) return;

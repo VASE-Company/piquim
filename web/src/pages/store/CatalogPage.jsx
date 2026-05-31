@@ -487,6 +487,9 @@ export default function CatalogPage() {
 
         return products.map((product) => {
             const data = product.data || {};
+            const specs = data.specifications && typeof data.specifications === "object" && !Array.isArray(data.specifications)
+                ? data.specifications
+                : {};
             const variations = Array.isArray(product?.variations) ? product.variations.map(mapVariation) : [];
             const prices = variations.length ? variations.map((item) => Number(item.price || 0)) : [Number(product.price || 0)];
             const stockLevels = variations.length ? variations.map((item) => Number(item.stock || 0)) : [Number(product.stock || 0)];
@@ -512,6 +515,18 @@ export default function CatalogPage() {
                 isWholesaleItem: Boolean(product?.pricing?.segment && product.pricing.segment !== "retail"),
                 variationGroup: product.variation_group,
                 variationGroupLabel: product.variation_group_label || data.variant_group_label || data.collection || null,
+                presentationLabel:
+                    product.variation_label ||
+                    data.variant_label ||
+                    data.variantLabel ||
+                    data.variant ||
+                    data.presentation ||
+                    specs.presentacion ||
+                    specs["presentación"] ||
+                    specs.envase ||
+                    specs.formato ||
+                    specs.peso ||
+                    null,
                 variationCount: Number(product.variation_count || variations.length || 1),
                 grouped: Boolean(product.grouped) && variations.length > 1,
                 variations,
@@ -949,8 +964,8 @@ function PiquimCatalogLanding({ onSelectCard }) {
     return (
         <div className="min-h-screen bg-[#FFFAF6] font-[Inter] text-[#1A1614]">
             <div className="w-full overflow-hidden bg-[#FFFAF6]">
-                <section className="w-full overflow-hidden pt-[86px] max-md:pt-[74px]">
-                    <div className="grid w-full grid-cols-1 items-stretch gap-0.5 overflow-hidden rounded-t-[45px] bg-[#FF4D00] lg:grid-cols-2">
+                <section className="w-full overflow-hidden">
+                    <div className="grid w-full grid-cols-1 items-stretch gap-0.5 overflow-hidden bg-[#FF4D00] lg:grid-cols-2">
                         {PIQUIM_EXACT_CARDS.map((card) => (
                             <PiquimExactCatalogCard
                                 key={card.id}
@@ -1013,7 +1028,7 @@ function PiquimCatalogHeader() {
 function PiquimExactCatalogCard({ card, onClick }) {
     return (
         <article
-            className="relative h-[700px] w-full overflow-hidden bg-[#1A1614] lg:h-[calc(100vh-113px)] lg:min-h-[700px]"
+            className="relative h-[calc(50svh+70px)] min-h-[430px] w-full overflow-hidden bg-[#1A1614] first:pt-[92px] lg:h-screen lg:min-h-[700px] lg:first:pt-0"
         >
             <img
                 src={card.image}
@@ -1021,13 +1036,13 @@ function PiquimExactCatalogCard({ card, onClick }) {
                 className="absolute inset-0 h-full w-full object-cover"
             />
             <div className="absolute inset-0" style={{ background: card.overlay }} />
-            <div className="absolute inset-x-10 bottom-[30px] inline-flex min-h-[290px] flex-col items-center justify-center gap-4 overflow-hidden">
+            <div className="absolute inset-x-5 bottom-8 inline-flex min-h-[230px] flex-col items-center justify-center gap-3 overflow-hidden sm:inset-x-10 sm:min-h-[290px] sm:gap-4">
                 <div className="inline-flex items-center justify-center gap-3 overflow-hidden">
                     <div className="text-[11px] font-bold text-white" style={{ fontFamily: 'Gilroy, sans-serif', letterSpacing: 1.98 }}>
                         {card.prefix}
                     </div>
                 </div>
-                <h2 className="text-[56px] font-black italic leading-none text-[#FF4D00]" style={{ fontFamily: 'Gilroy, sans-serif' }}>
+                <h2 className="text-center text-[38px] font-black italic leading-none text-[#FF4D00] sm:text-[56px]" style={{ fontFamily: 'Gilroy, sans-serif' }}>
                     {card.title}
                 </h2>
                 <div className="inline-flex w-full max-w-[398px] flex-wrap content-center items-center justify-center gap-1.5 overflow-hidden">
@@ -1437,7 +1452,7 @@ function PiquimSubcatalogPage({ catalog, products, currency, locale, onProductCl
 
     return (
         <div className="min-h-screen bg-[#FFFAF6] font-[Inter] text-[#1A1614]">
-            <main className="flex w-full items-start justify-center gap-0 bg-[#FFFAF6] px-[60px] pb-10 pt-[104px] max-lg:flex-col max-lg:px-5 max-md:pt-[86px]">
+            <main className="flex w-full items-start justify-center gap-6 bg-[#FFFAF6] px-[60px] pb-10 pt-[104px] max-lg:flex-col max-lg:px-5 max-md:gap-5 max-md:px-4 max-md:pt-[92px]">
                 <PiquimSubcatalogSidebar
                     catalog={catalog}
                     labels={labels}
@@ -1458,10 +1473,10 @@ function PiquimSubcatalogPage({ catalog, products, currency, locale, onProductCl
                     stockOnly={stockOnly}
                     setStockOnly={setStockOnly}
                 />
-                <section className="flex flex-1 flex-col items-start justify-start gap-[30px] overflow-hidden bg-[#FFFAF6] px-[60px] py-[30px] max-xl:px-8 max-lg:w-full max-md:px-0">
+                <section className="flex flex-1 flex-col items-start justify-start gap-[30px] overflow-hidden bg-[#FFFAF6] px-[60px] py-[30px] max-xl:px-8 max-lg:w-full max-lg:px-0 max-md:gap-6 max-md:py-0">
                     <header className="inline-flex w-full items-end justify-between overflow-hidden">
-                        <div className="inline-flex flex-col items-start justify-start gap-4 overflow-hidden">
-                            <h1 className="text-[56px] font-black leading-[56px] max-md:text-[40px] max-md:leading-[42px]" style={{ fontFamily: 'Gilroy, sans-serif' }}>
+                        <div className="inline-flex min-w-0 flex-col items-start justify-start gap-4 overflow-hidden">
+                            <h1 className="text-[56px] font-black leading-[56px] max-md:text-[34px] max-md:leading-[36px]" style={{ fontFamily: 'Gilroy, sans-serif' }}>
                                 <span className="text-[#1A1614]">{catalog.headingBase} </span>
                                 <span className="italic text-[#FF4D00]">{catalog.headingAccent}</span>
                             </h1>
@@ -1486,8 +1501,8 @@ function PiquimSubcatalogPage({ catalog, products, currency, locale, onProductCl
                                         className="flex w-full items-center justify-between gap-4 border-b border-[#E8DFD8] pb-4 text-left"
                                         aria-expanded={expanded}
                                     >
-                                        <span className="flex min-w-0 flex-col gap-1">
-                                            <span className="text-4xl font-bold leading-9 text-[#1A1614]" style={{ fontFamily: 'Gilroy, sans-serif' }}>
+                                            <span className="flex min-w-0 flex-col gap-1">
+                                            <span className="text-2xl font-bold leading-7 text-[#1A1614] sm:text-4xl sm:leading-9" style={{ fontFamily: 'Gilroy, sans-serif' }}>
                                                 {section.title}
                                             </span>
                                             <span className="text-xs font-bold uppercase tracking-[0.18em] text-[#8A7560]">
@@ -1511,7 +1526,7 @@ function PiquimSubcatalogPage({ catalog, products, currency, locale, onProductCl
                                                 <h3 className="text-2xl font-bold leading-8" style={{ color: catalog.accent, fontFamily: 'Gilroy, sans-serif' }}>
                                                     {categorySection.title}
                                                 </h3>
-                                                <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(282px,1fr))] gap-6">
+                                                <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(260px,1fr))] sm:gap-6">
                                                     {categorySection.products.map((product) => (
                                                         <PiquimSubcatalogProductCard
                                                             key={product.id}
@@ -1531,7 +1546,7 @@ function PiquimSubcatalogPage({ catalog, products, currency, locale, onProductCl
                                 ) : null}
 
                                 {expanded && !section.categories?.length ? (
-                                    <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(282px,1fr))] gap-6">
+                                    <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(260px,1fr))] sm:gap-6">
                                         {section.products.map((product) => (
                                             <PiquimSubcatalogProductCard
                                                 key={product.id}
@@ -1587,7 +1602,7 @@ function PiquimSubcatalogSidebar({
     const usesGroupedFilters = Array.isArray(catalog?.productGroups) && catalog.productGroups.length > 0;
 
     return (
-        <aside className="flex min-h-[1850px] w-64 shrink-0 flex-col items-start justify-start gap-2 overflow-hidden rounded-xl border-r border-[#FFDCC1] bg-[#FFD7B6] p-6 shadow-sm max-lg:min-h-0 max-lg:w-full">
+        <aside className="flex min-h-[1850px] w-64 shrink-0 flex-col items-start justify-start gap-2 overflow-hidden rounded-xl border border-[#FFDCC1] bg-[#FFD7B6] p-6 shadow-sm max-lg:min-h-0 max-lg:w-full max-md:p-4">
             <div className="flex w-full flex-col items-start justify-start gap-2">
                 <div className="flex w-full flex-col items-start justify-start pb-6">
                     <h2 className="flex w-full flex-col justify-center text-2xl font-bold leading-8 text-[#A04100]" style={{ fontFamily: 'Epilogue, Gilroy, sans-serif' }}>
@@ -1835,7 +1850,7 @@ function FilterGroup({ title, options, selected, onToggle }) {
 }
 
 function PiquimSubcatalogProductCard({ product, accent, mediaGradient, icon, currency, locale, onOpen }) {
-    const { addToCart, toggleFavorite, isFavorite } = useStore();
+    const { addToCart, toggleFavorite, isFavorite, showToast } = useStore();
     const temperatureType = String(product?.temperature || icon || "").toLowerCase();
     const isCold = temperatureType.includes("ice") || temperatureType.includes("cold") || temperatureType.includes("frio") || temperatureType.includes("frío");
     const isHot = temperatureType.includes("fire") || temperatureType.includes("hot") || temperatureType.includes("calor");
@@ -1866,7 +1881,8 @@ function PiquimSubcatalogProductCard({ product, accent, mediaGradient, icon, cur
 
     const handleFavoriteClick = (event) => {
         event.stopPropagation();
-        toggleFavorite(cartPayload);
+        const added = toggleFavorite(cartPayload);
+        showToast(added ? "Producto anadido a favoritos" : "Producto quitado de favoritos");
     };
 
     const handleAddToCart = (event) => {
@@ -1882,7 +1898,7 @@ function PiquimSubcatalogProductCard({ product, accent, mediaGradient, icon, cur
             aria-label={`Ver detalle de ${product.name}`}
             onClick={openProduct}
             onKeyDown={handleCardKeyDown}
-            className="group flex h-[400px] min-w-[282px] cursor-pointer flex-col items-start justify-start overflow-hidden rounded-[18px] bg-white outline outline-1 -outline-offset-1 outline-[#E8DFD8] transition-all duration-300 hover:-translate-y-1.5 hover:outline-[#FF4D00] hover:shadow-[0_18px_46px_rgba(255,77,0,0.16)] focus-visible:outline-2 focus-visible:outline-[#FF4D00]"
+            className="group flex h-[380px] w-full min-w-0 cursor-pointer flex-col items-start justify-start overflow-hidden rounded-[18px] bg-white outline outline-1 -outline-offset-1 outline-[#E8DFD8] transition-all duration-300 hover:-translate-y-1.5 hover:outline-[#FF4D00] hover:shadow-[0_18px_46px_rgba(255,77,0,0.16)] focus-visible:outline-2 focus-visible:outline-[#FF4D00] sm:h-[400px]"
         >
             <div className="relative h-[220px] w-full overflow-hidden" style={{ background: mediaGradient }}>
                 {product.badge ? (
@@ -1904,7 +1920,7 @@ function PiquimSubcatalogProductCard({ product, accent, mediaGradient, icon, cur
                         favorite ? "bg-[#FF4D00] text-white" : "bg-white/85 hover:bg-white"
                     }`}
                 >
-                    <HeartIcon className="size-5" />
+                    <HeartIcon active={favorite} className="size-5" />
                 </button>
                 {product.hasImage ? (
                     <img
@@ -2594,7 +2610,7 @@ function CatalogProductCard({
 }) {
     const { addToCart, toggleFavorite, isFavorite } = useStore();
     const [expanded, setExpanded] = useState(false);
-    const { name, desc, price, minPrice, maxPrice, oldPrice, tag, image, alt, stock, grouped, variationCount, variations, variationGroupLabel } = product;
+    const { name, desc, price, minPrice, maxPrice, oldPrice, tag, image, alt, stock, grouped, variationCount, variations, variationGroupLabel, presentationLabel } = product;
     const favoriteActive = isFavorite(product.id);
     const inStock = isInStock(stock);
     const stockStatus = showStock ? getStockStatus(stock, lowStockThreshold) : null;
@@ -2720,7 +2736,7 @@ function CatalogProductCard({
                                                     : "bg-[#181411]/10 text-[#181411] dark:bg-white/10 dark:text-white"
                                                 }`}
                                         >
-                                            {product.isWholesaleItem ? "Mayorista" : "Minorista"}
+                                            {presentationLabel || (product.isWholesaleItem ? "Mayorista" : "Minorista")}
                                         </span>
                                     </div>
                                     {hasPriceRange ? (

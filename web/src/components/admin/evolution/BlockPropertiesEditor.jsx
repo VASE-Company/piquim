@@ -50,7 +50,7 @@ const HERO_EXAMPLE_BY_VARIANT = {
     classic: 'Banner clasico de portada',
     fashion: 'Plantilla editorial de moda',
     home_decor: 'Plantilla estilo hogar / decoracion',
-    sanitarios_industrial: 'Plantilla industrial tipo vitrina',
+    sanitarios_industrial: 'Plantilla industrial',
 };
 
 const FEATURED_EXAMPLE_BY_VARIANT = {

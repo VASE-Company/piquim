@@ -38,7 +38,7 @@ const LEGACY_PIQUIM_ABOUT_SECTION_TYPES = new Set([
     'PiquimCTABanner',
 ]);
 const GENERIC_FOOTER_DEFAULTS = {
-    description: 'Soluciones sanitarias, griferia y accesorios con asesoramiento comercial.',
+    description: 'Tienda online con catalogo editable y asesoramiento comercial.',
     shopLinks: [
         { label: 'Catalogo', href: '/catalog' },
         { label: 'Nosotros', href: '/about' },
@@ -46,7 +46,7 @@ const GENERIC_FOOTER_DEFAULTS = {
     helpLinks: [{ label: 'Terminos', href: '/terms' }],
     legalLinks: [{ label: 'Terminos y condiciones', href: '/terms' }],
     newsletter: { enabled: false },
-    legalText: '(c) 2026 Sanitarios El Teflon. Todos los derechos reservados.',
+    legalText: '(c) 2026 Tu empresa. Todos los derechos reservados.',
 };
 
 const normalizeHomeSectionsForBrand = (settings = {}, tenant = null, sections = []) => {

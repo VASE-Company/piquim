@@ -391,6 +391,8 @@ export default function ProductDetail() {
                 getSpecificationValue(specifications, ["presentacion", "presentación", "envase", "formato", "peso"]) ||
                 "",
             variationGroupLabel: product.variation_group_label || data.variant_group_label || data.variantGroupLabel || "",
+            recipeFileUrl: data.recipe_file_url || "",
+            recipeFileName: data.recipe_file_name || "",
             priceTiers: Array.isArray(product.price_tiers) ? product.price_tiers : [],
             variations: Array.isArray(product.variations) ? product.variations : [],
             extra: data,
@@ -447,6 +449,14 @@ export default function ProductDetail() {
                 alt: data.image_alt || item.name || "Producto",
                 stock: item.stock,
                 isWholesaleItem: isWholesale && item.price_wholesale != null,
+                presentationLabel:
+                    item.variation_label ||
+                    data.variant_label ||
+                    data.variantLabel ||
+                    data.variant ||
+                    data.presentation ||
+                    getSpecificationValue(data.specifications, ["presentacion", "presentación", "envase", "formato", "peso"]) ||
+                    "",
                 index,
             };
         });
@@ -799,6 +809,27 @@ export default function ProductDetail() {
                                     </div>
                                 ) : null}
 
+                                {view.recipeFileUrl ? (
+                                    <div className="mt-6 rounded-2xl border border-[#FFD7B6] bg-[#FFF4EC] p-4">
+                                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#FF4D00]">
+                                            Recetario
+                                        </p>
+                                        <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                            <p className="text-sm font-bold text-[#1A1614]">
+                                                {view.recipeFileName || "Ficha de recetas del producto"}
+                                            </p>
+                                            <a
+                                                href={view.recipeFileUrl}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="inline-flex h-10 items-center justify-center rounded-full bg-white px-4 text-xs font-black uppercase tracking-[0.12em] text-[#FF4D00] shadow-sm transition-colors hover:bg-[#FF4D00] hover:text-white"
+                                            >
+                                                Descargar
+                                            </a>
+                                        </div>
+                                    </div>
+                                ) : null}
+
                                 <div className="mt-8 flex items-center gap-3">
                                     <button
                                         type="button"
@@ -1056,9 +1087,9 @@ export default function ProductDetail() {
                                                             <span className="text-primary font-black text-base">
                                                                 {formatCurrency(item.price, currency, locale)}
                                                             </span>
-                                                            {item.isWholesaleItem ? (
+                                                            {item.presentationLabel || item.isWholesaleItem ? (
                                                                 <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-bold uppercase">
-                                                                    Mayorista
+                                                                    {item.presentationLabel || "Mayorista"}
                                                                 </span>
                                                             ) : null}
                                                         </div>

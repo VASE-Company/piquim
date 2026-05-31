@@ -11,32 +11,35 @@ export default function PiquimTresMundos({
   rightImage = "/piquim/product-bucket.png",
 }) {
   return (
-    <section className="relative overflow-hidden bg-[#fffaf6] px-4 py-20 md:px-[80px] md:py-[100px]">
-      <div className="mx-auto max-w-[1317px] text-center">
-        <p className="text-[12px] font-semibold tracking-[2.4px] text-[#ff4d00]">
-          {eyebrow}
-        </p>
-        <h2 className="mt-3 text-[42px] font-black leading-none tracking-[-1px] text-[#1a1614] md:text-[66px]">
-          {titleStart}{" "}
-          <span className="italic text-[#ff4d00]">{titleHighlight}</span>
-          <br />
-          {titleEnd}
-        </h2>
-        <p className="mx-auto mt-6 max-w-[620px] text-[13px] leading-[1.55] text-[#4a4441]">
-          {subtitle || description}
-        </p>
-
-        <div className="mt-1 -mb-3 flex items-end justify-center gap-0 md:hidden">
+    <section className="relative overflow-hidden bg-[#fffaf6] px-4 py-14 sm:py-16 md:px-[80px] md:py-[100px]">
+      <div className="mx-auto grid max-w-[1317px] items-center gap-8 md:block md:text-center">
+        <div className="relative mx-auto flex h-[210px] w-full max-w-[360px] items-end justify-center md:hidden">
           <img
             src={leftImage}
             alt="Balde izquierdo"
-            className="w-[60%] max-w-[400px] -rotate-12 opacity-95"
+            className="absolute left-2 bottom-2 w-[48%] max-w-[170px] -rotate-6 opacity-95"
           />
           <img
             src={rightImage}
             alt="Balde derecho"
-            className="w-[60%] max-w-[300px] rotate-12 opacity-95"
+            className="absolute right-2 bottom-0 w-[52%] max-w-[185px] rotate-6 opacity-95"
           />
+        </div>
+
+        <div className="text-center">
+        <p className="text-[11px] font-semibold uppercase tracking-[2px] text-[#ff4d00] sm:text-[12px] sm:tracking-[2.4px]">
+          {eyebrow}
+        </p>
+        <h2 className="mx-auto mt-3 max-w-[720px] text-[34px] font-black leading-[0.98] text-[#1a1614] sm:text-[42px] md:text-[66px]">
+          {titleStart}{" "}
+          <span className="italic text-[#ff4d00]">{titleHighlight}</span>
+          <br className="hidden sm:block" />
+          <span className="sm:hidden"> </span>
+          {titleEnd}
+        </h2>
+        <p className="mx-auto mt-5 max-w-[620px] text-[13px] leading-[1.6] text-[#4a4441] sm:mt-6">
+          {subtitle || description}
+        </p>
         </div>
       </div>
 

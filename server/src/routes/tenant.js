@@ -3,6 +3,7 @@ import { pool } from '../db.js';
 import multer from 'multer';
 import path from 'path';
 import crypto from 'crypto';
+import fs from 'fs';
 import { resolve4, resolveCname } from 'node:dns/promises';
 import { fileURLToPath } from 'url';
 import { ensureDefaultPriceLists, ensurePricingSchema } from '../services/userPricing.js';
@@ -24,6 +25,7 @@ const __dirname = path.dirname(__filename);
 // Multer configuration for image uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
+    fs.mkdirSync('uploads/products/', { recursive: true });
     cb(null, 'uploads/products/');
   },
   filename: (req, file, cb) => {
@@ -44,6 +46,37 @@ const upload = multer({
     } else {
       cb(new Error('Solo se permiten imágenes (JPEG, PNG, WebP, GIF)'));
     }
+  }
+});
+
+const recipeStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    fs.mkdirSync('uploads/recipes/', { recursive: true });
+    cb(null, 'uploads/recipes/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = `${Date.now()}-${crypto.randomUUID()}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
+  }
+});
+
+const recipeUpload = multer({
+  storage: recipeStorage,
+  limits: { fileSize: 15 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const allowedExt = ['.pdf', '.doc', '.docx', '.txt'];
+    const allowedMime = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain',
+    ];
+    if (allowedExt.includes(ext) || allowedMime.includes(file.mimetype)) {
+      cb(null, true);
+      return;
+    }
+    cb(new Error('Solo se permiten PDF, DOC, DOCX o TXT'));
   }
 });
 
@@ -2076,6 +2109,12 @@ tenantRouter.put('/products/:id', async (req, res, next) => {
     const warranty = Object.prototype.hasOwnProperty.call(req.body || {}, 'warranty')
       ? (req.body?.warranty || null)
       : (existingData.warranty || null);
+    const recipeFileUrl = Object.prototype.hasOwnProperty.call(req.body || {}, 'recipe_file_url')
+      ? String(req.body?.recipe_file_url || '').trim() || null
+      : (existingData.recipe_file_url || null);
+    const recipeFileName = Object.prototype.hasOwnProperty.call(req.body || {}, 'recipe_file_name')
+      ? String(req.body?.recipe_file_name || '').trim() || null
+      : (existingData.recipe_file_name || null);
     const isVisibleWeb = hasVisiblePayload
       ? parseBooleanInput(req.body?.is_visible_web, existing.is_visible_web !== false)
       : existing.is_visible_web !== false;
@@ -2105,6 +2144,8 @@ tenantRouter.put('/products/:id', async (req, res, next) => {
       delivery_time: deliveryTime,
       shipping_details: shippingDetails,
       warranty,
+      recipe_file_url: recipeFileUrl,
+      recipe_file_name: recipeFileName,
     };
 
     await client.query(
@@ -2226,6 +2267,8 @@ tenantRouter.post('/products', async (req, res, next) => {
     delivery_time,
     shipping_details,
     warranty,
+    recipe_file_url,
+    recipe_file_name,
     external_id,
     source_system,
     is_visible_web,
@@ -2287,7 +2330,9 @@ tenantRouter.post('/products', async (req, res, next) => {
       is_variant_root: parseBooleanInput(is_variant_root, false),
       delivery_time: delivery_time || null,
       shipping_details: shipping_details || null,
-      warranty: warranty || null
+      warranty: warranty || null,
+      recipe_file_url: String(recipe_file_url || '').trim() || null,
+      recipe_file_name: String(recipe_file_name || '').trim() || null
     };
 
     const result = await client.query(
@@ -2394,6 +2439,26 @@ tenantRouter.post('/products/upload-image', upload.single('image'), (req, res, n
     const imageUrl = `${protocol}://${host}/uploads/products/${req.file.filename}`;
 
     return res.json({ url: imageUrl, filename: req.file.filename });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+tenantRouter.post('/products/upload-recipe-file', recipeUpload.single('file'), (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'no_file_uploaded' });
+    }
+
+    const protocol = req.get('x-forwarded-proto') || req.protocol;
+    const host = req.get('host');
+    const fileUrl = `${protocol}://${host}/uploads/recipes/${req.file.filename}`;
+
+    return res.json({
+      url: fileUrl,
+      filename: req.file.filename,
+      original_name: req.file.originalname,
+    });
   } catch (err) {
     return next(err);
   }

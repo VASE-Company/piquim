@@ -196,6 +196,7 @@ const CatalogInspectorPanel = ({ catalog, categories = [], brands = [] }) => {
         handleClearFeatured,
         handleAddStock,
         handleImageUpload,
+        handleRecipeFileUpload,
         handleRemoveImage,
         handleSetPrimaryImage,
         setStockEdits,
@@ -481,6 +482,62 @@ const CatalogInspectorPanel = ({ catalog, categories = [], brands = [] }) => {
                             multiline
                         />
 
+                        <div className="space-y-3 rounded-xl border border-white/10 bg-white/5 p-3">
+                            <div>
+                                <p className={sectionLabelClass}>Recetario del producto</p>
+                                <p className="mt-1 text-[11px] text-zinc-500">
+                                    Sube un PDF o ficha de recetas. En la tienda aparece arriba del boton de agregar al carrito.
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-1 gap-3">
+                                <EvolutionInput
+                                    label="URL del recetario"
+                                    value={productDraft.recipe_file_url || ''}
+                                    onChange={(e) => setProductDraft({ ...productDraft, recipe_file_url: e.target.value })}
+                                    placeholder="https://.../recetas.pdf"
+                                    helperText="Tambien podes pegar un enlace externo."
+                                />
+                                <EvolutionInput
+                                    label="Nombre visible"
+                                    value={productDraft.recipe_file_name || ''}
+                                    onChange={(e) => setProductDraft({ ...productDraft, recipe_file_name: e.target.value })}
+                                    placeholder="Recetas para este producto"
+                                />
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-white/5 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-zinc-200 hover:bg-white/10">
+                                        <input
+                                            type="file"
+                                            accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                                            onChange={handleRecipeFileUpload}
+                                            className="hidden"
+                                            disabled={uploading}
+                                        />
+                                        <Plus size={12} weight="bold" />
+                                        {uploading ? 'Subiendo...' : 'Subir PDF/fichero'}
+                                    </label>
+                                    {productDraft.recipe_file_url ? (
+                                        <>
+                                            <a
+                                                href={productDraft.recipe_file_url}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="rounded-lg border border-white/10 bg-black/10 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-zinc-300 hover:text-white"
+                                            >
+                                                Ver archivo
+                                            </a>
+                                            <button
+                                                type="button"
+                                                onClick={() => setProductDraft({ ...productDraft, recipe_file_url: '', recipe_file_name: '' })}
+                                                className="rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-rose-300"
+                                            >
+                                                Quitar
+                                            </button>
+                                        </>
+                                    ) : null}
+                                </div>
+                            </div>
+                        </div>
+
                         <EvolutionInput
                             label="Descripcion larga"
                             value={productDraft.long_description || ''}
@@ -588,11 +645,11 @@ const CatalogInspectorPanel = ({ catalog, categories = [], brands = [] }) => {
                             </div>
 
                             <EvolutionInput
-                                label="Etiqueta de variacion"
+                                label="Presentacion visible"
                                 value={productDraft.variant_label || ''}
                                 onChange={(e) => setProductDraft({ ...productDraft, variant_label: e.target.value })}
-                                placeholder="Ej: Cromo mate / Negro / 30 cm"
-                                helperText="Lo que el cliente vera al desplegar las variantes."
+                                placeholder="Ej: Balde 5kg / Balde 10kg / Caja 20kg"
+                                helperText="Este texto aparece como opcion de presentacion en la ficha del producto."
                             />
 
                             <label className="inline-flex items-center gap-2 text-[10px] font-bold text-zinc-400">

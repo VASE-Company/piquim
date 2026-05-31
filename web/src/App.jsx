@@ -33,7 +33,7 @@ function AppContent() {
     const isEditorHost = resolveIsEditorHost();
     const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
     const allowLocalAdmin = isEditorHost || isLocalHost || import.meta.env.VITE_ALLOW_LOCAL_ADMIN === 'true';
-    const isPreviewRoute = route === '/admin/preview';
+    const isPreviewRoute = route.endsWith('/admin/preview');
     const isAdminRoute = route === '/admin' || route === '/admin/evolution' || route === '/admin/legacy';
 
     useEffect(() => {
