@@ -30,6 +30,13 @@ const isReservedPlaceholder = (value) => RESERVED_PLACEHOLDER_TERMS.has(normaliz
 
 const PIQUIM_SECTION_TYPES = new Set(PIQUIM_HOME_SECTIONS.map((section) => section.type));
 const PIQUIM_ABOUT_SECTION_TYPES = new Set(PIQUIM_ABOUT_SECTIONS.map((section) => section.type));
+const LEGACY_PIQUIM_ABOUT_SECTION_TYPES = new Set([
+    'PiquimHero',
+    'PiquimAnnounceBar',
+    'PiquimTresMundos',
+    'PiquimCatalog3Panel',
+    'PiquimCTABanner',
+]);
 const GENERIC_FOOTER_DEFAULTS = {
     description: 'Soluciones sanitarias, griferia y accesorios con asesoramiento comercial.',
     shopLinks: [
@@ -59,7 +66,7 @@ const normalizeHomeSectionsForBrand = (settings = {}, tenant = null, sections = 
 const normalizeAboutSectionsForBrand = (settings = {}, tenant = null, sections = []) => {
     const source = Array.isArray(sections) ? sections : [];
     if (!isPiquimTenantIdentity({ tenant, settings })) {
-        const nonPiquimSections = source.filter((section) => !PIQUIM_ABOUT_SECTION_TYPES.has(section?.type));
+        const nonPiquimSections = source.filter((section) => !LEGACY_PIQUIM_ABOUT_SECTION_TYPES.has(section?.type));
         return nonPiquimSections.length ? mergeSectionsWithDefaults('about', nonPiquimSections) : DEFAULT_ABOUT_SECTIONS;
     }
 
@@ -67,7 +74,10 @@ const normalizeAboutSectionsForBrand = (settings = {}, tenant = null, sections =
     if (!source.length || !hasPiquimBlocks) {
         return PIQUIM_ABOUT_SECTIONS;
     }
-    return mergeSectionsWithDefaults('piquim-about', source);
+    return mergeSectionsWithDefaults(
+        'piquim-about',
+        source.filter((section) => !LEGACY_PIQUIM_ABOUT_SECTION_TYPES.has(section?.type))
+    );
 };
 
 const getNavbarLinkLabel = (link) => {

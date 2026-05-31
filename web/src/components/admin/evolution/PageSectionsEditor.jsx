@@ -36,11 +36,12 @@ const PIQUIM_HOME_SECTION_TYPES = [
 ];
 
 const PIQUIM_ABOUT_SECTION_TYPES = [
-    { type: 'PiquimHero', label: 'Portada Piquim' },
-    { type: 'PiquimAnnounceBar', label: 'Barra Anuncio' },
-    { type: 'PiquimTresMundos', label: 'Nosotros Piquim' },
-    { type: 'PiquimCatalog3Panel', label: 'Lineas Piquim' },
-    { type: 'PiquimCTABanner', label: 'CTA Piquim' },
+    { type: 'AboutHero', label: 'Portada Sobre Nosotros' },
+    { type: 'AboutMission', label: 'Mision' },
+    { type: 'AboutStats', label: 'Numeros' },
+    { type: 'AboutValues', label: 'Valores' },
+    { type: 'AboutTeam', label: 'Equipo' },
+    { type: 'AboutCTA', label: 'Llamada a la Accion' },
 ];
 
 const ABOUT_SECTION_TYPES = [
